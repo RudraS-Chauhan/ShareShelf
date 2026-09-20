@@ -1,6 +1,7 @@
 CREATE DATABASE IF NOT EXISTS shareshelf;
 USE shareshelf;
 
+-- Table for Student.java
 CREATE TABLE IF NOT EXISTS students (
   student_id      VARCHAR(20) PRIMARY KEY,
   name            VARCHAR(100) NOT NULL,
@@ -12,6 +13,8 @@ CREATE TABLE IF NOT EXISTS students (
   whatsapp_number VARCHAR(15) NOT NULL
 );
 
+
+--Resources.java
 CREATE TABLE IF NOT EXISTS resource_items (
   item_id         INT AUTO_INCREMENT PRIMARY KEY,
   owner_id        VARCHAR(20) NOT NULL,
@@ -24,6 +27,8 @@ CREATE TABLE IF NOT EXISTS resource_items (
   status          VARCHAR(20) DEFAULT 'AVAILABLE',
   FOREIGN KEY (owner_id) REFERENCES students(student_id)
 );
+
+--Requests.java
 
 CREATE TABLE IF NOT EXISTS requests (
   request_id            INT AUTO_INCREMENT PRIMARY KEY,
