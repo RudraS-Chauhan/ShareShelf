@@ -4,12 +4,12 @@ import java.sql.Timestamp;
 
 public class Request{
 
-    int requestId, itemId;
-    String requesterId, ownerId, message, status;
-    boolean contactRevealed;
-    Timestamp revealedAt;
-    Timestamp createdAt;
-    Date expectedReturnDate;
+    private int requestId, itemId;
+    private String requesterId, ownerId, message, status;
+    private boolean contactRevealed;
+    private Timestamp revealedAt;
+    private Timestamp createdAt;
+    private Date expectedReturnDate;
 
     public Request() {}
 
