@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS students (
 );
 
 
---Resources.java
+-- Resources.java
 CREATE TABLE IF NOT EXISTS resource_items (
   item_id         INT AUTO_INCREMENT PRIMARY KEY,
   owner_id        VARCHAR(20) NOT NULL,
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS resource_items (
   FOREIGN KEY (owner_id) REFERENCES students(student_id)
 );
 
---Requests.java
+-- Requests.java
 
 CREATE TABLE IF NOT EXISTS requests (
   request_id            INT AUTO_INCREMENT PRIMARY KEY,

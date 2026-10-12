@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ShareShelf</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <h1>ShareShelf</h1>
+    <p>Borrow what you need. Share what you have.</p>
+  </header>
+
+  <main>
+    <div class="auth-tabs">
+      <button class="tab-btn active" onclick="showForm('login')">Login</button>
+      <button class="tab-btn" onclick="showForm('register')">Register</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <form id="loginForm" class="card" method="post" action="login">
+      <h2>Login</h2>
+      <label>Student ID</label>
+      <input type="text" name="studentId" placeholder="e.g. RS2029014" required>
+
+      <label>Password</label>
+      <input type="password" name="password" required>
+
+      <button type="submit">Login</button>
+    </form>
+
+    <!-- REGISTER FORM -->
+    <form id="registerForm" class="card hidden" method="post" action="register">
+      <h2>Register</h2>
+      <label>Student ID</label>
+      <input type="text" name="studentId" required>
+
+      <label>Full Name</label>
+      <input type="text" name="name" required>
+
+      <label>Branch</label>
+      <input type="text" name="branch" required>
+
+      <label>Year</label>
+      <input type="number" name="year" min="1" max="4" required>
+
+      <!-- college email required — actual domain check happens server-side in RegisterServlet -->
+      <label>College Email</label>
+      <input type="email" name="email" placeholder="you@galgotiasuniversity.ac.in" required>
+
+      <label>Hostel or Day Scholar</label>
+      <select name="hostelOrDay" required>
+        <option value="Hostel">Hostel</option>
+        <option value="Day Scholar">Day Scholar</option>
+      </select>
+
+      <label>WhatsApp Number</label>
+      <input type="tel" name="whatsappNumber" placeholder="91XXXXXXXXXX" required>
+
+      <label>Password</label>
+      <input type="password" name="password" required>
+
+      <button type="submit">Create Account</button>
+    </form>
+  </main>
+
+  <script>
+    function showForm(which) {
+      document.getElementById('loginForm').classList.toggle('hidden', which !== 'login');
+      document.getElementById('registerForm').classList.toggle('hidden', which !== 'register');
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+  </script>
+</body>
+</html>
