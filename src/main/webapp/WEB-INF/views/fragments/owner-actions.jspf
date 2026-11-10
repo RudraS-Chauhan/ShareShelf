@@ -1,0 +1,51 @@
+<%--
+  The buttons an OWNER sees for one request. Used inside a <c:forEach var="r"> on the dashboard and
+  My requests pages. Expects:  r (the request),  back (page to return to),  borrowDays (list of day options).
+  Which buttons appear depends only on the request's status, mirroring the checks the servlets enforce.
+--%>
+<div class="actions">
+  <c:if test="${r.status == 'PENDING'}">
+    <form class="inline" method="post" action="${ctx}/request/accept">
+      <input type="hidden" name="requestId" value="${r.requestId}">
+      <input type="hidden" name="back" value="${back}">
+      <c:if test="${r.borrow}">
+        <c:set var="defaultDays" value="${r.itemSuggestedDays > 0 ? r.itemSuggestedDays : 7}"/>
+        <select name="days" aria-label="Borrow duration">
+          <c:forEach var="d" items="${borrowDays}">
+            <option value="${d}" ${d == defaultDays ? 'selected' : ''}>${d}${d == 1 ? ' day' : ' days'}</option>
+          </c:forEach>
+        </select>
+      </c:if>
+      <button type="submit" class="btn btn-sm">Accept</button>
+    </form>
+    <form class="inline" method="post" action="${ctx}/request/reject">
+      <input type="hidden" name="requestId" value="${r.requestId}">
+      <input type="hidden" name="back" value="${back}">
+      <button type="submit" class="btn btn-sm btn-danger">Reject</button>
+    </form>
+  </c:if>
+
+  <c:if test="${r.status == 'ACCEPTED' and r.borrow and r.itemStatus == 'RESERVED'}">
+    <form class="inline" method="post" action="${ctx}/request/handover">
+      <input type="hidden" name="requestId" value="${r.requestId}">
+      <input type="hidden" name="back" value="${back}">
+      <button type="submit" class="btn btn-sm btn-outline">Mark handed over</button>
+    </form>
+  </c:if>
+
+  <c:if test="${r.status == 'ACCEPTED' or r.status == 'OVERDUE'}">
+    <form class="inline" method="post" action="${ctx}/request/complete">
+      <input type="hidden" name="requestId" value="${r.requestId}">
+      <input type="hidden" name="back" value="${back}">
+      <button type="submit" class="btn btn-sm">${r.borrow ? 'Mark returned' : 'Mark completed'}</button>
+    </form>
+  </c:if>
+
+  <%-- Safety net: the WhatsApp button exists ONLY for overdue requests, and the server re-checks it --%>
+  <c:if test="${r.status == 'OVERDUE'}">
+    <form class="inline" method="post" action="${ctx}/request/reveal" target="_blank">
+      <input type="hidden" name="requestId" value="${r.requestId}">
+      <button type="submit" class="btn btn-sm btn-whatsapp">Contact via WhatsApp</button>
+    </form>
+  </c:if>
+</div>

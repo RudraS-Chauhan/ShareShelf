@@ -9,6 +9,8 @@ import java.io.PrintWriter;
 
 @WebServlet("/hello")
 public class HelloServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         resp.setContentType("text/html");

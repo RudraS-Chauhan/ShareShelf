@@ -1,76 +1,57 @@
-# ShareShelf — DAO Contract
+# ShareShelf — DAO Contract (as implemented)
 
-Shreya implements these exact method signatures. The Leader's servlets call them exactly like this — matching signatures means both sides can work in parallel without waiting on each other.
+The servlets call these exact signatures. All SQL lives in the DAOs; every statement is a `PreparedStatement`
+inside try-with-resources. SQL failures are logged and rethrown as the unchecked `DataAccessException`
+(servlets turn that into a friendly error page), except where a plain `false`/`null` is the documented answer.
 
-## StudentDAO.java (already fully written as the pattern — see repo)
-
+## StudentDAO
 ```java
-boolean register(Student s);
-Student login(String studentId, String password);
+boolean register(Student s);                       // hashes the password (PBKDF2) before storing; false on duplicate id
+Student login(String studentId, String password);  // verifies against the stored hash; null if wrong
 boolean isDuplicateId(String studentId);
-Student findById(String studentId);
+Student findById(String studentId);                // never returns the password hash
 ```
 
-## ListingDAO.java
-
+## ListingDAO
 ```java
-boolean insert(ResourceItem item);
-List<ResourceItem> search(String keyword);              // WHERE title LIKE ? AND status='AVAILABLE'
-List<ResourceItem> filter(String category, String listingType); // combine with search logic
-List<ResourceItem> findByOwner(String ownerId);          // for "My Listings" dashboard section
+boolean insert(ResourceItem item);                           // sets item.itemId; FK rejects unknown owners (DataAccessException)
+List<ResourceItem> search(String keyword);                   // AVAILABLE items, title/description LIKE
+List<ResourceItem> filter(String category, String listingType);
+List<ResourceItem> searchAvailable(String keyword, String category, String listingType); // all three combined (used by SearchServlet)
+List<ResourceItem> findByOwner(String ownerId);              // "My listings" (all statuses)
 boolean updateStatus(int itemId, String newStatus);
 ResourceItem findById(int itemId);
+Map<String,Integer> countByStatus();                         // reports
+Map<String,Integer> countByCategory();                       // reports
 ```
+Search trims the keyword, is case-insensitive, and treats `%` and `_` literally.
 
-## RequestDAO.java
-
+## RequestDAO
 ```java
 boolean insert(Request r);
 boolean hasDuplicatePending(int itemId, String requesterId);
-boolean accept(int requestId, int itemId, java.sql.Date expectedReturnDate); // TRANSACTION — see below
-boolean reject(int requestId);
-boolean cancel(int requestId);
-boolean complete(int requestId, int itemId);             // TRANSACTION — see below
+boolean accept(int requestId, int itemId, java.sql.Date expectedReturnDate); // TRANSACTION
+boolean reject(int requestId);                  // PENDING -> REJECTED only
+boolean cancel(int requestId);                  // PENDING -> CANCELLED only
+boolean complete(int requestId, int itemId);    // TRANSACTION
 List<Request> findByRequester(String studentId);
 List<Request> findByOwner(String studentId);
 Request findById(int requestId);
-String revealContact(int requestId, String ownerId);     // returns requester's whatsapp_number ONLY if status=='OVERDUE' and ownerId matches; logs the reveal; returns null otherwise
+String revealContact(int requestId, String ownerId);  // TRANSACTION; whatsapp number only if OVERDUE and ownerId matches
+int markOverdue();                              // ACCEPTED + due date passed -> OVERDUE; returns rows changed (background thread)
+int countCompleted(String studentId);           // reliability signal
+Map<String,Integer> countByStatus();            // reports
+Map<String,Integer> topRequestedCategories(int limit); // reports (innovation feature)
 ```
 
-### `accept()` — must be a real transaction
-
-```java
-Connection conn = DBConnection.getConnection();
-conn.setAutoCommit(false);
-try {
-    // 1. UPDATE requests SET status='ACCEPTED', expected_return_date=? WHERE request_id=?
-    // 2. UPDATE resource_items SET status='RESERVED' WHERE item_id=?
-    conn.commit();
-    return true;
-} catch (SQLException e) {
-    conn.rollback();
-    return false;
-} finally {
-    conn.setAutoCommit(true);
-    conn.close();
-}
-```
-
-### `complete()` — same transaction pattern
-
-Updates `requests.status='COMPLETED'` and `resource_items.status='CLOSED'` (or back to `AVAILABLE` if re-listing) together.
-
-### `revealContact()` — the safety-net method
-
-```java
-// 1. SELECT status, requester_id FROM requests WHERE request_id = ?
-// 2. If status != 'OVERDUE' → return null (not allowed yet)
-// 3. If the calling ownerId doesn't match this request's owner_id → return null (not their request)
-// 4. Otherwise: SELECT whatsapp_number FROM students WHERE student_id = <requester_id>
-// 5. UPDATE requests SET contact_revealed=TRUE, revealed_at=NOW() WHERE request_id = ?  (the log)
-// 6. Return the whatsapp_number
-```
+### Transactions (`setAutoCommit(false)` ... `commit()` / `rollback()`)
+* **accept()**: (1) `PENDING -> ACCEPTED` with the due date, (2) item `AVAILABLE -> RESERVED`, (3) every other
+  `PENDING` request for the same item becomes `REJECTED`. Each step is a guarded `UPDATE ... WHERE status = ...`;
+  if a guard matches no row the whole transaction rolls back, so two owners/tabs can never both win.
+* **complete()**: request `ACCEPTED/OVERDUE -> COMPLETED` and the item goes back to `AVAILABLE` (BORROW) or
+  to `CLOSED` (EXCHANGE/DONATE/GIVEAWAY), together or not at all.
+* **revealContact()**: reads the status and owner, fetches the requester's WhatsApp number, sets
+  `contact_revealed`/`revealed_at` and inserts a `contact_reveal_logs` row, together or not at all.
 
 ## Ground rule
-
-If either of you needs a method signature that isn't listed here, **add it to this file first**, then implement — don't silently add methods the other side doesn't know exist. Keeps the interface between your two pieces predictable.
+If a servlet needs a method that isn't listed here, add it to this file first, then implement it.

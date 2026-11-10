@@ -1,0 +1,111 @@
+== Registration & login ==
+PASS  T1 bad email domain rejected
+PASS     email without own admission number rejected
+PASS     weak password rejected
+PASS     password without digit rejected
+PASS     invalid WhatsApp number rejected
+PASS     missing WhatsApp consent rejected
+PASS     year out of range rejected
+PASS     registering Asha works
+PASS  T1 duplicate admission number rejected
+PASS     registering Bilal works
+PASS     registering Chitra works
+PASS     wrong password refused
+PASS     unknown user refused
+PASS     login is case-insensitive on the ID
+PASS     Bilal logs in
+PASS     Chitra logs in
+== Session gate ==
+PASS  anonymous GET /dashboard redirects to login
+PASS  anonymous GET /search redirects to login
+PASS  anonymous GET /add-listing redirects to login
+PASS  anonymous GET /my-requests redirects to login
+PASS  anonymous GET /reports redirects to login
+PASS  anonymous GET /reports?format=csv redirects to login
+PASS  anonymous POST /request/accept redirects to login
+PASS  login page is public
+== Empty database states ==
+PASS  T11 empty DB: search shows a clear empty state
+PASS     dashboard loads with no data
+PASS     my-requests loads with no data
+PASS     reports load with zero data
+== Listings ==
+PASS  T3 empty title: form shown again with a message
+PASS     invalid category refused
+PASS     invalid location refused
+PASS     good BORROW listing created
+PASS     good DONATE listing created
+PASS     XSS title stored
+PASS     dashboard shows the success flash and the listings
+PASS     flash message shows only once
+PASS     XSS: script tag is escaped everywhere
+== Search ==
+PASS  T4 keyword search finds the calculator
+PASS  T12 case-insensitive search
+PASS  T13 extra spaces ignored
+PASS  T10 no match: clear message
+PASS     category filter
+PASS     type filter
+PASS     keyword + category combined
+PASS     LIKE wildcards are literal (q=%)
+PASS     SQL injection attempt is harmless
+PASS     own listing shows 'This is your listing'
+== Requests ==
+PASS  T9 self-request blocked
+PASS     Bilal's request is sent
+PASS  T5 duplicate pending request blocked
+PASS     unknown item refused
+PASS     Chitra also requests the same item
+PASS     owner sees both requests
+PASS     requester sees Cancel for a pending request
+PASS     owner cannot cancel (only the requester can)
+== Accept / reject rules ==
+PASS  T8 non-owner cannot accept
+PASS     non-owner cannot reject
+PASS     non-owner cannot complete
+PASS     absurd duration refused
+PASS  T7 owner accepts (3 days)
+PASS     accepted request shows a due date
+PASS     competing request was auto-rejected
+PASS  T17 accepting an already-handled request is handled
+PASS     RESERVED listing disappears from search
+PASS  T6 request on a reserved item rejected
+PASS  T15 reveal before overdue blocked
+PASS     handover by non-owner refused
+PASS     owner marks handed over
+PASS     second handover refused
+PASS     close is refused while borrowed
+PASS  T-complete owner completes the exchange
+PASS     completing twice is handled
+PASS     BORROW item is available again
+PASS     reliability signal shows completed exchange
+== Reject, cancel, close ==
+PASS     Chitra requests again
+PASS     owner rejects
+PASS     rejecting twice handled
+PASS     Chitra requests then cancels
+PASS     cancel button present
+PASS     requester cancels
+PASS     Bilal cannot close Asha's listing
+PASS     Asha closes her book listing
+PASS  T6 closed listing is not searchable
+PASS  T6 request on a closed listing rejected
+== Overdue + WhatsApp safety net ==
+PASS     Bilal requests again for the overdue test
+PASS     owner accepts for 1 day
+PASS  T14 request is flagged OVERDUE by the background thread
+PASS     dashboard shows the overdue alert
+PASS  T15 non-owner cannot reveal the number
+PASS  T16 owner is sent to a wa.me chat with the requester's number
+PASS     reveal is recorded on the request
+PASS     overdue request can still be completed
+== Reports ==
+PASS     reports page shows live numbers + innovation stat
+PASS     CSV export works
+PASS     overdue-checker status visible
+== Logout ==
+PASS     logout redirects to login
+PASS     session is dead after logout
+PASS     unknown URL gives the friendly 404 page
+
+98 checks, 98 passed, 0 failed

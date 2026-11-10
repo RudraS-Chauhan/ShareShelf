@@ -1,0 +1,4 @@
+target
+.git
+src/main/resources/db.properties
+docs/screenshots

@@ -1,0 +1,36 @@
+<%--
+  Page header shared by every page after login: <head>, top navigation, and the one-time "flash" banner.
+  Before including, a page sets:  pageTitle (text for the tab)  and  active (which nav link is highlighted).
+--%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><c:out value="${pageTitle}"/> · ShareShelf</title>
+  <link rel="stylesheet" href="${ctx}/css/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="${ctx}/dashboard">📚 ShareShelf</a>
+    <nav class="nav">
+      <a href="${ctx}/dashboard" class="${active == 'dashboard' ? 'active' : ''}">Dashboard</a>
+      <a href="${ctx}/search" class="${active == 'search' ? 'active' : ''}">Search</a>
+      <a href="${ctx}/add-listing" class="${active == 'add' ? 'active' : ''}">Add listing</a>
+      <a href="${ctx}/my-requests" class="${active == 'requests' ? 'active' : ''}">My requests</a>
+      <a href="${ctx}/reports" class="${active == 'reports' ? 'active' : ''}">Reports</a>
+    </nav>
+    <div class="who">
+      <span>Hi, <strong><c:out value="${sessionScope.studentName}"/></strong></span>
+      <a href="${ctx}/logout">Log out</a>
+    </div>
+  </div>
+</header>
+<main class="container">
+<%-- Flash message: set by a servlet before a redirect, shown once, then removed --%>
+<c:if test="${not empty sessionScope.flashText}">
+  <div class="banner ${sessionScope.flashType == 'error' ? 'error' : 'success'}" role="status"><c:out value="${sessionScope.flashText}"/></div>
+  <c:remove var="flashText" scope="session"/>
+  <c:remove var="flashType" scope="session"/>
+</c:if>

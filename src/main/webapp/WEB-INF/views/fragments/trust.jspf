@@ -1,0 +1,2 @@
+<%-- Reliability chip: how many exchanges this student has completed. Expects  n  (the count). --%>
+<span class="trust ${n == 0 ? 'none' : ''}"><c:choose><c:when test="${n == 0}">New member</c:when><c:otherwise>✓ ${n} completed</c:otherwise></c:choose></span>

@@ -1,0 +1,11 @@
+target/
+*.class
+*.war
+.idea/
+.vscode/
+*.iml
+.classpath
+.project
+.settings/
+# local database credentials: never commit
+src/main/resources/db.properties
