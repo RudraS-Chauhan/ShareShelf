@@ -54,7 +54,7 @@ public class RegisterServlet extends BaseServlet {
         }
 
         // Check 2: the admission number must appear in the college email,
-        // e.g. rudra.25scse1180735@... contains 25SCSE1180735
+        // e.g. rudra.25scse1000000@... contains 25SCSE1000000
         if (!ValidationUtil.emailContainsId(email, studentId)) {
             fail(request, response, "email_mismatch");
             return;

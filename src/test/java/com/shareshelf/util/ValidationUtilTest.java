@@ -9,23 +9,23 @@ class ValidationUtilTest {
 
     @Test
     void studentIdIsTrimmedAndUpperCased() {
-        assertEquals("25SCSE1180735", ValidationUtil.normalizeStudentId("  25scse1180735 "));
+        assertEquals("25SCSE1000000", ValidationUtil.normalizeStudentId("  25scse1000000 "));
         assertEquals("", ValidationUtil.normalizeStudentId(null));
     }
 
     @Test
     void studentIdAcceptsOnlyLettersAndDigits() {
-        assertTrue(ValidationUtil.isValidStudentId("25SCSE1180735"));
+        assertTrue(ValidationUtil.isValidStudentId("25SCSE1000000"));
         assertFalse(ValidationUtil.isValidStudentId("25SC"));            // too short
-        assertFalse(ValidationUtil.isValidStudentId("25SCSE-1180735"));  // illegal character
-        assertFalse(ValidationUtil.isValidStudentId("25SCSE1180735'; DROP TABLE students;--"));
+        assertFalse(ValidationUtil.isValidStudentId("25SCSE-1000000"));  // illegal character
+        assertFalse(ValidationUtil.isValidStudentId("25SCSE1000000'; DROP TABLE students;--"));
         assertFalse(ValidationUtil.isValidStudentId(null));
     }
 
     @Test
     void onlyCollegeEmailsAreAccepted() {
-        assertTrue(ValidationUtil.isCollegeEmail("rudra.25scse1180735@galgotiasuniversity.ac.in"));
-        assertTrue(ValidationUtil.isCollegeEmail("  RUDRA.25SCSE1180735@GalgotiasUniversity.AC.IN "));
+        assertTrue(ValidationUtil.isCollegeEmail("rudra.25scse1000000@galgotiasuniversity.ac.in"));
+        assertTrue(ValidationUtil.isCollegeEmail("  RUDRA.25SCSE1000000@GalgotiasUniversity.AC.IN "));
         assertFalse(ValidationUtil.isCollegeEmail("rudra@gmail.com"));
         assertFalse(ValidationUtil.isCollegeEmail("@galgotiasuniversity.ac.in"));
         assertFalse(ValidationUtil.isCollegeEmail("rudra@galgotiasuniversity.ac.in.evil.com"));
@@ -34,8 +34,8 @@ class ValidationUtilTest {
 
     @Test
     void emailMustContainTheStudentsOwnAdmissionNumber() {
-        assertTrue(ValidationUtil.emailContainsId("rudra.25scse1180735@galgotiasuniversity.ac.in", "25SCSE1180735"));
-        assertFalse(ValidationUtil.emailContainsId("rudra.25scse9999999@galgotiasuniversity.ac.in", "25SCSE1180735"));
+        assertTrue(ValidationUtil.emailContainsId("rudra.25scse1000000@galgotiasuniversity.ac.in", "25SCSE1000000"));
+        assertFalse(ValidationUtil.emailContainsId("rudra.25scse2000000@galgotiasuniversity.ac.in", "25SCSE1000000"));
         assertFalse(ValidationUtil.emailContainsId("rudra@galgotiasuniversity.ac.in", ""));
     }
 

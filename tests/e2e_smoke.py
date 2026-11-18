@@ -120,10 +120,16 @@ s, _, page = A.post("/add-listing", dict(title="Calc", category="Nonsense", list
 check("   invalid category refused", s == 200 and "choose a category" in page.lower())
 s, _, page = A.post("/add-listing", dict(title="Calc", category="Stationery", listingType="BORROW", itemCondition="Good", location="Mars"))
 check("   invalid location refused", s == 200 and "meeting location" in page.lower())
+s, _, page = A.post("/add-listing", dict(title="Calc", category="Stationery", listingType="BORROW", itemCondition="Good", location="C Block"))
+check("   block without a floor refused", s == 200 and "choose the floor" in page.lower())
+check("   block + floor + landmark stored", loc(A.post("/add-listing", dict(title="Drafter set", category="Stationery", listingType="BORROW",
+      itemCondition="Good", location="C Block", floor="2nd floor", landmark="near the water cooler", suggestedDays="3"))).endswith("/dashboard"))
+s, _, page = A.get("/dashboard")
+check("   dashboard shows floor and landmark", "C Block, 2nd floor - near the water cooler" in page)
 check("   good BORROW listing created", loc(A.post("/add-listing", dict(title="Casio fx-991ES Calculator", description="Works great", category="Electronics & Accessories",
       listingType="BORROW", itemCondition="Good", location="Library", suggestedDays="3"))).endswith("/dashboard"))
 check("   good DONATE listing created", loc(A.post("/add-listing", dict(title="DBMS Textbook 3rd ed", category="Academic Materials",
-      listingType="DONATE", itemCondition="Fair", location="Main Gate"))).endswith("/dashboard"))
+      listingType="DONATE", itemCondition="Fair", location="Cafeteria"))).endswith("/dashboard"))
 check("   XSS title stored", loc(A.post("/add-listing", dict(title="<script>alert(1)</script>", category="Stationery", listingType="GIVEAWAY",
       itemCondition="New", location="Library"))).endswith("/dashboard"))
 s, _, page = A.get("/dashboard")

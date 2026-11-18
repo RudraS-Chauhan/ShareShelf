@@ -9,7 +9,7 @@
   <c:when test="${param.error == 'invalid'}"><c:set var="errText" value="Wrong student ID or password."/></c:when>
   <c:when test="${param.error == 'login_required'}"><c:set var="errText" value="Please log in first."/></c:when>
   <c:when test="${param.error == 'missing_fields'}"><c:set var="errText" value="Please fill in every field."/></c:when>
-  <c:when test="${param.error == 'invalid_id'}"><c:set var="errText" value="Admission number must be 6 to 20 letters/digits, e.g. 25SCSE1180735."/></c:when>
+  <c:when test="${param.error == 'invalid_id'}"><c:set var="errText" value="Admission number must be 6 to 20 letters/digits, e.g. 25SCSE1000000."/></c:when>
   <c:when test="${param.error == 'invalid_email'}"><c:set var="errText" value="Use your college email ending in @galgotiasuniversity.ac.in."/></c:when>
   <c:when test="${param.error == 'email_mismatch'}"><c:set var="errText" value="Your college email must contain your own admission number."/></c:when>
   <c:when test="${param.error == 'weak_password'}"><c:set var="errText" value="Password needs at least 8 characters, with a letter and a digit."/></c:when>
@@ -56,7 +56,7 @@
       <form id="loginForm" class="card ${showRegister ? 'hidden' : ''}" method="post" action="${ctx}/login">
         <h2>Login</h2>
         <label for="l-id">Admission number</label>
-        <input id="l-id" type="text" name="studentId" placeholder="e.g. 25SCSE1180735" required autocomplete="username">
+        <input id="l-id" type="text" name="studentId" placeholder="e.g. 25SCSE1000000" required autocomplete="username">
         <label for="l-pw">Password</label>
         <input id="l-pw" type="password" name="password" required autocomplete="current-password">
         <button type="submit">Login</button>
@@ -66,7 +66,7 @@
       <form id="registerForm" class="card ${showRegister ? '' : 'hidden'}" method="post" action="${ctx}/register">
         <h2>Create your account</h2>
         <label for="r-id">Admission number</label>
-        <input id="r-id" type="text" name="studentId" placeholder="e.g. 25SCSE1180735" required>
+        <input id="r-id" type="text" name="studentId" placeholder="e.g. 25SCSE1000000" required>
         <label for="r-name">Full name</label>
         <input id="r-name" type="text" name="name" maxlength="100" required>
         <label for="r-branch">Branch</label>
@@ -74,7 +74,7 @@
         <label for="r-year">Year</label>
         <input id="r-year" type="number" name="year" min="1" max="4" required>
         <label for="r-email">College email</label>
-        <input id="r-email" type="email" name="email" placeholder="name.25scse1180735@galgotiasuniversity.ac.in" required>
+        <input id="r-email" type="email" name="email" placeholder="name.25scse1000000@galgotiasuniversity.ac.in" required>
         <label for="r-res">Hostel or day scholar</label>
         <select id="r-res" name="hostelOrDay" required>
           <option value="Hostel">Hostel</option>

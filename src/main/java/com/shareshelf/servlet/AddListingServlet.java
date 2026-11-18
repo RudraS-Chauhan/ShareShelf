@@ -39,7 +39,10 @@ public class AddListingServlet extends BaseServlet {
         String category = param(req, "category");
         ListingType type = ListingType.fromString(req.getParameter("listingType"));
         String condition = param(req, "itemCondition");
-        String location = param(req, "location");
+        String place = param(req, "location");
+        String floor = param(req, "floor");
+        // keep the landmark to one plain line (no control characters) and a sane length
+        String landmark = param(req, "landmark").replaceAll("\\p{Cntrl}", " ").trim();
 
         String error = null;
         if (title.isEmpty()) {
@@ -54,8 +57,12 @@ public class AddListingServlet extends BaseServlet {
             error = "Please choose a listing type.";
         } else if (!AppConstants.CONDITIONS.contains(condition)) {
             error = "Please choose the item's condition.";
-        } else if (!AppConstants.LOCATIONS.contains(location)) {
+        } else if (!AppConstants.LOCATIONS.contains(place)) {
             error = "Please choose a meeting location.";
+        } else if (AppConstants.BLOCK_LOCATIONS.contains(place) && !AppConstants.FLOORS.contains(floor)) {
+            error = "Please choose the floor for " + place + ".";
+        } else if (landmark.length() > AppConstants.MAX_LANDMARK) {
+            error = "The landmark can be at most " + AppConstants.MAX_LANDMARK + " characters.";
         }
         if (error != null) {
             showForm(req, resp, error);   // form comes back with what the student typed (${param.*})
@@ -77,7 +84,7 @@ public class AddListingServlet extends BaseServlet {
         item.setCategory(category);
         item.setListingType(type.name());
         item.setItemCondition(condition);
-        item.setLocation(location);
+        item.setLocation(AppConstants.buildLocation(place, floor, landmark));
         item.setSuggestedDays(suggestedDays);
 
         if (listingDAO.insert(item)) {
@@ -95,6 +102,9 @@ public class AddListingServlet extends BaseServlet {
         req.setAttribute("types", ListingType.values());
         req.setAttribute("conditions", AppConstants.CONDITIONS);
         req.setAttribute("locations", AppConstants.LOCATIONS);
+        req.setAttribute("blockLocations", AppConstants.BLOCK_LOCATIONS);
+        req.setAttribute("floors", AppConstants.FLOORS);
+        req.setAttribute("maxLandmark", AppConstants.MAX_LANDMARK);
         req.setAttribute("borrowDays", AppConstants.BORROW_DAYS);
         forward(req, resp, "add-listing");
     }

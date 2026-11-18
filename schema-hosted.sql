@@ -1,4 +1,4 @@
--- ShareShelf schema for HOSTED databases (Aiven, Railway, TiDB, ...).
+-- ShareShelf schema for HOSTED databases (TiDB Cloud, Railway, ...).
 -- Same tables as schema.sql, but it does not create or select a database:
 -- you run it inside the database the provider gave you (often `defaultdb`).
 -- See docs/DEPLOYMENT.md.

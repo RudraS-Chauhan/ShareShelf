@@ -35,4 +35,27 @@ class AppConstantsTest {
         item.setListingType("DONATE");
         assertFalse(item.isBorrow());
     }
+
+    @Test
+    void blockSpotsNeedAFloorAndAreAlsoValidLocations() {
+        assertTrue(AppConstants.LOCATIONS.containsAll(AppConstants.BLOCK_LOCATIONS));
+        assertTrue(AppConstants.LOCATIONS.contains("Cafeteria"));
+        assertFalse(AppConstants.BLOCK_LOCATIONS.contains("Library"));
+    }
+
+    @Test
+    void locationTextCombinesPlaceFloorAndLandmark() {
+        assertEquals("C Block, 2nd floor - near the water cooler",
+                AppConstants.buildLocation("C Block", "2nd floor", "near the water cooler"));
+        assertEquals("Library", AppConstants.buildLocation("Library", "2nd floor", ""));
+        assertEquals("Cafeteria - near the juice counter",
+                AppConstants.buildLocation("Cafeteria", "", "near the juice counter"));
+    }
+
+    @Test
+    void longestPossibleLocationFitsTheDatabaseColumn() {
+        String longest = AppConstants.buildLocation("Ground in front of D Block", "",
+                "x".repeat(AppConstants.MAX_LANDMARK));
+        assertTrue(longest.length() <= 100);   // resource_items.location is VARCHAR(100)
+    }
 }

@@ -17,18 +17,18 @@ git add . && git commit -m "docs: add deployment guide" && git push
 Check on github.com that `Dockerfile`, `schema-hosted.sql` and `pom.xml` are in the repo, and that `db.properties` is **not**.
 
 ## Step 2: Create a hosted MySQL database
-Pick one provider (we suggest **Aiven** or **Railway**; **TiDB Cloud** also speaks MySQL).
+Use **TiDB Cloud Starter** (tidbcloud.com): MySQL-compatible, free tier, no credit card. (Aiven's free MySQL stopped taking new signups on 6 Nov 2026, so we do not use it.)
 
-1. Sign up and create a **MySQL** service on the free plan.
-2. Copy these five values from its dashboard: **host, port, database name, user, password**.
-3. Note whether it says SSL is required (Aiven does). We handle that in the URL below.
+1. Sign up, create a **Starter** instance (MySQL-compatible mode), and click **Connect** to see the connection details.
+2. Copy these five values: **host, port (4000), database name (`test` by default), user (it starts with a prefix like `abc123.root`), password** (generate one).
+3. TLS is required, which we handle with `?sslMode=REQUIRED` in the URL below.
 
 ## Step 3: Create the tables (no MySQL install needed)
 Use a free GUI client such as **DBeaver** (or the "MySQL" extension in VS Code):
 
 1. New connection → MySQL → enter the host, port, user, password from Step 2. Turn SSL on if the provider requires it.
 2. Open **`schema-hosted.sql`** (not `schema.sql`; the hosted version does not try to create a database, which most providers block).
-3. Make sure the connection's active database is the one from Step 2 (often `defaultdb`), then run the whole script.
+3. Make sure the connection's active database is the one from Step 2 (on TiDB it is `test`), then run the whole script.
 4. Refresh. You should see 4 tables: `students`, `resource_items`, `requests`, `contact_reveal_logs`.
 
 ## Step 4: Create the web service on Render

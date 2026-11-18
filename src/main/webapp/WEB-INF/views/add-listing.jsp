@@ -56,9 +56,23 @@
       <select id="location" name="location" required>
         <option value="">Choose…</option>
         <c:forEach var="loc" items="${locations}">
-          <option value="<c:out value='${loc}'/>" ${param.location == loc ? 'selected' : ''}><c:out value="${loc}"/></option>
+          <option value="<c:out value='${loc}'/>" data-block="${blockLocations.contains(loc)}" ${param.location == loc ? 'selected' : ''}><c:out value="${loc}"/></option>
         </c:forEach>
       </select>
+    </div>
+    <div id="floorBox" class="hidden">
+      <label for="floor">Floor</label>
+      <select id="floor" name="floor">
+        <option value="">Choose…</option>
+        <c:forEach var="fl" items="${floors}">
+          <option value="<c:out value='${fl}'/>" ${param.floor == fl ? 'selected' : ''}><c:out value="${fl}"/></option>
+        </c:forEach>
+      </select>
+    </div>
+    <div class="full">
+      <label for="landmark">Landmark (optional)</label>
+      <input id="landmark" type="text" name="landmark" maxlength="${maxLandmark}" value="<c:out value='${param.landmark}'/>" placeholder="e.g. near the water cooler, opposite the notice board">
+      <div class="hint">Helps the other student find you quickly. Do not write phone numbers or room numbers.</div>
     </div>
     <div id="durationBox" class="full ${param.listingType == 'BORROW' ? '' : 'hidden'}">
       <label for="suggestedDays">Suggested borrow duration</label>
@@ -83,5 +97,19 @@
   typeSelect.addEventListener('change', function () {
     durationBox.classList.toggle('hidden', typeSelect.value !== 'BORROW');
   });
+
+  // Ask for a floor only when the handover spot is inside a block.
+  var locSelect = document.getElementById('location');
+  var floorBox = document.getElementById('floorBox');
+  var floorSelect = document.getElementById('floor');
+  function syncFloor() {
+    var opt = locSelect.options[locSelect.selectedIndex];
+    var isBlock = opt && opt.getAttribute('data-block') === 'true';
+    floorBox.classList.toggle('hidden', !isBlock);
+    floorSelect.required = isBlock;
+    if (!isBlock) { floorSelect.value = ''; }
+  }
+  locSelect.addEventListener('change', syncFloor);
+  syncFloor();
 </script>
 <%@ include file="/WEB-INF/views/fragments/footer.jspf" %>

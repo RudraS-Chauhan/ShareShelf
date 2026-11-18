@@ -19,7 +19,7 @@ public final class ValidationUtil {
         return s == null || s.trim().isEmpty();
     }
 
-    /** Trims and upper-cases an admission number, e.g. " 25scse1180735 " -> "25SCSE1180735". */
+    /** Trims and upper-cases an admission number, e.g. " 25scse1000000 " -> "25SCSE1000000". */
     public static String normalizeStudentId(String raw) {
         return raw == null ? "" : raw.trim().toUpperCase();
     }
@@ -35,7 +35,7 @@ public final class ValidationUtil {
                 && email.indexOf('@') > 0;
     }
 
-    /** The admission number must appear in the college email (e.g. rudra.25scse1180735@...). */
+    /** The admission number must appear in the college email (e.g. rudra.25scse1000000@...). */
     public static boolean emailContainsId(String email, String studentId) {
         return email != null && studentId != null && !studentId.isEmpty()
                 && email.toLowerCase().contains(studentId.toLowerCase());
