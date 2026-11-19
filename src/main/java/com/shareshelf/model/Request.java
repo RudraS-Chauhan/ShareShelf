@@ -31,6 +31,8 @@ public class Request {
     // meeting and deadline details, set when the owner accepts
     private LocalDateTime meetTime, dueAt;
     private String meetNote;
+    private int borrowHours;           // agreed hours; the clock starts at pickup (0 = old-style request)
+    private String returnCondition;    // OK / DAMAGED / MISSING, set at the return scan
     private double requesterStars, ownerStars;   // average of revealed ratings (0 when none)
     private int requesterStarsN, ownerStarsN;
     private int requesterCompleted, ownerCompleted;   // reliability signal: completed exchanges
@@ -217,6 +219,30 @@ public class Request {
         return ListingType.BORROW.name().equals(listingType);
     }
 
+    public int getBorrowHours() { return borrowHours; }
+    public void setBorrowHours(int v) { borrowHours = v; }
+    public String getReturnCondition() { return returnCondition; }
+    public void setReturnCondition(String v) { returnCondition = v; }
+
+    /** "Timer starts at pickup (24 hours)" while the pickup has not happened yet; "" otherwise. */
+    public String getTimerNote() {
+        boolean waiting = "ACCEPTED".equals(status) && "RESERVED".equals(itemStatus) && borrowHours > 0;
+        return waiting ? "Timer starts at pickup (" + com.shareshelf.util.AppConstants.durationLabel(borrowHours) + ")" : "";
+    }
+
+    /** Short text for the return condition, "" when not returned yet. */
+    public String getReturnConditionText() {
+        if (returnCondition == null) {
+            return "";
+        }
+        return switch (returnCondition) {
+            case "OK" -> "Returned in good condition";
+            case "DAMAGED" -> "Returned damaged";
+            case "MISSING" -> "Returned with parts missing";
+            default -> "";
+        };
+    }
+
     public double getRequesterStars() { return requesterStars; }
     public void setRequesterStars(double v) { requesterStars = v; }
     public double getOwnerStars() { return ownerStars; }
@@ -244,7 +270,7 @@ public class Request {
         return n == 0 ? "" : String.format(Locale.ENGLISH, "%.1f (%d)", avg, n);
     }
 
-    private static String badge(String name, int completed, int late, double avg, int n) {
+    public static String badge(String name, int completed, int late, double avg, int n) {
         boolean earned = completed >= com.shareshelf.util.AppConstants.BADGE_MIN_EXCHANGES && late == 0
                 && n > 0 && avg >= com.shareshelf.util.AppConstants.BADGE_MIN_STARS;
         return earned ? name : "";

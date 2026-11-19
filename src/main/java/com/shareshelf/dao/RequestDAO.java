@@ -121,12 +121,23 @@ public class RequestDAO {
      * @return false (and nothing changed) if the request is no longer pending or the item is no longer available.
      */
     public boolean accept(int requestId, int itemId, LocalDateTime dueAt, LocalDateTime meetTime, String meetNote) {
+        return accept(requestId, itemId, dueAt, meetTime, meetNote, null);
+    }
+
+    /**
+     * Same as above, for the QR flow: the deadline is NOT fixed yet. Only the agreed number of hours is
+     * stored; the clock starts when the borrower's pickup is verified (see {@link #startBorrow}).
+     *
+     * @param borrowHours how long the borrower may keep the item once picked up (null = use dueAt as given)
+     */
+    public boolean accept(int requestId, int itemId, LocalDateTime dueAt, LocalDateTime meetTime, String meetNote,
+                          Integer borrowHours) {
         try (Connection conn = DBConnection.getConnection()) {
             conn.setAutoCommit(false);
             try {
                 int accepted;
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "UPDATE requests SET status = 'ACCEPTED', expected_return_date = ?, due_at = ?, meet_time = ?, meet_note = ? "
+                        "UPDATE requests SET status = 'ACCEPTED', expected_return_date = ?, due_at = ?, meet_time = ?, meet_note = ?, borrow_hours = ? "
                         + "WHERE request_id = ? AND item_id = ? AND status = 'PENDING'")) {
                     if (dueAt != null) {
                         ps.setDate(1, Date.valueOf(dueAt.toLocalDate()));
@@ -141,8 +152,13 @@ public class RequestDAO {
                         ps.setNull(3, Types.TIMESTAMP);
                     }
                     ps.setString(4, meetNote == null || meetNote.isEmpty() ? null : meetNote);
-                    ps.setInt(5, requestId);
-                    ps.setInt(6, itemId);
+                    if (borrowHours != null) {
+                        ps.setInt(5, borrowHours);
+                    } else {
+                        ps.setNull(5, Types.INTEGER);
+                    }
+                    ps.setInt(6, requestId);
+                    ps.setInt(7, itemId);
                     accepted = ps.executeUpdate();
                 }
                 if (accepted != 1) {
@@ -180,6 +196,98 @@ public class RequestDAO {
         } catch (SQLException e) {
             throw new DataAccessException("Could not accept request " + requestId, e);
         }
+    }
+
+    /**
+     * TRANSACTION: the borrower's pickup was verified. Item RESERVED -> BORROWED and the borrow clock
+     * starts NOW: due = now + the agreed hours (requests accepted before this feature keep their old due time).
+     *
+     * @return false (and nothing changed) if the request is not ACCEPTED or the item is not RESERVED.
+     */
+    public boolean startBorrow(int requestId, int itemId) {
+        LocalDateTime now = LocalDateTime.now(AppConstants.CAMPUS_ZONE);
+        try (Connection conn = DBConnection.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                int hours = 0;
+                try (PreparedStatement ps = conn.prepareStatement(
+                        "SELECT borrow_hours FROM requests WHERE request_id = ? AND item_id = ? AND status = 'ACCEPTED' FOR UPDATE")) {
+                    ps.setInt(1, requestId);
+                    ps.setInt(2, itemId);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (!rs.next()) {
+                            conn.rollback();
+                            return false;
+                        }
+                        hours = rs.getInt(1);   // NULL reads as 0
+                    }
+                }
+                int moved;
+                try (PreparedStatement ps = conn.prepareStatement(
+                        "UPDATE resource_items SET status = 'BORROWED' WHERE item_id = ? AND status = 'RESERVED'")) {
+                    ps.setInt(1, itemId);
+                    moved = ps.executeUpdate();
+                }
+                if (moved != 1) {
+                    conn.rollback();
+                    return false;
+                }
+                if (hours > 0) {
+                    LocalDateTime due = now.plusHours(hours);
+                    try (PreparedStatement ps = conn.prepareStatement(
+                            "UPDATE requests SET due_at = ?, expected_return_date = ? WHERE request_id = ?")) {
+                        ps.setObject(1, due);
+                        ps.setDate(2, Date.valueOf(due.toLocalDate()));
+                        ps.setInt(3, requestId);
+                        ps.executeUpdate();
+                    }
+                }
+                conn.commit();
+                return true;
+            } catch (SQLException e) {
+                rollbackQuietly(conn);
+                throw new DataAccessException("Could not start the borrow for request " + requestId, e);
+            } finally {
+                conn.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Could not start the borrow for request " + requestId, e);
+        }
+    }
+
+    /** Remembers what the owner saw when the item came back (OK, DAMAGED or MISSING). */
+    public void setReturnCondition(int requestId, String condition) {
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement("UPDATE requests SET return_condition = ? WHERE request_id = ?")) {
+            ps.setString(1, condition);
+            ps.setInt(2, requestId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataAccessException("Could not save the return condition", e);
+        }
+    }
+
+    /**
+     * A short fingerprint of the state of every request this student is part of. The browser compares it
+     * every few seconds; when it changes, something happened (a new request, an accept, a pickup, a return).
+     */
+    public String stateSignature(String studentId) {
+        String sql = "SELECT q.request_id, q.status, i.status FROM requests q JOIN resource_items i ON i.item_id = q.item_id "
+                + "WHERE q.owner_id = ? OR q.requester_id = ? ORDER BY q.request_id";
+        StringBuilder sb = new StringBuilder();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, studentId);
+            ps.setString(2, studentId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    sb.append(rs.getInt(1)).append(rs.getString(2)).append(rs.getString(3)).append(';');
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Could not read request states", e);
+        }
+        return Integer.toHexString(sb.toString().hashCode());
     }
 
     /**
@@ -470,6 +578,8 @@ public class RequestDAO {
         r.setMeetNote(rs.getString("meet_note"));
         r.setRequesterCompleted(rs.getInt("requester_completed"));
         r.setOwnerCompleted(rs.getInt("owner_completed"));
+        r.setBorrowHours(rs.getInt("borrow_hours"));
+        r.setReturnCondition(rs.getString("return_condition"));
         r.setRequesterStars(rs.getDouble("requester_stars"));
         r.setRequesterStarsN(rs.getInt("requester_stars_n"));
         r.setOwnerStars(rs.getDouble("owner_stars"));

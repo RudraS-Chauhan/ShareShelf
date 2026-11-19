@@ -50,6 +50,8 @@ CREATE TABLE IF NOT EXISTS requests (
   meet_time             DATETIME NULL,
   meet_note             VARCHAR(255) NULL,
   was_overdue           BOOLEAN DEFAULT FALSE,
+  borrow_hours INT NULL,
+  return_condition VARCHAR(10) NULL,
   contact_revealed      BOOLEAN DEFAULT FALSE,
   revealed_at           TIMESTAMP NULL,
   created_at            TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

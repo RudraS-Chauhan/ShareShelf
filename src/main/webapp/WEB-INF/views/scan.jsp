@@ -45,18 +45,7 @@
           </c:forEach>
         </div>
       </div>
-      <div class="full">
-        <label>Rate <c:out value="${request.requesterName}"/> as a borrower <span class="hint">(required)</span></label>
-        <div class="choice-row">
-          <c:forEach begin="1" end="5" var="s">
-            <label class="choice"><input type="radio" name="stars" value="${s}" ${param.stars == s ? 'checked' : ''}> ${s} ★</label>
-          </c:forEach>
-        </div>
-      </div>
-      <div class="full">
-        <label for="comment">Comment <span class="hint">(optional)</span></label>
-        <input id="comment" type="text" name="comment" maxlength="200" value="<c:out value='${param.comment}'/>" placeholder="e.g. On time, took good care of it">
-      </div>
+      <div class="hint full">After the code is verified you will rate <c:out value="${request.requesterName}"/> as a borrower (next screen).</div>
     </c:if>
   </div>
   <div class="form-actions">

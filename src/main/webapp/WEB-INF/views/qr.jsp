@@ -16,6 +16,7 @@
   </div>
 </div>
 
+<div id="live" data-mode="goto" data-goto="/my-requests"></div>
 <div class="card qr-card">
   <p class="qr-step">
     <c:choose>

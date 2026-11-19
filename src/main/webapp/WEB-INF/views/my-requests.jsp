@@ -12,6 +12,7 @@
   </div>
 </div>
 
+<div id="live" data-mode="reload"></div>
 <h2 class="section" style="margin-top:8px">Received on my listings <span class="role-tag">You are the Lender</span> <span class="count-pill">${fn:length(receivedRequests)}</span></h2>
 <c:choose>
   <c:when test="${empty receivedRequests}">
@@ -26,7 +27,7 @@
           <tr>
             <td data-label="Item"><strong><c:out value="${r.itemTitle}"/></strong><div class="sub"><c:out value="${r.listingType}"/></div></td>
             <td data-label="Borrower">
-              <c:out value="${r.requesterName}"/><br>
+              <a href="${ctx}/profile?id=${r.requesterId}"><c:out value="${r.requesterName}"/></a><br>
               <c:set var="n" value="${r.requesterCompleted}"/><%@ include file="/WEB-INF/views/fragments/trust.jspf" %>
               <div class="sub"><c:out value="${empty r.requesterBranch ? '' : r.requesterBranch}"/><c:if test="${r.requesterYear > 0}"> · Year ${r.requesterYear}</c:if></div>
               <c:if test="${not empty r.requesterStarsText}"><div class="sub">★ ${r.requesterStarsText}</div></c:if>
@@ -37,6 +38,8 @@
             <td data-label="Status"><span class="badge badge-${fn:toLowerCase(r.status)}"><c:out value="${r.status}"/></span></td>
             <td class="due ${r.status == 'OVERDUE' ? 'late' : ''}" data-label="Due back">
               <c:choose><c:when test="${empty r.dueText}">–</c:when><c:otherwise><c:out value="${r.dueText}"/></c:otherwise></c:choose>
+              <c:if test="${not empty r.timerNote}"><div class="sub"><c:out value="${r.timerNote}"/></div></c:if>
+              <c:if test="${not empty r.returnConditionText}"><div class="sub"><c:out value="${r.returnConditionText}"/></div></c:if>
               <c:if test="${not empty r.meetTimeText}"><div class="sub">Meet: <c:out value="${r.meetTimeText}"/></div></c:if>
               <c:if test="${not empty r.meetNote}"><div class="sub">Note: <c:out value="${r.meetNote}"/></div></c:if>
               <c:if test="${r.contactRevealed}"><div class="sub">Contact revealed ${fn:substring(r.revealedAt, 0, 10)}</div></c:if>
@@ -64,7 +67,7 @@
           <tr>
             <td data-label="Item"><strong><c:out value="${r.itemTitle}"/></strong><div class="sub"><c:out value="${r.listingType}"/></div></td>
             <td data-label="Lender">
-              <c:out value="${r.ownerName}"/><br>
+              <a href="${ctx}/profile?id=${r.ownerId}"><c:out value="${r.ownerName}"/></a><br>
               <c:set var="n" value="${r.ownerCompleted}"/><%@ include file="/WEB-INF/views/fragments/trust.jspf" %>
               <c:if test="${not empty r.ownerStarsText}"><div class="sub">★ ${r.ownerStarsText}</div></c:if>
               <c:if test="${not empty r.ownerBadge}"><span class="badge-chip">🏅 ${r.ownerBadge}</span></c:if>
@@ -73,6 +76,8 @@
             <td data-label="Status"><span class="badge badge-${fn:toLowerCase(r.status)}"><c:out value="${r.status}"/></span></td>
             <td class="due ${r.status == 'OVERDUE' ? 'late' : ''}" data-label="Due back">
               <c:choose><c:when test="${empty r.dueText}">–</c:when><c:otherwise><c:out value="${r.dueText}"/></c:otherwise></c:choose>
+              <c:if test="${not empty r.timerNote}"><div class="sub"><c:out value="${r.timerNote}"/></div></c:if>
+              <c:if test="${not empty r.returnConditionText}"><div class="sub"><c:out value="${r.returnConditionText}"/></div></c:if>
               <c:if test="${not empty r.meetTimeText}"><div class="sub">Meet: <c:out value="${r.meetTimeText}"/></div></c:if>
               <c:if test="${not empty r.meetNote}"><div class="sub">Note: <c:out value="${r.meetNote}"/></div></c:if>
               <c:if test="${r.status == 'OVERDUE'}"><div class="sub">Please return it soon</div></c:if>

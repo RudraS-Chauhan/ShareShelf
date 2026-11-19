@@ -20,10 +20,11 @@
       <a href="${ctx}/add-listing" class="${active == 'add' ? 'active' : ''}">Add listing</a>
       <a href="${ctx}/my-requests" class="${active == 'requests' ? 'active' : ''}">My requests</a>
       <a href="${ctx}/reports" class="${active == 'reports' ? 'active' : ''}">Reports</a>
+      <a href="${ctx}/profile" class="${active == 'profile' ? 'active' : ''}">Profile</a>
     </nav>
     <div class="who">
       <a class="bell ${active == 'notifications' ? 'active' : ''}" href="${ctx}/notifications" aria-label="Notifications">🔔<c:if test="${unreadCount > 0}"><span class="bell-count">${unreadCount}</span></c:if></a>
-      <span>Hi, <strong><c:out value="${sessionScope.studentName}"/></strong></span>
+      <span>Hi, <a href="${ctx}/profile" class="profile-link"><strong><c:out value="${sessionScope.studentName}"/></strong></a></span>
       <a href="${ctx}/logout">Log out</a>
     </div>
   </div>
@@ -31,8 +32,8 @@
 <main class="container">
 <c:if test="${not empty pendingRatings}">
   <div class="banner alert" role="status">
-    Please rate <strong><c:out value="${pendingRatings[0].ownerName}"/></strong> for "<c:out value="${pendingRatings[0].itemTitle}"/>".
-    <a href="${ctx}/rate?requestId=${pendingRatings[0].requestId}">Rate now</a> (needed before you can request again)
+    Please rate <strong><c:out value="${pendingRatings[0].otherName}"/></strong> as a ${pendingRatings[0].roleText} for "<c:out value="${pendingRatings[0].itemTitle}"/>".
+    <a href="${ctx}/rate?requestId=${pendingRatings[0].requestId}">Rate now</a> (needed before you can request or accept again)
   </div>
 </c:if>
 <%-- Flash message: set by a servlet before a redirect, shown once, then removed --%>

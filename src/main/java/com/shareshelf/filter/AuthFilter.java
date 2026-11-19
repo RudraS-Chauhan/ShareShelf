@@ -49,7 +49,7 @@ public class AuthFilter implements Filter {
         // Stops the browser showing a cached private page after logout / the Back button
         resp.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
         resp.setHeader("Pragma", "no-cache");
-        if ("GET".equals(req.getMethod())) {
+        if ("GET".equals(req.getMethod()) && !req.getRequestURI().endsWith("/live")) {
             addBellData(req, (String) session.getAttribute("studentId"));
         }
         chain.doFilter(request, response);

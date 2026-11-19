@@ -2,7 +2,7 @@
 
 **A student-to-student resource-sharing platform for Galgotias University.** Borrow, exchange, donate, or give away campus items such as calculators, lab coats, notes, and books, with tracked requests, due dates and an overdue safety net.
 
-![Java](https://img.shields.io/badge/Java-17-orange) ![Servlets](https://img.shields.io/badge/Servlets-4.0-green) ![JDBC](https://img.shields.io/badge/JDBC-MySQL-blue) ![Tests](https://img.shields.io/badge/tests-35%20unit%20%2B%20129%20e2e%20passing-brightgreen)
+![Java](https://img.shields.io/badge/Java-17-orange) ![Servlets](https://img.shields.io/badge/Servlets-4.0-green) ![JDBC](https://img.shields.io/badge/JDBC-MySQL-blue) ![Tests](https://img.shields.io/badge/tests-36%20unit%20%2B%20134%20e2e%20passing-brightgreen)
 
 [Problem](#-the-problem) · [Features](#-features) · [Screenshots](#-screenshots) · [How it works](#-how-it-works) · [Architecture](#-architecture) · [Database](#-database) · [Run it](#-run-it-locally) · [Host it](#-deploying-it-online) · [Testing](#-testing) · [Team](#-team)
 
@@ -129,10 +129,10 @@ The overdue-scan interval is the `overdueCheckMinutes` context parameter in `WEB
 
 ## 🧪 Testing
 ```bash
-> **Phase 2 features:** QR handover and return (one-time token, 6-digit fallback code, 10-minute expiry), condition check and mandatory mutual ratings at return, profile badges, and in-app notifications. On an existing database run `docs/migration-2026-11-19.sql` first.
+> **Phase 2 and 3 features:** QR handover and return (one-time token, 6-digit fallback code, 10-minute expiry), the borrow clock starts when the pickup is verified, a condition check at return, mandatory mutual ratings right after the return code is verified, profile pages with badges, in-app notifications, and live page updates (5-second polling). On an existing database run `docs/migration-2026-11-19.sql` and then `docs/migration-2026-11-19b.sql` first.
 
-mvn test                      # 35 JUnit tests: 25 unit + 10 DAO tests (the 7 skip themselves if no DB is reachable)
-python3 tests/e2e_smoke.py    # 129 end-to-end checks against the running app (empty DB)
+mvn test                      # 36 JUnit tests: 25 unit + 11 DAO tests (the 7 skip themselves if no DB is reachable)
+python3 tests/e2e_smoke.py    # 134 end-to-end checks against the running app (empty DB)
 ```
 New here? Follow the click-by-click guide in [`docs/HOW_TO_TEST.md`](docs/HOW_TO_TEST.md). Recorded results: [`docs/TESTING.md`](docs/TESTING.md). Test cases: [`docs/TEST_CASES.md`](docs/TEST_CASES.md).
 
@@ -156,7 +156,7 @@ Who did what, weekend by weekend: [`docs/TEAM_CONTRIBUTIONS.md`](docs/TEAM_CONTR
 We planned the screens and flows first (`docs/USER_FLOWS.md`, `docs/UI_GUIDE.md`), agreed on the database as a team (`docs/DAO_CONTRACT.md`), then built layer by layer: database → DAOs → servlets → pages. After Phase 1 feedback (empty files, hardcoded credentials, non-standard layout) we rebuilt the project on the standard Maven layout, hashed passwords, and added automated tests so those problems cannot come back.
 
 ### An honest note on tools
-We used an AI assistant (Claude) heavily in Phase 2 to write and test much of the code. We reviewed it, ran it, and can explain every layer, and the 35 unit and 129 end-to-end checks in `docs/test-results/` are real runs. We list this openly because we would rather be upfront than overclaim.
+We used an AI assistant (Claude) heavily in Phase 2 to write and test much of the code. We reviewed it, ran it, and can explain every layer, and the 36 unit and 134 end-to-end checks in `docs/test-results/` are real runs. We list this openly because we would rather be upfront than overclaim.
 
 ## 🧭 What's next
 Email verification of the college address, item photos, in-app notifications, and an admin moderation panel.

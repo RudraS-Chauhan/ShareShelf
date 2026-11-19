@@ -3,7 +3,6 @@ package com.shareshelf.servlet;
 import com.shareshelf.dao.HandoverDAO;
 import com.shareshelf.dao.ListingDAO;
 import com.shareshelf.dao.NotificationDAO;
-import com.shareshelf.dao.RatingDAO;
 import com.shareshelf.dao.RequestDAO;
 import com.shareshelf.model.ListingStatus;
 import com.shareshelf.model.Request;
@@ -23,8 +22,8 @@ import java.io.IOException;
  *   POST /scan                confirms the step
  *
  * HANDOVER: the borrower confirms pickup  -> item becomes BORROWED, the owner gets a notification.
- * RETURN:   the owner confirms the return -> request COMPLETED, and the owner must rate the borrower
- *           and note the item's condition in the same form (so feedback happens exactly at the scan).
+ * RETURN:   the owner confirms the return -> request COMPLETED, then the owner rates the borrower
+ *           and note the item's condition; the rating screen opens right after the code is verified.
  */
 @WebServlet("/scan")
 public class ScanServlet extends BaseServlet {
@@ -33,7 +32,6 @@ public class ScanServlet extends BaseServlet {
     private final transient RequestDAO requestDAO = new RequestDAO();
     private final transient ListingDAO listingDAO = new ListingDAO();
     private final transient HandoverDAO handoverDAO = new HandoverDAO();
-    private final transient RatingDAO ratingDAO = new RatingDAO();
     private final transient NotificationDAO notifier = new NotificationDAO();
 
     @Override
@@ -59,24 +57,11 @@ public class ScanServlet extends BaseServlet {
         String me = currentStudentId(req);
         String code = param(req, "code").replaceAll("\\D", "");
 
-        // For a return the rating must be valid BEFORE the code is used up.
-        int stars = ValidationUtil.parseIntOr(req.getParameter("stars"), 0);
         String condition = param(req, "condition");
-        String comment = ValidationUtil.limit(req.getParameter("comment"), 400).replaceAll("\\p{Cntrl}", " ");
         boolean isReturn = HandoverDAO.RETURN.equals(kind);
-        if (isReturn) {
-            if (stars < 1 || stars > 5) {
-                showError(req, resp, "Please give the borrower 1 to 5 stars. It is needed to finish the return.");
-                return;
-            }
-            if (!AppConstants.RETURN_CONDITIONS.contains(condition)) {
-                showError(req, resp, "Please choose the item's condition.");
-                return;
-            }
-            if (comment.length() > AppConstants.MAX_RATING_COMMENT) {
-                showError(req, resp, "The comment can be at most " + AppConstants.MAX_RATING_COMMENT + " characters.");
-                return;
-            }
+        if (isReturn && !AppConstants.RETURN_CONDITIONS.contains(condition)) {
+            showError(req, resp, "Please choose the item's condition.");
+            return;
         }
 
         if (!handoverDAO.redeem(r.getRequestId(), kind, token.isEmpty() ? null : token, code.isEmpty() ? null : code)) {
@@ -85,9 +70,11 @@ public class ScanServlet extends BaseServlet {
         }
 
         if (!isReturn) {
-            if (listingDAO.updateStatus(r.getItemId(), ListingStatus.BORROWED.name())) {
+            if (requestDAO.startBorrow(r.getRequestId(), r.getItemId())) {
+                Request now = requestDAO.findById(r.getRequestId());
                 notifier.add(r.getOwnerId(), r.getRequesterName() + " picked up \"" + r.getItemTitle() + "\". It is now marked as borrowed.", "/my-requests");
-                flash(req, "success", "Pickup confirmed. \"" + r.getItemTitle() + "\" is yours until " + (r.getDueText().isEmpty() ? "the agreed time" : r.getDueText()) + ".");
+                flash(req, "success", "Pickup confirmed. \"" + r.getItemTitle() + "\" is yours"
+                        + (now != null && !now.getDueText().isEmpty() ? " until " + now.getDueText() + "." : "."));
             } else {
                 flash(req, "error", "Could not confirm the pickup. Please try again.");
             }
@@ -96,14 +83,15 @@ public class ScanServlet extends BaseServlet {
         }
 
         if (requestDAO.complete(r.getRequestId(), r.getItemId())) {
-            ratingDAO.add(r.getRequestId(), me, r.getRequesterId(), stars, condition, comment);
+            requestDAO.setReturnCondition(r.getRequestId(), condition);
             notifier.add(r.getRequesterId(), "Return of \"" + r.getItemTitle() + "\" confirmed. Please rate " + r.getOwnerName() + ".",
                     "/rate?requestId=" + r.getRequestId());
-            flash(req, "success", "Return confirmed and " + r.getRequesterName() + " rated. \"" + r.getItemTitle() + "\" is available again.");
+            flash(req, "success", "Return verified. \"" + r.getItemTitle() + "\" is available again. Now rate " + r.getRequesterName() + ".");
+            redirect(req, resp, "/rate?requestId=" + r.getRequestId());   // step 2: the rating, after the code was verified
         } else {
             flash(req, "error", "Could not complete the return. Please try again.");
+            redirect(req, resp, "/my-requests");
         }
-        redirect(req, resp, "/my-requests");
     }
 
     /** Loads the request and checks that this student is the one who confirms this step. */

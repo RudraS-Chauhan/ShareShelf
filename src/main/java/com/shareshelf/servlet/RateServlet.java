@@ -14,8 +14,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * /rate?requestId=N - the borrower rates the owner after a completed borrow. (The owner rates the
- * borrower inside the return scan.) Until it is done the borrower cannot send new requests.
+ * /rate?requestId=N - each side rates the other after a completed borrow. The lender lands here right after the
+ * return code is verified. Until it is done the person cannot send or accept new requests.
  */
 @WebServlet("/rate")
 public class RateServlet extends BaseServlet {
@@ -45,8 +45,10 @@ public class RateServlet extends BaseServlet {
             forward(req, resp, "rate");
             return;
         }
-        if (ratingDAO.add(r.getRequestId(), r.getRequesterId(), r.getOwnerId(), stars, null, comment)) {
-            flash(req, "success", "Thanks! Your rating for " + r.getOwnerName() + " is saved.");
+        boolean iAmOwner = r.getOwnerId().equals(currentStudentId(req));
+        String ratee = iAmOwner ? r.getRequesterId() : r.getOwnerId();
+        if (ratingDAO.add(r.getRequestId(), currentStudentId(req), ratee, stars, null, comment)) {
+            flash(req, "success", "Thanks! Your rating for " + (iAmOwner ? r.getRequesterName() : r.getOwnerName()) + " is saved.");
         } else {
             flash(req, "error", "Could not save the rating.");
         }
@@ -57,7 +59,7 @@ public class RateServlet extends BaseServlet {
     private Request load(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Request r = requestDAO.findById(ValidationUtil.parseIntOr(req.getParameter("requestId"), -1));
         String me = currentStudentId(req);
-        if (r == null || !r.isBorrow() || !r.getRequesterId().equals(me)
+        if (r == null || !r.isBorrow() || !(r.getRequesterId().equals(me) || r.getOwnerId().equals(me))
                 || !RequestStatus.COMPLETED.name().equals(r.getStatus())) {
             flash(req, "error", "There is nothing to rate here.");
             redirect(req, resp, "/dashboard");
@@ -68,7 +70,11 @@ public class RateServlet extends BaseServlet {
             redirect(req, resp, "/dashboard");
             return null;
         }
+        boolean iAmOwner = r.getOwnerId().equals(me);
         req.setAttribute("request", r);
+        req.setAttribute("otherName", iAmOwner ? r.getRequesterName() : r.getOwnerName());
+        req.setAttribute("otherId", iAmOwner ? r.getRequesterId() : r.getOwnerId());
+        req.setAttribute("roleText", iAmOwner ? "borrower" : "lender");
         return r;
     }
 }

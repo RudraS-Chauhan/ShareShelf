@@ -65,21 +65,27 @@ public class AcceptRequestServlet extends RequestActionServlet {
             return Outcome.failure("The meeting note can be at most " + AppConstants.MAX_MEET_NOTE + " characters.");
         }
 
-        LocalDateTime dueAt = null;
+        if (!new com.shareshelf.dao.RatingDAO().pendingFor(currentStudentId(req)).isEmpty()) {
+            return Outcome.failure("Please rate your last borrower first (yellow banner), then you can accept new requests.");
+        }
+
+        LocalDateTime dueAt = null;     // stays null for borrow items: the clock starts when the pickup is verified
+        Integer borrowHours = null;
         if (item.isBorrow()) {
             int fallback = item.getDurationHours() > 0 ? item.getDurationHours() : AppConstants.DEFAULT_DURATION_HOURS;
             int hours = ValidationUtil.parseIntOr(req.getParameter("hours"), fallback);
             if (!AppConstants.DURATION_HOURS.contains(hours)) {
                 return Outcome.failure("Choose one of the borrow durations from the list.");
             }
-            dueAt = (meetTime != null ? meetTime : now).plusHours(hours);
+            borrowHours = hours;
         }
 
-        if (requestDAO.accept(request.getRequestId(), request.getItemId(), dueAt, meetTime, meetNote)) {
+        if (requestDAO.accept(request.getRequestId(), request.getItemId(), dueAt, meetTime, meetNote, borrowHours)) {
             notifier.add(request.getRequesterId(), request.getOwnerName() + " accepted your request for \"" + item.getTitle() + "\""
-                    + (meetTime != null ? ". Meet: " + meetTime.format(DUE_FORMAT) : "."), "/my-requests");
+                    + (meetTime != null ? ". Meet: " + meetTime.format(DUE_FORMAT) : ".")
+                    + (borrowHours != null ? " You can keep it " + AppConstants.durationLabel(borrowHours) + " from pickup." : ""), "/my-requests");
             return Outcome.success("Accepted. \"" + item.getTitle() + "\" is now reserved for "
-                    + request.getRequesterName() + (dueAt != null ? ", due back by " + dueAt.format(DUE_FORMAT) + "." : "."));
+                    + request.getRequesterName() + (borrowHours != null ? " for " + AppConstants.durationLabel(borrowHours) + ", counted from pickup." : "."));
         }
         return Outcome.failure("Could not accept: the item is no longer available.");
     }

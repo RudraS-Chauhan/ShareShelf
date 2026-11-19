@@ -96,16 +96,21 @@ PASS     manual 'mark returned' of an on-time borrow is refused
 PASS     owner cannot show the return QR
 PASS     borrower sees the return QR
 PASS     borrower cannot confirm their own return
-PASS     return needs a rating
 PASS     return needs a condition
 PASS     return with a wrong code is refused
-PASS  T-complete owner confirms the return with a rating
+PASS  T-complete owner verifies the return code, then lands on the rating screen
 PASS     BORROW item is available again after the scan
 PASS     borrower is asked to rate the owner
 PASS     borrower cannot request again before rating
 PASS     rating needs stars
-PASS     non-borrower cannot rate
+PASS     lender is asked to rate the borrower too
+PASS     lender profile shows nothing for others yet
+PASS     a stranger cannot rate
+PASS     lender rates the borrower
 PASS     borrower rates the owner
+PASS     live endpoint answers with bell count and a signature
+PASS     live endpoint needs a login
+PASS     profile page shows track record, no contact details
 PASS     rating twice is refused
 PASS     banner is gone after rating
 PASS     completing twice is handled
@@ -140,4 +145,4 @@ PASS     logout redirects to login
 PASS     session is dead after logout
 PASS     unknown URL gives the friendly 404 page
 
-129 checks, 129 passed, 0 failed
+134 checks, 134 passed, 0 failed

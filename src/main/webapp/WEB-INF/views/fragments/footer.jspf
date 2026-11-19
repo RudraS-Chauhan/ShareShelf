@@ -1,3 +1,39 @@
 </main>
+<%-- Live updates: every 5 seconds ask /live. Updates the bell, and refreshes the page when a request changed.
+     A page opts in with <div id="live" data-mode="reload"> (refresh in place) or data-mode="goto" data-goto="/my-requests". --%>
+<script>
+(function () {
+  var base = '${ctx}';
+  var last = null, el = document.getElementById('live');
+  function busy() {   // never reload while the person is typing or has the accept form open
+    var a = document.activeElement;
+    return !!(a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) || !!document.querySelector('details[open]');
+  }
+  function tick() {
+    if (document.hidden) { return; }
+    fetch(base + '/live', { credentials: 'same-origin', cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || d.sig === undefined) { return; }
+        var bell = document.querySelector('.bell');
+        if (bell) {
+          var c = bell.querySelector('.bell-count');
+          if (d.unread > 0) {
+            if (!c) { c = document.createElement('span'); c.className = 'bell-count'; bell.appendChild(c); }
+            c.textContent = d.unread;
+          } else if (c) { c.remove(); }
+        }
+        if (last !== null && d.sig !== last && el) {
+          if (el.dataset.mode === 'goto') { window.location = base + el.dataset.goto; }
+          else if (!busy()) { window.location.reload(); }
+        }
+        last = d.sig;
+      })
+      .catch(function () {});
+  }
+  tick();
+  setInterval(tick, 5000);
+})();
+</script>
 </body>
 </html>

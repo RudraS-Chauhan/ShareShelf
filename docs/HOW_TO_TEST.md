@@ -19,8 +19,9 @@ Admission numbers must appear inside the email, for example `25SCSE1001001` with
 | 8 | **B:** Request the same item again | Refused (duplicate) |
 | 9 | **A:** Accept, set a meeting time, a note and "Borrow for" hours | Item RESERVED, request ACCEPTED; B sees the meeting time and note |
 | 10 | **A:** open "Show handover QR". **B:** "Confirm pickup (code)" and type the 6-digit code (or scan the QR with a phone camera) | Item BORROWED; A gets a bell notification "B picked up ..." |
-| 10b | **B:** "Show return QR". **A:** "Confirm return (code)", tick the condition, give 1-5 stars | Item AVAILABLE again; request COMPLETED |
-| 10c | **B:** sees the yellow "Please rate" banner, tries a new request, is blocked, then rates A | Banner gone; stars show on both profiles once both rated |
+| 10b | **B:** "Show return QR". **A:** "Confirm return (code)" and tick the condition | Code verified, request COMPLETED, A lands on the rating screen |
+| 10c | **A** rates B. **B** sees the yellow "Please rate" banner, is blocked from new requests, then rates A | Banners gone; stars and reviews appear on both Profile pages once both have rated |
+| 10d | Keep both browsers open on My requests while doing 10 and 10b | The pages update by themselves within about 5 seconds, no reload needed |
 | 11 | Check the Reports page | Counts changed; "most requested category" shown |
 | 12 | Open `/ShareShelf/reports?format=csv` | A CSV file downloads |
 | 13 | Log out, then open `/ShareShelf/dashboard` | Sent back to login (login filter works) |
@@ -40,16 +41,16 @@ Within `overdueCheckMinutes` (default 5) the status becomes OVERDUE, the owner s
 ```bash
 mvn test
 ```
-Expect **35 tests, 0 failures** with a database (25 unit + 10 DAO). Without a database the 10 DAO tests are skipped, so you see 25. The DAO integration tests need a reachable database; without one they skip themselves.
+Expect **36 tests, 0 failures** with a database (25 unit + 11 DAO). Without a database the 11 DAO tests are skipped, so you see 25. The DAO integration tests need a reachable database; without one they skip themselves.
 
 ## Level 3: Automated end-to-end script
 With the app running and an **empty** database (re-run `schema.sql` to empty it):
 ```bash
-python3 tests/e2e_smoke.py                    # 123 checks (129 with the overdue hook)
+python3 tests/e2e_smoke.py                    # 128 checks (134 with the overdue hook)
 ```
 It registers students, lists items, runs every request step, and checks escaping and security. Every line prints `PASS` or `FAIL`.
 
-The overdue part needs a hook that backdates a due date and restarts the app, so it only runs when you set `OVERDUE_HOOK`; that brings it to the full 129 checks. Our recorded run is in [`test-results/e2e-output.txt`](test-results/e2e-output.txt).
+The overdue part needs a hook that backdates a due date and restarts the app, so it only runs when you set `OVERDUE_HOOK`; that brings it to the full 134 checks. Our recorded run is in [`test-results/e2e-output.txt`](test-results/e2e-output.txt).
 
 ## What a good demo test looks like
 Run level 1 steps 1-10 live: it tells the whole story of the app in about three minutes.

@@ -313,7 +313,8 @@ class DaoIntegrationTest {
 
         // the borrower owes a rating for the finished borrow
         assertEquals(1, ratings.pendingFor(borrower).size());
-        assertTrue(ratings.pendingFor(owner).isEmpty());
+        assertEquals(1, ratings.pendingFor(owner).size(), "the lender owes a rating too");
+        assertTrue(ratings.pendingFor(owner).get(0).isRateBorrower());
 
         assertFalse(ratings.add(r.getRequestId(), owner, borrower, 0, "OK", ""), "0 stars refused");
         assertFalse(ratings.add(r.getRequestId(), owner, borrower, 6, "OK", ""), "6 stars refused");
@@ -324,11 +325,56 @@ class DaoIntegrationTest {
         assertEquals(0, requests.findById(r.getRequestId()).getRequesterStarsN());
         assertTrue(ratings.add(r.getRequestId(), borrower, owner, 5, null, "nice"));
         assertTrue(ratings.pendingFor(borrower).isEmpty());
+        assertTrue(ratings.pendingFor(owner).isEmpty());
         Request shown = requests.findById(r.getRequestId());
         assertEquals(1, shown.getRequesterStarsN());
         assertEquals(4.0, shown.getRequesterStars(), 0.001);
         assertEquals("4.0 (1)", shown.getRequesterStarsText());
         assertEquals("", shown.getRequesterBadge(), "one exchange is not enough for a badge");
+
+        // the public profile uses the same rule and never exposes contact details
+        com.shareshelf.model.Profile profile = new ProfileDAO().load(borrower);
+        assertEquals(1, profile.getBorrowerStarsN());
+        assertEquals(4.0, profile.getBorrowerStars(), 0.001);
+        assertEquals(0, profile.getLenderStarsN());
+        assertEquals("good", profile.getReviews().get(0).getComment());
+        assertEquals("borrower", profile.getReviews().get(0).getRole());
+        assertNull(new ProfileDAO().load("NO_SUCH_STUDENT"));
+    }
+
+    @Test
+    void borrowClockStartsAtVerifiedPickupNotAtAccept() {
+        String owner = uniqueId("U11"), borrower = uniqueId("U12");
+        students.register(newStudent(owner));
+        students.register(newStudent(borrower));
+        ResourceItem item = newItem(owner, "BORROW");
+        listings.insert(item);
+        Request r = newRequest(item, borrower);
+        requests.insert(r);
+
+        String before = requests.stateSignature(owner);
+        assertTrue(requests.accept(r.getRequestId(), item.getItemId(), null, null, "", 24));
+        Request accepted = requests.findById(r.getRequestId());
+        assertEquals(24, accepted.getBorrowHours());
+        assertEquals("", accepted.getDueText(), "no deadline before pickup");
+        assertTrue(accepted.getTimerNote().contains("starts at pickup"));
+        assertNotEquals(before, requests.stateSignature(owner), "the live signature changes on accept");
+
+        // a reserved item that was never picked up must not be flagged overdue
+        requests.markOverdue();
+        assertEquals("ACCEPTED", requests.findById(r.getRequestId()).getStatus());
+
+        LocalDateTime t0 = LocalDateTime.now(AppConstants.CAMPUS_ZONE);
+        assertTrue(requests.startBorrow(r.getRequestId(), item.getItemId()));
+        assertFalse(requests.startBorrow(r.getRequestId(), item.getItemId()), "pickup counts once");
+        Request picked = requests.findById(r.getRequestId());
+        assertEquals("BORROWED", picked.getItemStatus());
+        assertNotNull(picked.getDueAt());
+        long minutes = java.time.Duration.between(t0, picked.getDueAt()).toMinutes();
+        assertTrue(minutes >= 24 * 60 - 1 && minutes <= 24 * 60 + 1, "due = pickup time + 24 hours, was " + minutes);
+
+        requests.setReturnCondition(r.getRequestId(), "DAMAGED");
+        assertEquals("Returned damaged", requests.findById(r.getRequestId()).getReturnConditionText());
     }
 
     @Test

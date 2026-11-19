@@ -1,13 +1,13 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%-- Borrower rates the owner (GET/POST /rate). Model from RateServlet: request, error --%>
-<c:set var="pageTitle" value="Rate your lender"/>
+<c:set var="pageTitle" value="Rate"/>
 <c:set var="active" value="requests"/>
 <%@ include file="/WEB-INF/views/fragments/header.jspf" %>
 
 <div class="page-head">
   <div>
-    <h1>Rate <c:out value="${request.ownerName}"/></h1>
-    <p>You returned "<c:out value="${request.itemTitle}"/>". Ratings help the next student decide.</p>
+    <h1>Rate <c:out value="${otherName}"/> as a ${roleText}</h1>
+    <p>About "<c:out value="${request.itemTitle}"/>". Ratings appear on their profile once you have both rated.</p>
   </div>
 </div>
 
@@ -16,7 +16,7 @@
   <input type="hidden" name="requestId" value="${request.requestId}">
   <div class="form-grid">
     <div class="full">
-      <label>How was lending with <c:out value="${request.ownerName}"/>? <span class="hint">(required)</span></label>
+      <label>How was it with <c:out value="${otherName}"/>? <span class="hint">(required)</span></label>
       <div class="choice-row">
         <c:forEach begin="1" end="5" var="s">
           <label class="choice"><input type="radio" name="stars" value="${s}" ${param.stars == s ? 'checked' : ''}> ${s} ★</label>

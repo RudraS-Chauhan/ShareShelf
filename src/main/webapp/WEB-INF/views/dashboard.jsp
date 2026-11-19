@@ -27,6 +27,7 @@
   <div class="stat"><div class="num">${completedCount}</div><div class="lbl">Completed exchanges</div></div>
 </section>
 
+<div id="live" data-mode="reload"></div>
 <h2 class="section">Requests on your items <span class="role-tag">You are the Lender</span> <span class="count-pill">${fn:length(pendingRequests)}</span></h2>
 <c:choose>
   <c:when test="${empty pendingRequests}">
@@ -41,7 +42,7 @@
           <tr>
             <td data-label="Item"><strong><c:out value="${r.itemTitle}"/></strong><div class="sub"><c:out value="${r.listingType}"/></div></td>
             <td data-label="Borrower (asking)">
-              <c:out value="${r.requesterName}"/><br>
+              <a href="${ctx}/profile?id=${r.requesterId}"><c:out value="${r.requesterName}"/></a><br>
               <c:set var="n" value="${r.requesterCompleted}"/><%@ include file="/WEB-INF/views/fragments/trust.jspf" %>
               <div class="sub"><c:out value="${empty r.requesterBranch ? '' : r.requesterBranch}"/><c:if test="${r.requesterYear > 0}"> · Year ${r.requesterYear}</c:if></div>
               <c:if test="${not empty r.requesterStarsText}"><div class="sub">★ ${r.requesterStarsText}</div></c:if>

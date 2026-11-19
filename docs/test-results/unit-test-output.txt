@@ -1,11 +1,11 @@
 
 Thanks for using JUnit! Support its development at https://junit.org/sponsoring
 
-Nov 19, 2026 8:34:08 AM com.shareshelf.util.StaleReservationChecker run
+Nov 19, 2026 4:17:57 PM com.shareshelf.util.StaleReservationChecker run
 INFO: Overdue check: flagged 2 request(s) as OVERDUE
-Nov 19, 2026 8:34:08 AM com.shareshelf.util.StaleReservationChecker run
+Nov 19, 2026 4:17:57 PM com.shareshelf.util.StaleReservationChecker run
 INFO: Overdue check: flagged 2 request(s) as OVERDUE
-Nov 19, 2026 8:34:08 AM com.shareshelf.util.StaleReservationChecker run
+Nov 19, 2026 4:17:57 PM com.shareshelf.util.StaleReservationChecker run
 WARNING: Overdue check failed; will retry on the next cycle
 com.shareshelf.util.DataAccessException: database is down
 	at com.shareshelf.util.StaleReservationCheckerTest.lambda$aFailingScanDoesNotKillTheThreadAndRecoversNextTime$1(StaleReservationCheckerTest.java:27)
@@ -113,9 +113,9 @@ com.shareshelf.util.DataAccessException: database is down
 Caused by: java.lang.RuntimeException
 	... 102 more
 
-Nov 19, 2026 8:34:08 AM com.shareshelf.util.StaleReservationChecker run
+Nov 19, 2026 4:17:57 PM com.shareshelf.util.StaleReservationChecker run
 INFO: Overdue check: flagged 1 request(s) as OVERDUE
-Nov 19, 2026 8:34:08 AM com.shareshelf.util.DBConnection <clinit>
+Nov 19, 2026 4:17:57 PM com.shareshelf.util.DBConnection <clinit>
 SEVERE: MySQL JDBC driver not found on the classpath
 java.lang.ClassNotFoundException: com.mysql.cj.jdbc.Driver
 	at java.base/java.net.URLClassLoader.findClass(URLClassLoader.java:445)
@@ -236,6 +236,7 @@ java.lang.ClassNotFoundException: com.mysql.cj.jdbc.Driver
 ?  ?  ?? ratingsAreOnePerPersonValidatedAndOnlyCountOnceBothSidesRated() ?
 ?  ?  ?? searchIsCaseInsensitiveTrimmedAndOnlyShowsAvailableItems() ?
 ?  ?  ?? passwordIsStoredHashedAndLoginChecksTheHash() ?
+?  ?  ?? borrowClockStartsAtVerifiedPickupNotAtAccept() ?
 ?  ?  ?? listingForUnknownOwnerIsRejectedByTheForeignKey() ?
 ?  ?  ?? completeReopensBorrowItemsAndClosesGiveaways() ?
 ?  ?  ?? ownerAndRequesterListsContainTheRequest() ?
@@ -260,18 +261,18 @@ java.lang.ClassNotFoundException: com.mysql.cj.jdbc.Driver
 ?     ?? handoverRulesAreSane() ?
 ?? JUnit Vintage ?
 
-Test run finished after 1519 ms
+Test run finished after 1711 ms
 [         9 containers found      ]
 [         0 containers skipped    ]
 [         9 containers started    ]
 [         0 containers aborted    ]
 [         9 containers successful ]
 [         0 containers failed     ]
-[        35 tests found           ]
+[        36 tests found           ]
 [         0 tests skipped         ]
-[        35 tests started         ]
+[        36 tests started         ]
 [         0 tests aborted         ]
-[        35 tests successful      ]
+[        36 tests successful      ]
 [         0 tests failed          ]
 
 

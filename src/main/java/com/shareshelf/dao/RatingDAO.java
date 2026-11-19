@@ -15,23 +15,27 @@ import java.util.List;
 /** Ratings given at the end of a borrow. One per person per request; hidden until both sides have rated. */
 public class RatingDAO {
 
-    /** A finished borrow this student still has to rate. */
+    /** A finished borrow this student still has to rate (as lender or as borrower). */
     public static final class Pending {
         private final int requestId;
-        private final String itemTitle, ownerId, ownerName;
+        private final String itemTitle, otherId, otherName;
+        private final boolean rateBorrower;   // true when this student was the lender, so they rate the borrower
 
-        public Pending(int requestId, String itemTitle, String ownerId, String ownerName) {
+        public Pending(int requestId, String itemTitle, String otherId, String otherName, boolean rateBorrower) {
             this.requestId = requestId;
             this.itemTitle = itemTitle;
-            this.ownerId = ownerId;
-            this.ownerName = ownerName;
+            this.otherId = otherId;
+            this.otherName = otherName;
+            this.rateBorrower = rateBorrower;
         }
 
         // plain getters: the JSP expression language reads bean properties, not record accessors
         public int getRequestId() { return requestId; }
         public String getItemTitle() { return itemTitle; }
-        public String getOwnerId() { return ownerId; }
-        public String getOwnerName() { return ownerName; }
+        public String getOtherId() { return otherId; }
+        public String getOtherName() { return otherName; }
+        public boolean isRateBorrower() { return rateBorrower; }
+        public String getRoleText() { return rateBorrower ? "borrower" : "lender"; }
     }
 
     /**
@@ -66,12 +70,13 @@ public class RatingDAO {
         }
     }
 
-    /** Finished borrows (this student was the borrower) that have no rating from this student yet. */
+    /** Finished borrows (either side) that have no rating from this student yet, oldest first. */
     public List<Pending> pendingFor(String studentId) {
-        String sql = "SELECT q.request_id, i.title, q.owner_id, os.name FROM requests q "
+        String sql = "SELECT q.request_id, i.title, q.owner_id, os.name, q.requester_id, rs.name FROM requests q "
                 + "JOIN resource_items i ON i.item_id = q.item_id "
                 + "JOIN students os ON os.student_id = q.owner_id "
-                + "WHERE q.requester_id = ? AND q.status = 'COMPLETED' AND i.listing_type = 'BORROW' "
+                + "JOIN students rs ON rs.student_id = q.requester_id "
+                + "WHERE (q.requester_id = ? OR q.owner_id = ?) AND q.status = 'COMPLETED' AND i.listing_type = 'BORROW' "
                 + "AND NOT EXISTS (SELECT 1 FROM ratings r WHERE r.request_id = q.request_id AND r.rater_id = ?) "
                 + "ORDER BY q.request_id";
         List<Pending> list = new ArrayList<>();
@@ -79,9 +84,13 @@ public class RatingDAO {
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, studentId);
             ps.setString(2, studentId);
+            ps.setString(3, studentId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    list.add(new Pending(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4)));
+                    boolean iAmOwner = studentId.equals(rs.getString(3));
+                    list.add(iAmOwner
+                            ? new Pending(rs.getInt(1), rs.getString(2), rs.getString(5), rs.getString(6), true)
+                            : new Pending(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4), false));
                 }
             }
         } catch (SQLException e) {
