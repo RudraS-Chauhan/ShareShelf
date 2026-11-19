@@ -12,7 +12,7 @@
   </div>
 </div>
 
-<h2 class="section" style="margin-top:8px">Received on my listings <span class="count-pill">${fn:length(receivedRequests)}</span></h2>
+<h2 class="section" style="margin-top:8px">Received on my listings <span class="role-tag">You are the Lender</span> <span class="count-pill">${fn:length(receivedRequests)}</span></h2>
 <c:choose>
   <c:when test="${empty receivedRequests}">
     <div class="empty"><strong>No requests received</strong>When someone asks for one of your items it will appear here.</div>
@@ -20,12 +20,12 @@
   <c:otherwise>
     <div class="table-wrap">
       <table class="data">
-        <thead><tr><th>Item</th><th>From</th><th>Message</th><th>Status</th><th>Due back</th><th>Actions</th></tr></thead>
+        <thead><tr><th>Item</th><th>Borrower</th><th>Message</th><th>Status</th><th>Due back</th><th>Actions</th></tr></thead>
         <tbody>
         <c:forEach var="r" items="${receivedRequests}">
           <tr>
             <td data-label="Item"><strong><c:out value="${r.itemTitle}"/></strong><div class="sub"><c:out value="${r.listingType}"/></div></td>
-            <td data-label="From">
+            <td data-label="Borrower">
               <c:out value="${r.requesterName}"/><br>
               <c:set var="n" value="${r.requesterCompleted}"/><%@ include file="/WEB-INF/views/fragments/trust.jspf" %>
               <div class="sub"><c:out value="${empty r.requesterBranch ? '' : r.requesterBranch}"/><c:if test="${r.requesterYear > 0}"> · Year ${r.requesterYear}</c:if></div>
@@ -50,7 +50,7 @@
   </c:otherwise>
 </c:choose>
 
-<h2 class="section">Sent by me <span class="count-pill">${fn:length(sentRequests)}</span></h2>
+<h2 class="section">Sent by me <span class="role-tag">You are the Borrower</span> <span class="count-pill">${fn:length(sentRequests)}</span></h2>
 <c:choose>
   <c:when test="${empty sentRequests}">
     <div class="empty"><strong>You haven't requested anything</strong><a href="${ctx}/search">Find an item</a> you need.</div>
@@ -58,12 +58,12 @@
   <c:otherwise>
     <div class="table-wrap">
       <table class="data">
-        <thead><tr><th>Item</th><th>Owner</th><th>My message</th><th>Status</th><th>Due back</th><th></th></tr></thead>
+        <thead><tr><th>Item</th><th>Lender</th><th>My message</th><th>Status</th><th>Due back</th><th></th></tr></thead>
         <tbody>
         <c:forEach var="r" items="${sentRequests}">
           <tr>
             <td data-label="Item"><strong><c:out value="${r.itemTitle}"/></strong><div class="sub"><c:out value="${r.listingType}"/></div></td>
-            <td data-label="Owner">
+            <td data-label="Lender">
               <c:out value="${r.ownerName}"/><br>
               <c:set var="n" value="${r.ownerCompleted}"/><%@ include file="/WEB-INF/views/fragments/trust.jspf" %>
               <c:if test="${not empty r.ownerStarsText}"><div class="sub">★ ${r.ownerStarsText}</div></c:if>
