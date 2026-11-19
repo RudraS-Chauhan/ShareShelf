@@ -37,19 +37,35 @@
     </form>
   </c:if>
 
+  <%-- Borrow items: handover and return are confirmed by QR / code, not by a button --%>
   <c:if test="${r.status == 'ACCEPTED' and r.borrow and r.itemStatus == 'RESERVED'}">
-    <form class="inline" method="post" action="${ctx}/request/handover">
-      <input type="hidden" name="requestId" value="${r.requestId}">
-      <input type="hidden" name="back" value="${back}">
-      <button type="submit" class="btn btn-sm btn-outline">Mark handed over</button>
-    </form>
+    <a class="btn btn-sm" href="${ctx}/handover/qr?requestId=${r.requestId}">Show handover QR</a>
+  </c:if>
+  <c:if test="${(r.status == 'ACCEPTED' or r.status == 'OVERDUE') and r.borrow and r.itemStatus == 'BORROWED'}">
+    <a class="btn btn-sm" href="${ctx}/scan?requestId=${r.requestId}">Confirm return (code)</a>
+    <span class="hint">or scan the borrower's QR with your camera</span>
   </c:if>
 
-  <c:if test="${r.status == 'ACCEPTED' or r.status == 'OVERDUE'}">
+  <c:if test="${r.status == 'ACCEPTED' and not r.borrow}">
     <form class="inline" method="post" action="${ctx}/request/complete">
       <input type="hidden" name="requestId" value="${r.requestId}">
       <input type="hidden" name="back" value="${back}">
-      <button type="submit" class="btn btn-sm">${r.borrow ? 'Mark returned' : 'Mark completed'}</button>
+      <button type="submit" class="btn btn-sm">Mark completed</button>
+    </form>
+  </c:if>
+  <%-- Last resort when the borrower never shows up: only for OVERDUE, no rating --%>
+  <c:if test="${r.status == 'OVERDUE' and r.borrow}">
+    <form class="inline" method="post" action="${ctx}/request/complete" onsubmit="return confirm('Mark as returned without a scan? Use this only if you really have the item back.');">
+      <input type="hidden" name="requestId" value="${r.requestId}">
+      <input type="hidden" name="back" value="${back}">
+      <button type="submit" class="btn btn-sm btn-outline">Returned (no scan)</button>
+    </form>
+  </c:if>
+  <c:if test="${r.status == 'OVERDUE' and not r.borrow}">
+    <form class="inline" method="post" action="${ctx}/request/complete">
+      <input type="hidden" name="requestId" value="${r.requestId}">
+      <input type="hidden" name="back" value="${back}">
+      <button type="submit" class="btn btn-sm">Mark completed</button>
     </form>
   </c:if>
 

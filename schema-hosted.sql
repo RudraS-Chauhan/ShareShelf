@@ -70,3 +70,49 @@ CREATE TABLE IF NOT EXISTS contact_reveal_logs (
   FOREIGN KEY (request_id) REFERENCES requests(request_id),
   FOREIGN KEY (owner_id) REFERENCES students(student_id)
 );
+
+-- ===== Phase 2 (19 Nov 2026): QR handover/return, notifications, ratings =====
+
+-- One-time QR token + 6-digit fallback code for a handover (kind HANDOVER) or a return (kind RETURN).
+-- Valid for a few minutes; the code is locked after 5 wrong tries.
+CREATE TABLE IF NOT EXISTS handover_tokens (
+  token_id    INT AUTO_INCREMENT PRIMARY KEY,
+  request_id  INT NOT NULL,
+  kind        VARCHAR(10) NOT NULL,
+  token       VARCHAR(40) NOT NULL UNIQUE,
+  code        VARCHAR(6) NOT NULL,
+  expires_at  DATETIME NOT NULL,
+  used        BOOLEAN NOT NULL DEFAULT FALSE,
+  attempts    INT NOT NULL DEFAULT 0,
+  FOREIGN KEY (request_id) REFERENCES requests(request_id),
+  INDEX idx_tokens_request (request_id)
+);
+
+-- In-app notifications (the bell in the top bar).
+CREATE TABLE IF NOT EXISTS notifications (
+  notification_id INT AUTO_INCREMENT PRIMARY KEY,
+  student_id      VARCHAR(20) NOT NULL,
+  message         VARCHAR(255) NOT NULL,
+  link            VARCHAR(100),
+  is_read         BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at      DATETIME NOT NULL,
+  FOREIGN KEY (student_id) REFERENCES students(student_id),
+  INDEX idx_notifications_student (student_id, is_read)
+);
+
+-- One rating per person per completed request. A rating only counts on a profile once the
+-- other side has rated the same request too, so nobody can rate in revenge.
+CREATE TABLE IF NOT EXISTS ratings (
+  rating_id      INT AUTO_INCREMENT PRIMARY KEY,
+  request_id     INT NOT NULL,
+  rater_id       VARCHAR(20) NOT NULL,
+  ratee_id       VARCHAR(20) NOT NULL,
+  stars          INT NOT NULL,
+  item_condition VARCHAR(10),
+  comment        VARCHAR(200),
+  created_at     DATETIME NOT NULL,
+  UNIQUE KEY uq_rating (request_id, rater_id),
+  FOREIGN KEY (request_id) REFERENCES requests(request_id),
+  FOREIGN KEY (rater_id) REFERENCES students(student_id),
+  FOREIGN KEY (ratee_id) REFERENCES students(student_id)
+);

@@ -79,10 +79,35 @@ PASS     RESERVED listing disappears from search
 PASS  T6 request on a reserved item rejected
 PASS  T15 reveal before overdue blocked
 PASS     handover by non-owner refused
-PASS     owner marks handed over
-PASS     second handover refused
+== QR handover, return and rating ==
+PASS     manual handover of a borrow item is refused (QR required)
+PASS     borrower cannot show the handover QR
+PASS     owner sees a QR and a 6-digit code
+PASS     owner cannot confirm their own handover
+PASS     wrong code is refused
+PASS     after 5 wrong tries even the right code is locked
+PASS     a new QR gives a new working code
+PASS     owner sees an unread count on the bell
+PASS     owner is notified that the item was picked up
+PASS     bell count clears after opening notifications
+PASS     code cannot be used twice (step has moved on)
 PASS     close is refused while borrowed
-PASS  T-complete owner completes the exchange
+PASS     manual 'mark returned' of an on-time borrow is refused
+PASS     owner cannot show the return QR
+PASS     borrower sees the return QR
+PASS     borrower cannot confirm their own return
+PASS     return needs a rating
+PASS     return needs a condition
+PASS     return with a wrong code is refused
+PASS  T-complete owner confirms the return with a rating
+PASS     BORROW item is available again after the scan
+PASS     borrower is asked to rate the owner
+PASS     borrower cannot request again before rating
+PASS     rating needs stars
+PASS     non-borrower cannot rate
+PASS     borrower rates the owner
+PASS     rating twice is refused
+PASS     banner is gone after rating
 PASS     completing twice is handled
 PASS     BORROW item is available again
 PASS     reliability signal shows completed exchange
@@ -115,4 +140,4 @@ PASS     logout redirects to login
 PASS     session is dead after logout
 PASS     unknown URL gives the friendly 404 page
 
-105 checks, 105 passed, 0 failed
+129 checks, 129 passed, 0 failed

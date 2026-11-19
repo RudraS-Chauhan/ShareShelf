@@ -69,4 +69,11 @@ class AppConstantsTest {
         assertEquals("7 days", AppConstants.durationLabel(168));
         assertEquals(AppConstants.DURATION_HOURS.size(), AppConstants.durationOptions().size());
     }
+
+    @Test
+    void handoverRulesAreSane() {
+        assertTrue(AppConstants.HANDOVER_MINUTES >= 5 && AppConstants.HANDOVER_MINUTES <= 30);
+        assertTrue(AppConstants.MAX_CODE_ATTEMPTS <= 5, "6-digit codes need a tight attempt limit");
+        assertEquals(java.util.List.of("OK", "DAMAGED", "MISSING"), AppConstants.RETURN_CONDITIONS);
+    }
 }

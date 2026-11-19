@@ -24,6 +24,7 @@ public class RejectRequestServlet extends RequestActionServlet {
     @Override
     protected Outcome perform(HttpServletRequest req, Request request) {
         if (requestDAO.reject(request.getRequestId())) {
+            notifier.add(request.getRequesterId(), request.getOwnerName() + " could not lend \"" + request.getItemTitle() + "\" this time.", "/my-requests");
             return Outcome.success("Request from " + request.getRequesterName() + " rejected.");
         }
         return Outcome.failure("This request has already been handled.");

@@ -21,6 +21,9 @@ public class CompleteRequestServlet extends RequestActionServlet {
 
     @Override
     protected Outcome perform(HttpServletRequest req, Request request) {
+        if (request.isBorrow() && !"OVERDUE".equals(request.getStatus())) {
+            return Outcome.failure("A return is confirmed by scanning the borrower's return QR (or typing the 6-digit code).");
+        }
         if (requestDAO.complete(request.getRequestId(), request.getItemId())) {
             String next = request.isBorrow() ? "It is available to borrow again." : "The listing is now closed.";
             return Outcome.success("Marked as completed. " + next);

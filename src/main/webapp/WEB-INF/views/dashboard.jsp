@@ -44,6 +44,8 @@
               <c:out value="${r.requesterName}"/><br>
               <c:set var="n" value="${r.requesterCompleted}"/><%@ include file="/WEB-INF/views/fragments/trust.jspf" %>
               <div class="sub"><c:out value="${empty r.requesterBranch ? '' : r.requesterBranch}"/><c:if test="${r.requesterYear > 0}"> · Year ${r.requesterYear}</c:if></div>
+              <c:if test="${not empty r.requesterStarsText}"><div class="sub">★ ${r.requesterStarsText}</div></c:if>
+              <c:if test="${not empty r.requesterBadge}"><span class="badge-chip">🏅 ${r.requesterBadge}</span></c:if>
               <c:if test="${r.requesterLate > 0}"><div class="sub late">${r.requesterLate} late return${r.requesterLate == 1 ? '' : 's'}</div></c:if>
             </td>
             <td class="msg-text" data-label="Message"><c:out value="${empty r.message ? '(no message)' : r.message}"/></td>

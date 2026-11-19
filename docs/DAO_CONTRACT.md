@@ -30,6 +30,10 @@ Search trims the keyword, is case-insensitive, and treats `%` and `_` literally.
 ```java
 boolean insert(Request r);
 boolean hasDuplicatePending(int itemId, String requesterId);
+// Phase 2 DAOs (see the Javadoc in each file):
+//   HandoverDAO      issue(requestId, kind) / redeem(requestId, kind, token, code)   one-time QR token + 6-digit code, 10 min, locks after 5 wrong tries
+//   NotificationDAO  add / unreadCount / latest / markAllRead                         in-app bell; add() never throws
+//   RatingDAO        add / pendingFor / hasRated                                      1 rating per person per request, hidden until both rated
 boolean accept(int requestId, int itemId, LocalDateTime dueAt, LocalDateTime meetTime, String meetNote); // TRANSACTION
 boolean reject(int requestId);                  // PENDING -> REJECTED only
 boolean cancel(int requestId);                  // PENDING -> CANCELLED only

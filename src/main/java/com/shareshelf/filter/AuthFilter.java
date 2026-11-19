@@ -49,6 +49,20 @@ public class AuthFilter implements Filter {
         // Stops the browser showing a cached private page after logout / the Back button
         resp.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
         resp.setHeader("Pragma", "no-cache");
+        if ("GET".equals(req.getMethod())) {
+            addBellData(req, (String) session.getAttribute("studentId"));
+        }
         chain.doFilter(request, response);
+    }
+
+    /** Numbers for the top bar (bell count, ratings still owed). A failure here must never break the page. */
+    private void addBellData(HttpServletRequest req, String studentId) {
+        try {
+            req.setAttribute("unreadCount", new com.shareshelf.dao.NotificationDAO().unreadCount(studentId));
+            java.util.List<com.shareshelf.dao.RatingDAO.Pending> owed = new com.shareshelf.dao.RatingDAO().pendingFor(studentId);
+            req.setAttribute("pendingRatings", owed);
+        } catch (RuntimeException e) {
+            java.util.logging.Logger.getLogger(AuthFilter.class.getName()).warning("Bell data unavailable: " + e.getMessage());
+        }
     }
 }

@@ -251,4 +251,97 @@ class DaoIntegrationTest {
         assertTrue(requests.cancel(r.getRequestId()));
         assertFalse(requests.reject(r.getRequestId()), "a cancelled request cannot be rejected");
     }
+
+    @Test
+    void handoverCodeWorksOnceExpiresWithNewOnesAndLocksAfterWrongGuesses() {
+        String owner = uniqueId("U6"), borrower = uniqueId("U7");
+        students.register(newStudent(owner));
+        students.register(newStudent(borrower));
+        ResourceItem item = newItem(owner, "BORROW");
+        listings.insert(item);
+        Request r = newRequest(item, borrower);
+        requests.insert(r);
+        HandoverDAO tokens = new HandoverDAO();
+
+        HandoverDAO.Issued first = tokens.issue(r.getRequestId(), HandoverDAO.HANDOVER);
+        assertEquals(6, first.code().length());
+        assertEquals(r.getRequestId(), tokens.requestIdOfToken(first.token()));
+        assertEquals(-1, tokens.requestIdOfToken("nope"));
+
+        // a newer token cancels the older one
+        HandoverDAO.Issued second = tokens.issue(r.getRequestId(), HandoverDAO.HANDOVER);
+        assertFalse(tokens.redeem(r.getRequestId(), HandoverDAO.HANDOVER, first.token(), null));
+        // a token for a handover cannot be used as a return
+        assertFalse(tokens.redeem(r.getRequestId(), HandoverDAO.RETURN, second.token(), null));
+        // the real one works exactly once
+        assertTrue(tokens.redeem(r.getRequestId(), HandoverDAO.HANDOVER, second.token(), null));
+        assertFalse(tokens.redeem(r.getRequestId(), HandoverDAO.HANDOVER, second.token(), null));
+
+        // guessing the code: 5 wrong tries lock it, even for the right code
+        HandoverDAO.Issued third = tokens.issue(r.getRequestId(), HandoverDAO.RETURN);
+        String wrong = third.code().equals("000000") ? "000001" : "000000";
+        for (int i = 0; i < AppConstants.MAX_CODE_ATTEMPTS; i++) {
+            assertFalse(tokens.redeem(r.getRequestId(), HandoverDAO.RETURN, null, wrong));
+        }
+        assertFalse(tokens.redeem(r.getRequestId(), HandoverDAO.RETURN, null, third.code()));
+
+        // expired tokens are refused
+        HandoverDAO.Issued fourth = tokens.issue(r.getRequestId(), HandoverDAO.RETURN);
+        try (Connection c = DBConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement("UPDATE handover_tokens SET expires_at = ? WHERE token = ?")) {
+            ps.setObject(1, LocalDateTime.now(AppConstants.CAMPUS_ZONE).minusMinutes(1));
+            ps.setString(2, fourth.token());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            fail(e);
+        }
+        assertFalse(tokens.redeem(r.getRequestId(), HandoverDAO.RETURN, fourth.token(), null));
+    }
+
+    @Test
+    void ratingsAreOnePerPersonValidatedAndOnlyCountOnceBothSidesRated() {
+        String owner = uniqueId("U8"), borrower = uniqueId("U9");
+        students.register(newStudent(owner));
+        students.register(newStudent(borrower));
+        ResourceItem item = newItem(owner, "BORROW");
+        listings.insert(item);
+        Request r = newRequest(item, borrower);
+        requests.insert(r);
+        assertTrue(requests.accept(r.getRequestId(), item.getItemId(), LocalDateTime.now().plusDays(1), null, ""));
+        assertTrue(requests.complete(r.getRequestId(), item.getItemId()));
+        RatingDAO ratings = new RatingDAO();
+
+        // the borrower owes a rating for the finished borrow
+        assertEquals(1, ratings.pendingFor(borrower).size());
+        assertTrue(ratings.pendingFor(owner).isEmpty());
+
+        assertFalse(ratings.add(r.getRequestId(), owner, borrower, 0, "OK", ""), "0 stars refused");
+        assertFalse(ratings.add(r.getRequestId(), owner, borrower, 6, "OK", ""), "6 stars refused");
+        assertTrue(ratings.add(r.getRequestId(), owner, borrower, 4, "OK", "good"));
+        assertFalse(ratings.add(r.getRequestId(), owner, borrower, 5, "OK", "again"), "one rating per person");
+
+        // hidden until the borrower has rated too
+        assertEquals(0, requests.findById(r.getRequestId()).getRequesterStarsN());
+        assertTrue(ratings.add(r.getRequestId(), borrower, owner, 5, null, "nice"));
+        assertTrue(ratings.pendingFor(borrower).isEmpty());
+        Request shown = requests.findById(r.getRequestId());
+        assertEquals(1, shown.getRequesterStarsN());
+        assertEquals(4.0, shown.getRequesterStars(), 0.001);
+        assertEquals("4.0 (1)", shown.getRequesterStarsText());
+        assertEquals("", shown.getRequesterBadge(), "one exchange is not enough for a badge");
+    }
+
+    @Test
+    void notificationsAreStoredCountedAndMarkedRead() {
+        String id = uniqueId("U10");
+        students.register(newStudent(id));
+        NotificationDAO n = new NotificationDAO();
+        assertEquals(0, n.unreadCount(id));
+        n.add(id, "hello", "/dashboard");
+        n.add(id, "second", null);
+        assertEquals(2, n.unreadCount(id));
+        assertEquals("second", n.latest(id).get(0).getMessage(), "newest first");
+        n.markAllRead(id);
+        assertEquals(0, n.unreadCount(id));
+    }
 }

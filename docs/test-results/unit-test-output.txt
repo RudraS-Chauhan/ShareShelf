@@ -1,11 +1,11 @@
 
 Thanks for using JUnit! Support its development at https://junit.org/sponsoring
 
-Nov 18, 2026 2:53:56 PM com.shareshelf.util.StaleReservationChecker run
+Nov 19, 2026 8:34:08 AM com.shareshelf.util.StaleReservationChecker run
 INFO: Overdue check: flagged 2 request(s) as OVERDUE
-Nov 18, 2026 2:53:56 PM com.shareshelf.util.StaleReservationChecker run
+Nov 19, 2026 8:34:08 AM com.shareshelf.util.StaleReservationChecker run
 INFO: Overdue check: flagged 2 request(s) as OVERDUE
-Nov 18, 2026 2:53:56 PM com.shareshelf.util.StaleReservationChecker run
+Nov 19, 2026 8:34:08 AM com.shareshelf.util.StaleReservationChecker run
 WARNING: Overdue check failed; will retry on the next cycle
 com.shareshelf.util.DataAccessException: database is down
 	at com.shareshelf.util.StaleReservationCheckerTest.lambda$aFailingScanDoesNotKillTheThreadAndRecoversNextTime$1(StaleReservationCheckerTest.java:27)
@@ -113,9 +113,9 @@ com.shareshelf.util.DataAccessException: database is down
 Caused by: java.lang.RuntimeException
 	... 102 more
 
-Nov 18, 2026 2:53:56 PM com.shareshelf.util.StaleReservationChecker run
+Nov 19, 2026 8:34:08 AM com.shareshelf.util.StaleReservationChecker run
 INFO: Overdue check: flagged 1 request(s) as OVERDUE
-Nov 18, 2026 2:53:56 PM com.shareshelf.util.DBConnection <clinit>
+Nov 19, 2026 8:34:08 AM com.shareshelf.util.DBConnection <clinit>
 SEVERE: MySQL JDBC driver not found on the classpath
 java.lang.ClassNotFoundException: com.mysql.cj.jdbc.Driver
 	at java.base/java.net.URLClassLoader.findClass(URLClassLoader.java:445)
@@ -214,57 +214,64 @@ java.lang.ClassNotFoundException: com.mysql.cj.jdbc.Driver
 	at org.junit.platform.console.ConsoleLauncher.run(ConsoleLauncher.java:42)
 	at org.junit.platform.console.ConsoleLauncher.main(ConsoleLauncher.java:35)
 
-[36m?[0m
-[36m??[0m [36mJUnit Platform Suite[0m [32m?[0m
-[36m??[0m [36mJUnit Jupiter[0m [32m?[0m
-[36m?  ??[0m [36mPasswordUtilTest[0m [32m?[0m
-[36m?  ?  ??[0m [34mhashIsNeverThePlaintextAndIsSalted()[0m [32m?[0m
-[36m?  ?  ??[0m [34mwrongPasswordIsRejected()[0m [32m?[0m
-[36m?  ?  ??[0m [34mmalformedStoredValuesNeverVerify()[0m [32m?[0m
-[36m?  ?  ??[0m [34mcorrectPasswordVerifies()[0m [32m?[0m
-[36m?  ??[0m [36mStaleReservationCheckerTest[0m [32m?[0m
-[36m?  ?  ??[0m [34mcountsFlaggedRequestsAndRecordsTheScanTime()[0m [32m?[0m
-[36m?  ?  ??[0m [34maFailingScanDoesNotKillTheThreadAndRecoversNextTime()[0m [32m?[0m
-[36m?  ??[0m [36mDaoIntegrationTest[0m [32m?[0m
-[36m?  ?  ??[0m [34macceptIsATransactionAndOnlyOneRequestCanWin()[0m [32m?[0m
-[36m?  ?  ??[0m [34moverdueFlaggingAndTheWhatsAppSafetyNet()[0m [32m?[0m
-[36m?  ?  ??[0m [34msearchIsCaseInsensitiveTrimmedAndOnlyShowsAvailableItems()[0m [32m?[0m
-[36m?  ?  ??[0m [34mpasswordIsStoredHashedAndLoginChecksTheHash()[0m [32m?[0m
-[36m?  ?  ??[0m [34mlistingForUnknownOwnerIsRejectedByTheForeignKey()[0m [32m?[0m
-[36m?  ?  ??[0m [34mcompleteReopensBorrowItemsAndClosesGiveaways()[0m [32m?[0m
-[36m?  ?  ??[0m [34mownerAndRequesterListsContainTheRequest()[0m [32m?[0m
-[36m?  ?  ??[0m [34mmeetingDetailsAreStoredAndTimedLoansBecomeOverdueByTheMinute()[0m [32m?[0m
-[36m?  ??[0m [36mValidationUtilTest[0m [32m?[0m
-[36m?  ?  ??[0m [34mhelpersAreNullSafe()[0m [32m?[0m
-[36m?  ?  ??[0m [34memailMustContainTheStudentsOwnAdmissionNumber()[0m [32m?[0m
-[36m?  ?  ??[0m [34mstudentIdAcceptsOnlyLettersAndDigits()[0m [32m?[0m
-[36m?  ?  ??[0m [34mstudentIdIsTrimmedAndUpperCased()[0m [32m?[0m
-[36m?  ?  ??[0m [34mpasswordNeedsEightCharsWithLetterAndDigit()[0m [32m?[0m
-[36m?  ?  ??[0m [34mwhatsappNumbersAreNormalisedForWaMe()[0m [32m?[0m
-[36m?  ?  ??[0m [34monlyCollegeEmailsAreAccepted()[0m [32m?[0m
-[36m?  ??[0m [36mAppConstantsTest[0m [32m?[0m
-[36m?     ??[0m [34mblockSpotsNeedAFloorAndAreAlsoValidLocations()[0m [32m?[0m
-[36m?     ??[0m [34mborrowListingsAreRecognised()[0m [32m?[0m
-[36m?     ??[0m [34mdurationsAreOrderedAndLabelledSensibly()[0m [32m?[0m
-[36m?     ??[0m [34mhostelItemsCategoryWasDroppedOnPurpose()[0m [32m?[0m
-[36m?     ??[0m [34mlocationTextCombinesPlaceFloorAndLandmark()[0m [32m?[0m
-[36m?     ??[0m [34mlistingTypesParseSafely()[0m [32m?[0m
-[36m?     ??[0m [34mlongestPossibleLocationFitsTheDatabaseColumn()[0m [32m?[0m
-[36m?     ??[0m [34mdefaultBorrowDurationIsOneOfTheOfferedChoices()[0m [32m?[0m
-[36m??[0m [36mJUnit Vintage[0m [32m?[0m
+?
+?? JUnit Platform Suite ?
+?? JUnit Jupiter ?
+?  ?? PasswordUtilTest ?
+?  ?  ?? hashIsNeverThePlaintextAndIsSalted() ?
+?  ?  ?? wrongPasswordIsRejected() ?
+?  ?  ?? malformedStoredValuesNeverVerify() ?
+?  ?  ?? correctPasswordVerifies() ?
+?  ?? QrUtilTest ?
+?  ?  ?? differentTextGivesADifferentCode() ?
+?  ?  ?? drawsAScalableSvgAndOnlyEverContainsShapes() ?
+?  ?? StaleReservationCheckerTest ?
+?  ?  ?? countsFlaggedRequestsAndRecordsTheScanTime() ?
+?  ?  ?? aFailingScanDoesNotKillTheThreadAndRecoversNextTime() ?
+?  ?? DaoIntegrationTest ?
+?  ?  ?? notificationsAreStoredCountedAndMarkedRead() ?
+?  ?  ?? handoverCodeWorksOnceExpiresWithNewOnesAndLocksAfterWrongGuesses() ?
+?  ?  ?? acceptIsATransactionAndOnlyOneRequestCanWin() ?
+?  ?  ?? overdueFlaggingAndTheWhatsAppSafetyNet() ?
+?  ?  ?? ratingsAreOnePerPersonValidatedAndOnlyCountOnceBothSidesRated() ?
+?  ?  ?? searchIsCaseInsensitiveTrimmedAndOnlyShowsAvailableItems() ?
+?  ?  ?? passwordIsStoredHashedAndLoginChecksTheHash() ?
+?  ?  ?? listingForUnknownOwnerIsRejectedByTheForeignKey() ?
+?  ?  ?? completeReopensBorrowItemsAndClosesGiveaways() ?
+?  ?  ?? ownerAndRequesterListsContainTheRequest() ?
+?  ?  ?? meetingDetailsAreStoredAndTimedLoansBecomeOverdueByTheMinute() ?
+?  ?? ValidationUtilTest ?
+?  ?  ?? helpersAreNullSafe() ?
+?  ?  ?? emailMustContainTheStudentsOwnAdmissionNumber() ?
+?  ?  ?? studentIdAcceptsOnlyLettersAndDigits() ?
+?  ?  ?? studentIdIsTrimmedAndUpperCased() ?
+?  ?  ?? passwordNeedsEightCharsWithLetterAndDigit() ?
+?  ?  ?? whatsappNumbersAreNormalisedForWaMe() ?
+?  ?  ?? onlyCollegeEmailsAreAccepted() ?
+?  ?? AppConstantsTest ?
+?     ?? blockSpotsNeedAFloorAndAreAlsoValidLocations() ?
+?     ?? borrowListingsAreRecognised() ?
+?     ?? durationsAreOrderedAndLabelledSensibly() ?
+?     ?? hostelItemsCategoryWasDroppedOnPurpose() ?
+?     ?? locationTextCombinesPlaceFloorAndLandmark() ?
+?     ?? listingTypesParseSafely() ?
+?     ?? longestPossibleLocationFitsTheDatabaseColumn() ?
+?     ?? defaultBorrowDurationIsOneOfTheOfferedChoices() ?
+?     ?? handoverRulesAreSane() ?
+?? JUnit Vintage ?
 
-Test run finished after 1255 ms
-[         8 containers found      ]
+Test run finished after 1519 ms
+[         9 containers found      ]
 [         0 containers skipped    ]
-[         8 containers started    ]
+[         9 containers started    ]
 [         0 containers aborted    ]
-[         8 containers successful ]
+[         9 containers successful ]
 [         0 containers failed     ]
-[        29 tests found           ]
+[        35 tests found           ]
 [         0 tests skipped         ]
-[        29 tests started         ]
+[        35 tests started         ]
 [         0 tests aborted         ]
-[        29 tests successful      ]
+[        35 tests successful      ]
 [         0 tests failed          ]
 
 

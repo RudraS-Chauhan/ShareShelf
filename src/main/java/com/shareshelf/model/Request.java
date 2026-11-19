@@ -31,6 +31,8 @@ public class Request {
     // meeting and deadline details, set when the owner accepts
     private LocalDateTime meetTime, dueAt;
     private String meetNote;
+    private double requesterStars, ownerStars;   // average of revealed ratings (0 when none)
+    private int requesterStarsN, ownerStarsN;
     private int requesterCompleted, ownerCompleted;   // reliability signal: completed exchanges
 
     public Request() {}
@@ -213,5 +215,38 @@ public class Request {
     /** True when the requested listing is a BORROW listing. */
     public boolean isBorrow() {
         return ListingType.BORROW.name().equals(listingType);
+    }
+
+    public double getRequesterStars() { return requesterStars; }
+    public void setRequesterStars(double v) { requesterStars = v; }
+    public double getOwnerStars() { return ownerStars; }
+    public void setOwnerStars(double v) { ownerStars = v; }
+    public int getRequesterStarsN() { return requesterStarsN; }
+    public void setRequesterStarsN(int v) { requesterStarsN = v; }
+    public int getOwnerStarsN() { return ownerStarsN; }
+    public void setOwnerStarsN(int v) { ownerStarsN = v; }
+
+    /** "4.5 (3)" or "" when nobody has rated yet. */
+    public String getRequesterStarsText() { return starsText(requesterStars, requesterStarsN); }
+    public String getOwnerStarsText() { return starsText(ownerStars, ownerStarsN); }
+
+    /** Badge for the borrower: earned by 3+ finished exchanges, no late returns, and 4+ stars on average. */
+    public String getRequesterBadge() {
+        return badge("Reliable borrower", requesterCompleted, requesterLate, requesterStars, requesterStarsN);
+    }
+
+    /** Badge for the lender: 3+ finished exchanges and 4+ stars on average. */
+    public String getOwnerBadge() {
+        return badge("Trusted lender", ownerCompleted, 0, ownerStars, ownerStarsN);
+    }
+
+    private static String starsText(double avg, int n) {
+        return n == 0 ? "" : String.format(Locale.ENGLISH, "%.1f (%d)", avg, n);
+    }
+
+    private static String badge(String name, int completed, int late, double avg, int n) {
+        boolean earned = completed >= com.shareshelf.util.AppConstants.BADGE_MIN_EXCHANGES && late == 0
+                && n > 0 && avg >= com.shareshelf.util.AppConstants.BADGE_MIN_STARS;
+        return earned ? name : "";
     }
 }

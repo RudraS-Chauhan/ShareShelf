@@ -76,6 +76,8 @@ public class AcceptRequestServlet extends RequestActionServlet {
         }
 
         if (requestDAO.accept(request.getRequestId(), request.getItemId(), dueAt, meetTime, meetNote)) {
+            notifier.add(request.getRequesterId(), request.getOwnerName() + " accepted your request for \"" + item.getTitle() + "\""
+                    + (meetTime != null ? ". Meet: " + meetTime.format(DUE_FORMAT) : "."), "/my-requests");
             return Outcome.success("Accepted. \"" + item.getTitle() + "\" is now reserved for "
                     + request.getRequesterName() + (dueAt != null ? ", due back by " + dueAt.format(DUE_FORMAT) + "." : "."));
         }

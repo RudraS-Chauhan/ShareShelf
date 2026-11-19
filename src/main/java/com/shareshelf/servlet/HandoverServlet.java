@@ -23,6 +23,9 @@ public class HandoverServlet extends RequestActionServlet {
 
     @Override
     protected Outcome perform(HttpServletRequest req, Request request) {
+        if (request.isBorrow()) {
+            return Outcome.failure("Handover is confirmed by the borrower scanning your QR code (or typing the 6-digit code).");
+        }
         boolean validRequest = RequestStatus.ACCEPTED.name().equals(request.getStatus()) && request.isBorrow();
         boolean validItem = ListingStatus.RESERVED.name().equals(request.getItemStatus());
         if (!validRequest || !validItem) {

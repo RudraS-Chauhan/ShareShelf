@@ -34,6 +34,12 @@
       <artifactId>mysql-connector-java</artifactId>
       <version>8.0.33</version>
     </dependency>
+    <!-- QR code image generation (pure Java, no native code) -->
+    <dependency>
+      <groupId>com.google.zxing</groupId>
+      <artifactId>core</artifactId>
+      <version>3.5.3</version>
+    </dependency>
     <!-- Unit tests -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>

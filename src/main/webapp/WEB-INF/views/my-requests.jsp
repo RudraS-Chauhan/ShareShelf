@@ -29,6 +29,8 @@
               <c:out value="${r.requesterName}"/><br>
               <c:set var="n" value="${r.requesterCompleted}"/><%@ include file="/WEB-INF/views/fragments/trust.jspf" %>
               <div class="sub"><c:out value="${empty r.requesterBranch ? '' : r.requesterBranch}"/><c:if test="${r.requesterYear > 0}"> · Year ${r.requesterYear}</c:if></div>
+              <c:if test="${not empty r.requesterStarsText}"><div class="sub">★ ${r.requesterStarsText}</div></c:if>
+              <c:if test="${not empty r.requesterBadge}"><span class="badge-chip">🏅 ${r.requesterBadge}</span></c:if>
               <c:if test="${r.requesterLate > 0}"><div class="sub late">${r.requesterLate} late return${r.requesterLate == 1 ? '' : 's'}</div></c:if>
             </td>
             <td class="msg-text" data-label="Message"><c:out value="${empty r.message ? '(no message)' : r.message}"/></td>
@@ -64,6 +66,8 @@
             <td data-label="Owner">
               <c:out value="${r.ownerName}"/><br>
               <c:set var="n" value="${r.ownerCompleted}"/><%@ include file="/WEB-INF/views/fragments/trust.jspf" %>
+              <c:if test="${not empty r.ownerStarsText}"><div class="sub">★ ${r.ownerStarsText}</div></c:if>
+              <c:if test="${not empty r.ownerBadge}"><span class="badge-chip">🏅 ${r.ownerBadge}</span></c:if>
             </td>
             <td class="msg-text" data-label="My message"><c:out value="${empty r.message ? '(no message)' : r.message}"/></td>
             <td data-label="Status"><span class="badge badge-${fn:toLowerCase(r.status)}"><c:out value="${r.status}"/></span></td>
@@ -80,6 +84,13 @@
                   <input type="hidden" name="back" value="my-requests">
                   <button type="submit" class="btn btn-sm btn-danger">Cancel</button>
                 </form>
+              </c:if>
+              <c:if test="${r.status == 'ACCEPTED' and r.borrow and r.itemStatus == 'RESERVED'}">
+                <a class="btn btn-sm" href="${ctx}/scan?requestId=${r.requestId}">Confirm pickup (code)</a>
+                <div class="hint">or scan the owner's QR with your camera</div>
+              </c:if>
+              <c:if test="${(r.status == 'ACCEPTED' or r.status == 'OVERDUE') and r.borrow and r.itemStatus == 'BORROWED'}">
+                <a class="btn btn-sm" href="${ctx}/handover/qr?requestId=${r.requestId}">Show return QR</a>
               </c:if>
             </td>
           </tr>

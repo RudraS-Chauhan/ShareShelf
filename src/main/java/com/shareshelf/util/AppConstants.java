@@ -110,4 +110,16 @@ public final class AppConstants {
         Collections.addAll(s, values);
         return Collections.unmodifiableSet(s);
     }
+
+    // ---- Phase 2: QR handover, ratings ----
+    /** How long a QR token / 6-digit code stays valid. */
+    public static final int HANDOVER_MINUTES = 10;
+    /** Wrong 6-digit guesses allowed before the code is locked. */
+    public static final int MAX_CODE_ATTEMPTS = 5;
+    /** Condition the owner records when the item comes back. */
+    public static final List<String> RETURN_CONDITIONS = List.of("OK", "DAMAGED", "MISSING");
+    public static final int MAX_RATING_COMMENT = 200;
+    /** A profile badge appears after this many completed exchanges. */
+    public static final int BADGE_MIN_EXCHANGES = 3;
+    public static final double BADGE_MIN_STARS = 4.0;
 }

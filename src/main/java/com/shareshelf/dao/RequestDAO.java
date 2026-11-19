@@ -40,11 +40,21 @@ public class RequestDAO {
             + "(SELECT COUNT(*) FROM requests c WHERE c.status = 'COMPLETED' "
             + "   AND (c.owner_id = q.requester_id OR c.requester_id = q.requester_id)) AS requester_completed, "
             + "(SELECT COUNT(*) FROM requests c WHERE c.status = 'COMPLETED' "
-            + "   AND (c.owner_id = q.owner_id OR c.requester_id = q.owner_id)) AS owner_completed "
+            + "   AND (c.owner_id = q.owner_id OR c.requester_id = q.owner_id)) AS owner_completed, "
+            + stars("q.requester_id", "requester") + stars("q.owner_id", "owner")
+            + "q.request_id AS rid "
             + "FROM requests q "
             + "JOIN resource_items i ON i.item_id = q.item_id "
             + "JOIN students rs ON rs.student_id = q.requester_id "
             + "JOIN students os ON os.student_id = q.owner_id ";
+
+    /** Average stars and count for one student, counting only ratings whose other side has rated too. */
+    private static String stars(String who, String alias) {
+        String revealed = " FROM ratings r WHERE r.ratee_id = " + who + " AND EXISTS (SELECT 1 FROM ratings o "
+                + "WHERE o.request_id = r.request_id AND o.rater_id = r.ratee_id)";
+        return "(SELECT AVG(r.stars)" + revealed + ") AS " + alias + "_stars, "
+                + "(SELECT COUNT(*)" + revealed + ") AS " + alias + "_stars_n, ";
+    }
 
     // ------------------------------------------------------------ create / simple transitions
 
@@ -460,6 +470,10 @@ public class RequestDAO {
         r.setMeetNote(rs.getString("meet_note"));
         r.setRequesterCompleted(rs.getInt("requester_completed"));
         r.setOwnerCompleted(rs.getInt("owner_completed"));
+        r.setRequesterStars(rs.getDouble("requester_stars"));
+        r.setRequesterStarsN(rs.getInt("requester_stars_n"));
+        r.setOwnerStars(rs.getDouble("owner_stars"));
+        r.setOwnerStarsN(rs.getInt("owner_stars_n"));
         return r;
     }
 

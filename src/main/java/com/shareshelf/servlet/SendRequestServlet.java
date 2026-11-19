@@ -1,6 +1,8 @@
 package com.shareshelf.servlet;
 
 import com.shareshelf.dao.ListingDAO;
+import com.shareshelf.dao.NotificationDAO;
+import com.shareshelf.dao.RatingDAO;
 import com.shareshelf.dao.RequestDAO;
 import com.shareshelf.model.ListingStatus;
 import com.shareshelf.model.Request;
@@ -43,6 +45,8 @@ public class SendRequestServlet extends BaseServlet {
             error = "You can't request your own listing.";
         } else if (message.length() > MAX_MESSAGE) {
             error = "Your message can be at most " + MAX_MESSAGE + " characters.";
+        } else if (!new RatingDAO().pendingFor(studentId).isEmpty()) {
+            error = "Please rate your last lender first (see the yellow banner), then you can request again.";
         } else if (requestDAO.hasDuplicatePending(itemId, studentId)) {
             error = "You already have a pending request for \"" + item.getTitle() + "\".";
         }
@@ -59,6 +63,8 @@ public class SendRequestServlet extends BaseServlet {
         request.setMessage(message);
 
         if (requestDAO.insert(request)) {
+            new NotificationDAO().add(item.getOwnerId(), "New request for \"" + item.getTitle() + "\" from "
+                    + (String) req.getSession().getAttribute("studentName"), "/dashboard");
             flash(req, "success", "Request sent to " + item.getOwnerName() + " for \"" + item.getTitle() + "\".");
             redirect(req, resp, "/my-requests");
         } else {
