@@ -30,7 +30,7 @@ Search trims the keyword, is case-insensitive, and treats `%` and `_` literally.
 ```java
 boolean insert(Request r);
 boolean hasDuplicatePending(int itemId, String requesterId);
-boolean accept(int requestId, int itemId, java.sql.Date expectedReturnDate); // TRANSACTION
+boolean accept(int requestId, int itemId, LocalDateTime dueAt, LocalDateTime meetTime, String meetNote); // TRANSACTION
 boolean reject(int requestId);                  // PENDING -> REJECTED only
 boolean cancel(int requestId);                  // PENDING -> CANCELLED only
 boolean complete(int requestId, int itemId);    // TRANSACTION
@@ -45,7 +45,7 @@ Map<String,Integer> topRequestedCategories(int limit); // reports (innovation fe
 ```
 
 ### Transactions (`setAutoCommit(false)` ... `commit()` / `rollback()`)
-* **accept()**: (1) `PENDING -> ACCEPTED` with the due date, (2) item `AVAILABLE -> RESERVED`, (3) every other
+* **accept()**: (1) `PENDING -> ACCEPTED` with the due time and the agreed meeting time and note, (2) item `AVAILABLE -> RESERVED`, (3) every other
   `PENDING` request for the same item becomes `REJECTED`. Each step is a guarded `UPDATE ... WHERE status = ...`;
   if a guard matches no row the whole transaction rolls back, so two owners/tabs can never both win.
 * **complete()**: request `ACCEPTED/OVERDUE -> COMPLETED` and the item goes back to `AVAILABLE` (BORROW) or

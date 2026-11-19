@@ -24,18 +24,22 @@
         <tbody>
         <c:forEach var="r" items="${receivedRequests}">
           <tr>
-            <td><strong><c:out value="${r.itemTitle}"/></strong><div class="sub"><c:out value="${r.listingType}"/></div></td>
-            <td>
+            <td data-label="Item"><strong><c:out value="${r.itemTitle}"/></strong><div class="sub"><c:out value="${r.listingType}"/></div></td>
+            <td data-label="From">
               <c:out value="${r.requesterName}"/><br>
               <c:set var="n" value="${r.requesterCompleted}"/><%@ include file="/WEB-INF/views/fragments/trust.jspf" %>
+              <div class="sub"><c:out value="${empty r.requesterBranch ? '' : r.requesterBranch}"/><c:if test="${r.requesterYear > 0}"> · Year ${r.requesterYear}</c:if></div>
+              <c:if test="${r.requesterLate > 0}"><div class="sub late">${r.requesterLate} late return${r.requesterLate == 1 ? '' : 's'}</div></c:if>
             </td>
-            <td class="msg-text"><c:out value="${empty r.message ? '(no message)' : r.message}"/></td>
-            <td><span class="badge badge-${fn:toLowerCase(r.status)}"><c:out value="${r.status}"/></span></td>
-            <td class="due ${r.status == 'OVERDUE' ? 'late' : ''}">
-              <c:choose><c:when test="${empty r.expectedReturnDate}">–</c:when><c:otherwise><c:out value="${r.expectedReturnDate}"/></c:otherwise></c:choose>
+            <td class="msg-text" data-label="Message"><c:out value="${empty r.message ? '(no message)' : r.message}"/></td>
+            <td data-label="Status"><span class="badge badge-${fn:toLowerCase(r.status)}"><c:out value="${r.status}"/></span></td>
+            <td class="due ${r.status == 'OVERDUE' ? 'late' : ''}" data-label="Due back">
+              <c:choose><c:when test="${empty r.dueText}">–</c:when><c:otherwise><c:out value="${r.dueText}"/></c:otherwise></c:choose>
+              <c:if test="${not empty r.meetTimeText}"><div class="sub">Meet: <c:out value="${r.meetTimeText}"/></div></c:if>
+              <c:if test="${not empty r.meetNote}"><div class="sub">Note: <c:out value="${r.meetNote}"/></div></c:if>
               <c:if test="${r.contactRevealed}"><div class="sub">Contact revealed ${fn:substring(r.revealedAt, 0, 10)}</div></c:if>
             </td>
-            <td><%@ include file="/WEB-INF/views/fragments/owner-actions.jspf" %></td>
+            <td data-label="Actions"><%@ include file="/WEB-INF/views/fragments/owner-actions.jspf" %></td>
           </tr>
         </c:forEach>
         </tbody>
@@ -56,18 +60,20 @@
         <tbody>
         <c:forEach var="r" items="${sentRequests}">
           <tr>
-            <td><strong><c:out value="${r.itemTitle}"/></strong><div class="sub"><c:out value="${r.listingType}"/></div></td>
-            <td>
+            <td data-label="Item"><strong><c:out value="${r.itemTitle}"/></strong><div class="sub"><c:out value="${r.listingType}"/></div></td>
+            <td data-label="Owner">
               <c:out value="${r.ownerName}"/><br>
               <c:set var="n" value="${r.ownerCompleted}"/><%@ include file="/WEB-INF/views/fragments/trust.jspf" %>
             </td>
-            <td class="msg-text"><c:out value="${empty r.message ? '(no message)' : r.message}"/></td>
-            <td><span class="badge badge-${fn:toLowerCase(r.status)}"><c:out value="${r.status}"/></span></td>
-            <td class="due ${r.status == 'OVERDUE' ? 'late' : ''}">
-              <c:choose><c:when test="${empty r.expectedReturnDate}">–</c:when><c:otherwise><c:out value="${r.expectedReturnDate}"/></c:otherwise></c:choose>
+            <td class="msg-text" data-label="My message"><c:out value="${empty r.message ? '(no message)' : r.message}"/></td>
+            <td data-label="Status"><span class="badge badge-${fn:toLowerCase(r.status)}"><c:out value="${r.status}"/></span></td>
+            <td class="due ${r.status == 'OVERDUE' ? 'late' : ''}" data-label="Due back">
+              <c:choose><c:when test="${empty r.dueText}">–</c:when><c:otherwise><c:out value="${r.dueText}"/></c:otherwise></c:choose>
+              <c:if test="${not empty r.meetTimeText}"><div class="sub">Meet: <c:out value="${r.meetTimeText}"/></div></c:if>
+              <c:if test="${not empty r.meetNote}"><div class="sub">Note: <c:out value="${r.meetNote}"/></div></c:if>
               <c:if test="${r.status == 'OVERDUE'}"><div class="sub">Please return it soon</div></c:if>
             </td>
-            <td>
+            <td data-label="">
               <c:if test="${r.status == 'PENDING'}">
                 <form class="inline" method="post" action="${ctx}/request/cancel">
                   <input type="hidden" name="requestId" value="${r.requestId}">

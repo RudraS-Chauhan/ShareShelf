@@ -123,11 +123,11 @@ check("   invalid location refused", s == 200 and "meeting location" in page.low
 s, _, page = A.post("/add-listing", dict(title="Calc", category="Stationery", listingType="BORROW", itemCondition="Good", location="C Block"))
 check("   block without a floor refused", s == 200 and "choose the floor" in page.lower())
 check("   block + floor + landmark stored", loc(A.post("/add-listing", dict(title="Drafter set", category="Stationery", listingType="BORROW",
-      itemCondition="Good", location="C Block", floor="2nd floor", landmark="near the water cooler", suggestedDays="3"))).endswith("/dashboard"))
+      itemCondition="Good", location="C Block", floor="2nd floor", landmark="near the water cooler", suggestedHours="72"))).endswith("/dashboard"))
 s, _, page = A.get("/dashboard")
 check("   dashboard shows floor and landmark", "C Block, 2nd floor - near the water cooler" in page)
 check("   good BORROW listing created", loc(A.post("/add-listing", dict(title="Casio fx-991ES Calculator", description="Works great", category="Electronics & Accessories",
-      listingType="BORROW", itemCondition="Good", location="Library", suggestedDays="3"))).endswith("/dashboard"))
+      listingType="BORROW", itemCondition="Good", location="Library", suggestedHours="72"))).endswith("/dashboard"))
 check("   good DONATE listing created", loc(A.post("/add-listing", dict(title="DBMS Textbook 3rd ed", category="Academic Materials",
       listingType="DONATE", itemCondition="Fair", location="Cafeteria"))).endswith("/dashboard"))
 check("   XSS title stored", loc(A.post("/add-listing", dict(title="<script>alert(1)</script>", category="Stationery", listingType="GIVEAWAY",
@@ -165,15 +165,22 @@ check("   requester sees Cancel for a pending request", 'action="/ShareShelf/req
 check("   owner cannot cancel (only the requester can)", "isn't yours" in A.follow(A.post("/request/cancel", dict(requestId=rid_b)))[2])
 
 print("== Accept / reject rules ==")
-check("T8 non-owner cannot accept", "isn't yours" in B.follow(B.post("/request/accept", dict(requestId=rid_b, days="3")))[2])
+check("T8 non-owner cannot accept", "isn't yours" in B.follow(B.post("/request/accept", dict(requestId=rid_b, hours="72")))[2])
 check("   non-owner cannot reject", "isn't yours" in C.follow(C.post("/request/reject", dict(requestId=rid_b)))[2])
 check("   non-owner cannot complete", "isn't yours" in C.follow(C.post("/request/complete", dict(requestId=rid_b)))[2])
-check("   absurd duration refused", "between 1 and 90" in A.follow(A.post("/request/accept", dict(requestId=rid_b, days="500", back="dashboard")))[2])
-check("T7 owner accepts (3 days)", "Accepted." in A.follow(A.post("/request/accept", dict(requestId=rid_b, days="3", back="my-requests")))[2])
+check("   absurd duration refused", "borrow durations" in A.follow(A.post("/request/accept", dict(requestId=rid_b, hours="5000", back="dashboard")))[2])
+check("   meeting time in the past refused", "meeting time" in A.follow(A.post("/request/accept", dict(requestId=rid_b, hours="72", meetTime="2020-01-01T10:00", back="dashboard")))[2])
+check("   garbage meeting time refused", "not valid" in A.follow(A.post("/request/accept", dict(requestId=rid_b, hours="72", meetTime="soon", back="dashboard")))[2])
+import datetime
+meet = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime("%Y-%m-%dT15:00")
+check("T7 owner accepts (3 days, with meeting time and note)", "Accepted." in A.follow(A.post("/request/accept", dict(requestId=rid_b, hours="72", meetTime=meet, meetNote="table opposite the left water outlet", back="my-requests")))[2])
 _, _, a_page = A.get("/my-requests")
-check("   accepted request shows a due date", re.search(r"\d{4}-\d{2}-\d{2}", a_page) is not None)
+check("   accepted request shows an exact due date and time", re.search(r"[A-Z][a-z]{2} \d{1,2} [A-Z][a-z]{2}, \d{1,2}:\d{2} [AP]M", a_page) is not None)
+_, _, b_page = B.get("/my-requests")
+check("   the borrower sees the meeting time and note", "Meet:" in b_page and "left water outlet" in b_page)
+check("   the owner sees the requester's branch and year on the request", "Year" in A.get("/dashboard")[2] or "Year" in a_page)
 check("   competing request was auto-rejected", "REJECTED" in C.get("/my-requests")[2])
-check("T17 accepting an already-handled request is handled", "already been handled" in A.follow(A.post("/request/accept", dict(requestId=rid_b, days="3")))[2])
+check("T17 accepting an already-handled request is handled", "already been handled" in A.follow(A.post("/request/accept", dict(requestId=rid_b, hours="72")))[2])
 check("   RESERVED listing disappears from search", "No listings found" in B.get("/search?q=calculator")[2])
 check("T6 request on a reserved item rejected", "no longer available" in C.follow(C.post("/request/send", dict(itemId=item, message="late")))[2])
 check("T15 reveal before overdue blocked", "only available to the owner of an overdue" in A.follow(A.post("/request/reveal", dict(requestId=rid_b)))[2])
@@ -206,7 +213,7 @@ check("T6 request on a closed listing rejected", "no longer available" in B.foll
 print("== Overdue + WhatsApp safety net ==")
 check("   Bilal requests again for the overdue test", "Request sent" in B.follow(B.post("/request/send", dict(itemId=item, message="Overdue test")))[2])
 rid_o = re.search(r'Overdue test.*?name="requestId" value="(\d+)"', A.get("/my-requests")[2], re.S).group(1)
-check("   owner accepts for 1 day", "Accepted." in A.follow(A.post("/request/accept", dict(requestId=rid_o, days="1")))[2])
+check("   owner accepts for 1 day", "Accepted." in A.follow(A.post("/request/accept", dict(requestId=rid_o, hours="24")))[2])
 if OVERDUE_HOOK:
     subprocess.run([OVERDUE_HOOK, rid_o], check=True)      # backdates the due date and restarts the app
     A.post("/login", dict(studentId=SA, password="Passw0rd!x"))   # sessions do not survive the restart

@@ -67,8 +67,12 @@ PASS  T8 non-owner cannot accept
 PASS     non-owner cannot reject
 PASS     non-owner cannot complete
 PASS     absurd duration refused
-PASS  T7 owner accepts (3 days)
-PASS     accepted request shows a due date
+PASS     meeting time in the past refused
+PASS     garbage meeting time refused
+PASS  T7 owner accepts (3 days, with meeting time and note)
+PASS     accepted request shows an exact due date and time
+PASS     the borrower sees the meeting time and note
+PASS     the owner sees the requester's branch and year on the request
 PASS     competing request was auto-rejected
 PASS  T17 accepting an already-handled request is handled
 PASS     RESERVED listing disappears from search
@@ -111,4 +115,4 @@ PASS     logout redirects to login
 PASS     session is dead after logout
 PASS     unknown URL gives the friendly 404 page
 
-101 checks, 101 passed, 0 failed
+105 checks, 105 passed, 0 failed

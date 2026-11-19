@@ -39,7 +39,7 @@ public class DashboardServlet extends BaseServlet {
         req.setAttribute("pendingRequests", pending);
         req.setAttribute("overdueCount", overdue);
         req.setAttribute("completedCount", requestDAO.countCompleted(studentId));
-        req.setAttribute("borrowDays", AppConstants.BORROW_DAYS);
+        req.setAttribute("durations", AppConstants.durationOptions());
         forward(req, resp, "dashboard");
     }
 }

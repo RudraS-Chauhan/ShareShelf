@@ -39,14 +39,16 @@
         <tbody>
         <c:forEach var="r" items="${pendingRequests}">
           <tr>
-            <td><strong><c:out value="${r.itemTitle}"/></strong><div class="sub"><c:out value="${r.listingType}"/></div></td>
-            <td>
+            <td data-label="Item"><strong><c:out value="${r.itemTitle}"/></strong><div class="sub"><c:out value="${r.listingType}"/></div></td>
+            <td data-label="Requested by">
               <c:out value="${r.requesterName}"/><br>
               <c:set var="n" value="${r.requesterCompleted}"/><%@ include file="/WEB-INF/views/fragments/trust.jspf" %>
+              <div class="sub"><c:out value="${empty r.requesterBranch ? '' : r.requesterBranch}"/><c:if test="${r.requesterYear > 0}"> · Year ${r.requesterYear}</c:if></div>
+              <c:if test="${r.requesterLate > 0}"><div class="sub late">${r.requesterLate} late return${r.requesterLate == 1 ? '' : 's'}</div></c:if>
             </td>
-            <td class="msg-text"><c:out value="${empty r.message ? '(no message)' : r.message}"/></td>
-            <td class="due">${fn:substring(r.createdAt, 0, 16)}</td>
-            <td><%@ include file="/WEB-INF/views/fragments/owner-actions.jspf" %></td>
+            <td class="msg-text" data-label="Message"><c:out value="${empty r.message ? '(no message)' : r.message}"/></td>
+            <td class="due" data-label="Received">${fn:substring(r.createdAt, 0, 16)}</td>
+            <td data-label="Decision"><%@ include file="/WEB-INF/views/fragments/owner-actions.jspf" %></td>
           </tr>
         </c:forEach>
         </tbody>
@@ -67,11 +69,11 @@
         <tbody>
         <c:forEach var="item" items="${myListings}">
           <tr>
-            <td><strong><c:out value="${item.title}"/></strong><div class="sub"><c:out value="${item.itemCondition}"/> · <c:out value="${item.location}"/></div></td>
-            <td><c:out value="${item.category}"/></td>
-            <td><span class="badge badge-type"><c:out value="${item.listingType}"/></span></td>
-            <td><span class="badge badge-${fn:toLowerCase(item.status)}"><c:out value="${item.status}"/></span></td>
-            <td>
+            <td data-label="Item"><strong><c:out value="${item.title}"/></strong><div class="sub"><c:out value="${item.itemCondition}"/> · <c:out value="${item.location}"/></div></td>
+            <td data-label="Category"><c:out value="${item.category}"/></td>
+            <td data-label="Type"><span class="badge badge-type"><c:out value="${item.listingType}"/></span></td>
+            <td data-label="Status"><span class="badge badge-${fn:toLowerCase(item.status)}"><c:out value="${item.status}"/></span></td>
+            <td data-label="">
               <c:if test="${item.status == 'AVAILABLE'}">
                 <form class="inline" method="post" action="${ctx}/listing/close"
                       onsubmit="return confirm('Close this listing? It will disappear from search.');">

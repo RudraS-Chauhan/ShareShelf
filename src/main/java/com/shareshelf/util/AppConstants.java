@@ -1,8 +1,11 @@
 package com.shareshelf.util;
 
+import java.time.ZoneId;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /** Fixed vocabularies used by forms, validation and servlets (one source of truth). */
@@ -63,6 +66,44 @@ public final class AppConstants {
 
     /** Upper limit accepted by the server even if the form is tampered with. */
     public static final int MAX_BORROW_DAYS = 90;
+
+    /** All times shown and compared in the app are campus time (the server itself may run in UTC). */
+    public static final ZoneId CAMPUS_ZONE = ZoneId.of("Asia/Kolkata");
+
+    /**
+     * Borrow durations in HOURS, shortest first: a class slot (1-4 h), a day, then days to a month.
+     * One list drives the listing form, the owner's accept form and the stored due time.
+     */
+    public static final List<Integer> DURATION_HOURS = List.of(1, 2, 4, 8, 24, 72, 168, 336, 720);
+
+    public static final int DEFAULT_DURATION_HOURS = 168;   // 7 days
+
+    /** Longest duration the server accepts, even if the form is tampered with. */
+    public static final int MAX_DURATION_HOURS = MAX_BORROW_DAYS * 24;
+
+    /** How far ahead a meeting time may be set, in days. */
+    public static final int MAX_MEET_DAYS_AHEAD = 14;
+
+    /** Longest meeting note accepted (e.g. "Table opposite the left water outlet, blue hoodie"). */
+    public static final int MAX_MEET_NOTE = 200;
+
+    /** "2 hours", "1 day", "3 days": the text shown for a duration given in hours. */
+    public static String durationLabel(int hours) {
+        if (hours < 24 || hours % 24 != 0) {
+            return hours + (hours == 1 ? " hour" : " hours");
+        }
+        int days = hours / 24;
+        return days + (days == 1 ? " day" : " days");
+    }
+
+    /** hours -> label, in display order, for the dropdowns. */
+    public static Map<Integer, String> durationOptions() {
+        Map<Integer, String> options = new LinkedHashMap<>();
+        for (int h : DURATION_HOURS) {
+            options.put(h, durationLabel(h));
+        }
+        return Collections.unmodifiableMap(options);
+    }
 
     private static Set<String> set(String... values) {
         Set<String> s = new LinkedHashSet<>();

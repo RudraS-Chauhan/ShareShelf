@@ -6,12 +6,12 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import com.shareshelf.model.Request;
 import com.shareshelf.model.ResourceItem;
 import com.shareshelf.model.Student;
+import com.shareshelf.util.AppConstants;
 import com.shareshelf.util.DBConnection;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -139,15 +139,15 @@ class DaoIntegrationTest {
         assertTrue(requests.insert(rb));
         assertTrue(requests.hasDuplicatePending(item.getItemId(), a));
 
-        Date due = Date.valueOf(LocalDate.now().plusDays(3));
-        assertTrue(requests.accept(ra.getRequestId(), item.getItemId(), due));
+        LocalDateTime due = LocalDateTime.now(AppConstants.CAMPUS_ZONE).plusDays(3);
+        assertTrue(requests.accept(ra.getRequestId(), item.getItemId(), due, null, null));
 
         assertEquals("ACCEPTED", requests.findById(ra.getRequestId()).getStatus());
         assertEquals("RESERVED", listings.findById(item.getItemId()).getStatus());
         assertEquals("REJECTED", requests.findById(rb.getRequestId()).getStatus(), "competing request auto-rejected");
 
         // second accept must fail and change nothing
-        assertFalse(requests.accept(rb.getRequestId(), item.getItemId(), due));
+        assertFalse(requests.accept(rb.getRequestId(), item.getItemId(), due, null, null));
         assertEquals("ACCEPTED", requests.findById(ra.getRequestId()).getStatus());
     }
 
@@ -161,7 +161,7 @@ class DaoIntegrationTest {
         listings.insert(borrow);
         Request r1 = newRequest(borrow, taker);
         requests.insert(r1);
-        requests.accept(r1.getRequestId(), borrow.getItemId(), Date.valueOf(LocalDate.now().plusDays(1)));
+        requests.accept(r1.getRequestId(), borrow.getItemId(), LocalDateTime.now(AppConstants.CAMPUS_ZONE).plusDays(1), null, null);
         assertTrue(requests.complete(r1.getRequestId(), borrow.getItemId()));
         assertEquals("AVAILABLE", listings.findById(borrow.getItemId()).getStatus());
         assertEquals(1, requests.countCompleted(owner));
@@ -171,7 +171,7 @@ class DaoIntegrationTest {
         listings.insert(gift);
         Request r2 = newRequest(gift, taker);
         requests.insert(r2);
-        requests.accept(r2.getRequestId(), gift.getItemId(), null);
+        requests.accept(r2.getRequestId(), gift.getItemId(), null, null, null);
         assertTrue(requests.complete(r2.getRequestId(), gift.getItemId()));
         assertEquals("CLOSED", listings.findById(gift.getItemId()).getStatus());
     }
@@ -186,13 +186,13 @@ class DaoIntegrationTest {
         listings.insert(item);
         Request r = newRequest(item, taker);
         requests.insert(r);
-        requests.accept(r.getRequestId(), item.getItemId(), Date.valueOf(LocalDate.now().plusDays(2)));
+        requests.accept(r.getRequestId(), item.getItemId(), LocalDateTime.now(AppConstants.CAMPUS_ZONE).plusDays(2), null, null);
 
         assertNull(requests.revealContact(r.getRequestId(), owner), "not overdue yet: must stay hidden");
 
         try (Connection c = DBConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(
-                     "UPDATE requests SET expected_return_date = DATE_SUB(CURDATE(), INTERVAL 1 DAY) WHERE request_id = ?")) {
+                     "UPDATE requests SET expected_return_date = DATE_SUB(CURDATE(), INTERVAL 1 DAY), due_at = DATE_SUB(NOW(), INTERVAL 1 DAY) WHERE request_id = ?")) {
             ps.setInt(1, r.getRequestId());
             ps.executeUpdate();
         }
@@ -202,6 +202,35 @@ class DaoIntegrationTest {
         assertNull(requests.revealContact(r.getRequestId(), other), "only the request's owner may reveal");
         assertEquals("919876543210", requests.revealContact(r.getRequestId(), owner));
         assertTrue(requests.findById(r.getRequestId()).isContactRevealed(), "reveal is logged on the request");
+    }
+
+    @Test
+    void meetingDetailsAreStoredAndTimedLoansBecomeOverdueByTheMinute() {
+        String owner = uniqueId("UD"), taker = uniqueId("UE");
+        students.register(newStudent(owner));
+        students.register(newStudent(taker));
+        ResourceItem item = newItem(owner, "BORROW");
+        item.setSuggestedHours(2);
+        listings.insert(item);
+        assertEquals(2, listings.findById(item.getItemId()).getDurationHours());
+        assertEquals("2 hours", listings.findById(item.getItemId()).getDurationLabel());
+
+        Request r = newRequest(item, taker);
+        requests.insert(r);
+        LocalDateTime meet = LocalDateTime.now(AppConstants.CAMPUS_ZONE).minusHours(3).withNano(0);
+        LocalDateTime due = meet.plusHours(2);          // already one hour in the past
+        assertTrue(requests.accept(r.getRequestId(), item.getItemId(), due, meet, "table near the left water outlet"));
+
+        Request loaded = requests.findById(r.getRequestId());
+        assertEquals(meet, loaded.getMeetTime());
+        assertEquals(due, loaded.getDueAt());
+        assertEquals("table near the left water outlet", loaded.getMeetNote());
+        assertEquals(0, loaded.getRequesterLate());
+
+        assertTrue(requests.markOverdue() >= 1, "due_at has passed, so it is flagged even though the date is today");
+        loaded = requests.findById(r.getRequestId());
+        assertEquals("OVERDUE", loaded.getStatus());
+        assertEquals(1, loaded.getRequesterLate(), "the late return is remembered for the requester's record");
     }
 
     @Test

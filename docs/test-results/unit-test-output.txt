@@ -1,11 +1,11 @@
 
 Thanks for using JUnit! Support its development at https://junit.org/sponsoring
 
-Nov 18, 2026 9:07:12 AM com.shareshelf.util.StaleReservationChecker run
+Nov 18, 2026 2:53:56 PM com.shareshelf.util.StaleReservationChecker run
 INFO: Overdue check: flagged 2 request(s) as OVERDUE
-Nov 18, 2026 9:07:12 AM com.shareshelf.util.StaleReservationChecker run
+Nov 18, 2026 2:53:56 PM com.shareshelf.util.StaleReservationChecker run
 INFO: Overdue check: flagged 2 request(s) as OVERDUE
-Nov 18, 2026 9:07:12 AM com.shareshelf.util.StaleReservationChecker run
+Nov 18, 2026 2:53:56 PM com.shareshelf.util.StaleReservationChecker run
 WARNING: Overdue check failed; will retry on the next cycle
 com.shareshelf.util.DataAccessException: database is down
 	at com.shareshelf.util.StaleReservationCheckerTest.lambda$aFailingScanDoesNotKillTheThreadAndRecoversNextTime$1(StaleReservationCheckerTest.java:27)
@@ -113,9 +113,9 @@ com.shareshelf.util.DataAccessException: database is down
 Caused by: java.lang.RuntimeException
 	... 102 more
 
-Nov 18, 2026 9:07:12 AM com.shareshelf.util.StaleReservationChecker run
+Nov 18, 2026 2:53:56 PM com.shareshelf.util.StaleReservationChecker run
 INFO: Overdue check: flagged 1 request(s) as OVERDUE
-Nov 18, 2026 9:07:12 AM com.shareshelf.util.DBConnection <clinit>
+Nov 18, 2026 2:53:56 PM com.shareshelf.util.DBConnection <clinit>
 SEVERE: MySQL JDBC driver not found on the classpath
 java.lang.ClassNotFoundException: com.mysql.cj.jdbc.Driver
 	at java.base/java.net.URLClassLoader.findClass(URLClassLoader.java:445)
@@ -233,6 +233,7 @@ java.lang.ClassNotFoundException: com.mysql.cj.jdbc.Driver
 [36m?  ?  ??[0m [34mlistingForUnknownOwnerIsRejectedByTheForeignKey()[0m [32m?[0m
 [36m?  ?  ??[0m [34mcompleteReopensBorrowItemsAndClosesGiveaways()[0m [32m?[0m
 [36m?  ?  ??[0m [34mownerAndRequesterListsContainTheRequest()[0m [32m?[0m
+[36m?  ?  ??[0m [34mmeetingDetailsAreStoredAndTimedLoansBecomeOverdueByTheMinute()[0m [32m?[0m
 [36m?  ??[0m [36mValidationUtilTest[0m [32m?[0m
 [36m?  ?  ??[0m [34mhelpersAreNullSafe()[0m [32m?[0m
 [36m?  ?  ??[0m [34memailMustContainTheStudentsOwnAdmissionNumber()[0m [32m?[0m
@@ -244,6 +245,7 @@ java.lang.ClassNotFoundException: com.mysql.cj.jdbc.Driver
 [36m?  ??[0m [36mAppConstantsTest[0m [32m?[0m
 [36m?     ??[0m [34mblockSpotsNeedAFloorAndAreAlsoValidLocations()[0m [32m?[0m
 [36m?     ??[0m [34mborrowListingsAreRecognised()[0m [32m?[0m
+[36m?     ??[0m [34mdurationsAreOrderedAndLabelledSensibly()[0m [32m?[0m
 [36m?     ??[0m [34mhostelItemsCategoryWasDroppedOnPurpose()[0m [32m?[0m
 [36m?     ??[0m [34mlocationTextCombinesPlaceFloorAndLandmark()[0m [32m?[0m
 [36m?     ??[0m [34mlistingTypesParseSafely()[0m [32m?[0m
@@ -251,18 +253,18 @@ java.lang.ClassNotFoundException: com.mysql.cj.jdbc.Driver
 [36m?     ??[0m [34mdefaultBorrowDurationIsOneOfTheOfferedChoices()[0m [32m?[0m
 [36m??[0m [36mJUnit Vintage[0m [32m?[0m
 
-Test run finished after 1559 ms
+Test run finished after 1255 ms
 [         8 containers found      ]
 [         0 containers skipped    ]
 [         8 containers started    ]
 [         0 containers aborted    ]
 [         8 containers successful ]
 [         0 containers failed     ]
-[        27 tests found           ]
+[        29 tests found           ]
 [         0 tests skipped         ]
-[        27 tests started         ]
+[        29 tests started         ]
 [         0 tests aborted         ]
-[        27 tests successful      ]
+[        29 tests successful      ]
 [         0 tests failed          ]
 
 

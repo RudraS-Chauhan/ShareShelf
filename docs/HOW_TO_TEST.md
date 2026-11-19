@@ -17,7 +17,7 @@ Admission numbers must appear inside the email, for example `25SCSE1001001` with
 | 6 | **B:** Search for A's item by keyword (try upper/lower case) | A's item is listed |
 | 7 | **B:** Send a request | Status PENDING in B's "My requests" |
 | 8 | **B:** Request the same item again | Refused (duplicate) |
-| 9 | **A:** Accept and pick a return date | Item RESERVED, request ACCEPTED |
+| 9 | **A:** Accept, set a meeting time, a note and "Borrow for" hours | Item RESERVED, request ACCEPTED; B sees the meeting time and note |
 | 10 | **A:** Mark handed over, then completed | Item BORROWED, then AVAILABLE again |
 | 11 | Check the Reports page | Counts changed; "most requested category" shown |
 | 12 | Open `/ShareShelf/reports?format=csv` | A CSV file downloads |
@@ -29,7 +29,7 @@ The full manual test list is [`TEST_CASES.md`](TEST_CASES.md). Write **Pass/Fail
 ### Testing the overdue safety net
 Overdue needs a past due date, which the form will not allow. Backdate one in the database:
 ```sql
-UPDATE requests SET expected_return_date = CURDATE() - INTERVAL 2 DAY
+UPDATE requests SET due_at = NOW() - INTERVAL 2 DAY, expected_return_date = CURDATE() - INTERVAL 2 DAY
 WHERE status = 'ACCEPTED' AND request_id = <id>;
 ```
 Within `overdueCheckMinutes` (default 5) the status becomes OVERDUE, the owner sees a banner, and only then does the "reveal WhatsApp" button work. Each reveal adds a row to `contact_reveal_logs`.
@@ -38,16 +38,16 @@ Within `overdueCheckMinutes` (default 5) the status becomes OVERDUE, the owner s
 ```bash
 mvn test
 ```
-Expect **27 tests, 0 failures** with a database (20 unit + 7 DAO). Without a database the 7 DAO tests are skipped, so you see 20. The DAO integration tests need a reachable database; without one they skip themselves.
+Expect **29 tests, 0 failures** with a database (22 unit + 7 DAO). Without a database the 7 DAO tests are skipped, so you see 22. The DAO integration tests need a reachable database; without one they skip themselves.
 
 ## Level 3: Automated end-to-end script
 With the app running and an **empty** database (re-run `schema.sql` to empty it):
 ```bash
-python3 tests/e2e_smoke.py                    # 95 checks
+python3 tests/e2e_smoke.py                    # 99 checks (105 with the overdue hook)
 ```
 It registers students, lists items, runs every request step, and checks escaping and security. Every line prints `PASS` or `FAIL`.
 
-The overdue part needs a hook that backdates a due date and restarts the app, so it only runs when you set `OVERDUE_HOOK`; that brings it to the full 101 checks. Our recorded run is in [`test-results/e2e-output.txt`](test-results/e2e-output.txt).
+The overdue part needs a hook that backdates a due date and restarts the app, so it only runs when you set `OVERDUE_HOOK`; that brings it to the full 105 checks. Our recorded run is in [`test-results/e2e-output.txt`](test-results/e2e-output.txt).
 
 ## What a good demo test looks like
 Run level 1 steps 1-10 live: it tells the whole story of the app in about three minutes.

@@ -29,8 +29,8 @@ public class ListingDAO {
     /** Creates a listing with status AVAILABLE and stores the generated id back into the item. */
     public boolean insert(ResourceItem item) {
         String sql = "INSERT INTO resource_items "
-                + "(owner_id, title, description, category, listing_type, item_condition, location, suggested_days, status) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'AVAILABLE')";
+                + "(owner_id, title, description, category, listing_type, item_condition, location, suggested_days, suggested_hours, status) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'AVAILABLE')";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, item.getOwnerId());
@@ -40,10 +40,19 @@ public class ListingDAO {
             ps.setString(5, item.getListingType());
             ps.setString(6, item.getItemCondition());
             ps.setString(7, item.getLocation());
-            if (item.getSuggestedDays() > 0) {
+            // the day count is kept (when the duration is whole days) so older code and reports still work
+            int hours = item.getSuggestedHours();
+            if (hours >= 24 && hours % 24 == 0) {
+                ps.setInt(8, hours / 24);
+            } else if (hours == 0 && item.getSuggestedDays() > 0) {
                 ps.setInt(8, item.getSuggestedDays());
             } else {
                 ps.setNull(8, Types.INTEGER);
+            }
+            if (hours > 0) {
+                ps.setInt(9, hours);
+            } else {
+                ps.setNull(9, Types.INTEGER);
             }
             if (ps.executeUpdate() != 1) {
                 return false;
@@ -178,6 +187,7 @@ public class ListingDAO {
         item.setItemCondition(rs.getString("item_condition"));
         item.setLocation(rs.getString("location"));
         item.setSuggestedDays(rs.getInt("suggested_days"));   // NULL reads as 0
+        item.setSuggestedHours(rs.getInt("suggested_hours"));
         item.setStatus(rs.getString("status"));
         item.setOwnerName(rs.getString("owner_name"));
         item.setOwnerCompleted(rs.getInt("owner_completed"));

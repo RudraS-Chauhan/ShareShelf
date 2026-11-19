@@ -69,11 +69,11 @@ public class AddListingServlet extends BaseServlet {
             return;
         }
 
-        int suggestedDays = 0;
+        int suggestedHours = 0;
         if (type == ListingType.BORROW) {
-            suggestedDays = ValidationUtil.parseIntOr(req.getParameter("suggestedDays"), AppConstants.DEFAULT_BORROW_DAYS);
-            if (!AppConstants.BORROW_DAYS.contains(suggestedDays)) {
-                suggestedDays = AppConstants.DEFAULT_BORROW_DAYS;
+            suggestedHours = ValidationUtil.parseIntOr(req.getParameter("suggestedHours"), AppConstants.DEFAULT_DURATION_HOURS);
+            if (!AppConstants.DURATION_HOURS.contains(suggestedHours)) {
+                suggestedHours = AppConstants.DEFAULT_DURATION_HOURS;
             }
         }
 
@@ -85,7 +85,7 @@ public class AddListingServlet extends BaseServlet {
         item.setListingType(type.name());
         item.setItemCondition(condition);
         item.setLocation(AppConstants.buildLocation(place, floor, landmark));
-        item.setSuggestedDays(suggestedDays);
+        item.setSuggestedHours(suggestedHours);
 
         if (listingDAO.insert(item)) {
             flash(req, "success", "\"" + title + "\" is now listed and visible to other students.");
@@ -105,7 +105,7 @@ public class AddListingServlet extends BaseServlet {
         req.setAttribute("blockLocations", AppConstants.BLOCK_LOCATIONS);
         req.setAttribute("floors", AppConstants.FLOORS);
         req.setAttribute("maxLandmark", AppConstants.MAX_LANDMARK);
-        req.setAttribute("borrowDays", AppConstants.BORROW_DAYS);
+        req.setAttribute("durations", AppConstants.durationOptions());
         forward(req, resp, "add-listing");
     }
 }

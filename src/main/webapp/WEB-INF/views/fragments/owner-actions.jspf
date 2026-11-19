@@ -1,23 +1,35 @@
 <%--
   The buttons an OWNER sees for one request. Used inside a <c:forEach var="r"> on the dashboard and
-  My requests pages. Expects:  r (the request),  back (page to return to),  borrowDays (list of day options).
+  My requests pages. Expects:  r (the request),  back (page to return to),  durations (map: hours -> label).
   Which buttons appear depends only on the request's status, mirroring the checks the servlets enforce.
 --%>
 <div class="actions">
   <c:if test="${r.status == 'PENDING'}">
-    <form class="inline" method="post" action="${ctx}/request/accept">
-      <input type="hidden" name="requestId" value="${r.requestId}">
-      <input type="hidden" name="back" value="${back}">
-      <c:if test="${r.borrow}">
-        <c:set var="defaultDays" value="${r.itemSuggestedDays > 0 ? r.itemSuggestedDays : 7}"/>
-        <select name="days" aria-label="Borrow duration">
-          <c:forEach var="d" items="${borrowDays}">
-            <option value="${d}" ${d == defaultDays ? 'selected' : ''}>${d}${d == 1 ? ' day' : ' days'}</option>
-          </c:forEach>
-        </select>
-      </c:if>
-      <button type="submit" class="btn btn-sm">Accept</button>
-    </form>
+    <details class="accept-box">
+      <summary class="btn btn-sm">Accept…</summary>
+      <form class="accept-form" method="post" action="${ctx}/request/accept">
+        <input type="hidden" name="requestId" value="${r.requestId}">
+        <input type="hidden" name="back" value="${back}">
+        <label>Meeting time (optional)
+          <input type="datetime-local" name="meetTime">
+        </label>
+        <label>Where exactly / how to spot you (optional)
+          <input type="text" name="meetNote" maxlength="200" placeholder="e.g. table opposite the left water outlet, blue hoodie">
+        </label>
+        <c:if test="${r.borrow}">
+          <c:set var="defaultHours" value="${r.itemSuggestedHours > 0 ? r.itemSuggestedHours : (r.itemSuggestedDays > 0 ? r.itemSuggestedDays * 24 : 168)}"/>
+          <label>Borrow for
+            <select name="hours">
+              <c:forEach var="d" items="${durations}">
+                <option value="${d.key}" ${d.key == defaultHours ? 'selected' : ''}><c:out value="${d.value}"/></option>
+              </c:forEach>
+            </select>
+          </label>
+          <div class="hint">The deadline counts from the meeting time, or from now if you leave it empty.</div>
+        </c:if>
+        <button type="submit" class="btn btn-sm">Confirm accept</button>
+      </form>
+    </details>
     <form class="inline" method="post" action="${ctx}/request/reject">
       <input type="hidden" name="requestId" value="${r.requestId}">
       <input type="hidden" name="back" value="${back}">

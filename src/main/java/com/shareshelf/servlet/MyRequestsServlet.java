@@ -22,7 +22,7 @@ public class MyRequestsServlet extends BaseServlet {
         String studentId = currentStudentId(req);
         req.setAttribute("sentRequests", requestDAO.findByRequester(studentId));
         req.setAttribute("receivedRequests", requestDAO.findByOwner(studentId));
-        req.setAttribute("borrowDays", AppConstants.BORROW_DAYS);
+        req.setAttribute("durations", AppConstants.durationOptions());
         forward(req, resp, "my-requests");
     }
 }

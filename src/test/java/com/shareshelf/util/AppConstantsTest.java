@@ -58,4 +58,15 @@ class AppConstantsTest {
                 "x".repeat(AppConstants.MAX_LANDMARK));
         assertTrue(longest.length() <= 100);   // resource_items.location is VARCHAR(100)
     }
+
+    @Test
+    void durationsAreOrderedAndLabelledSensibly() {
+        assertTrue(AppConstants.DURATION_HOURS.contains(AppConstants.DEFAULT_DURATION_HOURS));
+        assertTrue(AppConstants.DURATION_HOURS.stream().allMatch(h -> h >= 1 && h <= AppConstants.MAX_DURATION_HOURS));
+        assertEquals("1 hour", AppConstants.durationLabel(1));
+        assertEquals("4 hours", AppConstants.durationLabel(4));
+        assertEquals("1 day", AppConstants.durationLabel(24));
+        assertEquals("7 days", AppConstants.durationLabel(168));
+        assertEquals(AppConstants.DURATION_HOURS.size(), AppConstants.durationOptions().size());
+    }
 }

@@ -64,8 +64,8 @@
             <div><strong>Category:</strong> <c:out value="${item.category}"/></div>
             <div><strong>Condition:</strong> <c:out value="${item.itemCondition}"/></div>
             <div><strong>Handover:</strong> <c:out value="${item.location}"/></div>
-            <c:if test="${item.borrow and item.suggestedDays > 0}">
-              <div><strong>Suggested:</strong> ${item.suggestedDays}${item.suggestedDays == 1 ? ' day' : ' days'}</div>
+            <c:if test="${item.borrow and not empty item.durationLabel}">
+              <div><strong>Suggested:</strong> <c:out value="${item.durationLabel}"/></div>
             </c:if>
             <div>
               <strong>Owner:</strong> <c:out value="${item.ownerName}"/>

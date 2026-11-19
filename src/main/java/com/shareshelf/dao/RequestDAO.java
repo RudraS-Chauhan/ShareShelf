@@ -4,11 +4,13 @@ import com.shareshelf.model.ListingStatus;
 import com.shareshelf.model.ListingType;
 import com.shareshelf.model.Request;
 import com.shareshelf.model.RequestStatus;
+import com.shareshelf.util.AppConstants;
 import com.shareshelf.util.DBConnection;
 import com.shareshelf.util.DataAccessException;
 
 import java.sql.Connection;
 import java.sql.Date;
+import java.time.LocalDateTime;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -32,6 +34,8 @@ public class RequestDAO {
     /** Request columns plus item title/type/status, both names and both reliability counts. */
     private static final String SELECT_DETAILED =
             "SELECT q.*, i.title AS item_title, i.listing_type AS listing_type, i.status AS item_status, i.suggested_days AS item_suggested_days, "
+            + "i.suggested_hours AS item_suggested_hours, rs.branch AS requester_branch, rs.year AS requester_year, "
+            + "(SELECT COUNT(*) FROM requests l WHERE l.requester_id = q.requester_id AND l.was_overdue = TRUE) AS requester_late, "
             + "rs.name AS requester_name, os.name AS owner_name, "
             + "(SELECT COUNT(*) FROM requests c WHERE c.status = 'COMPLETED' "
             + "   AND (c.owner_id = q.requester_id OR c.requester_id = q.requester_id)) AS requester_completed, "
@@ -101,23 +105,34 @@ public class RequestDAO {
      *  3. every other PENDING request on the same listing -> REJECTED (the item is taken)
      * Either all three happen or none do.
      *
+     * @param dueAt     when the item must be back (null for non-BORROW listings); also stored as a plain date
+     * @param meetTime  optional agreed meeting time
+     * @param meetNote  optional note on where exactly / how to recognise each other
      * @return false (and nothing changed) if the request is no longer pending or the item is no longer available.
      */
-    public boolean accept(int requestId, int itemId, Date expectedReturnDate) {
+    public boolean accept(int requestId, int itemId, LocalDateTime dueAt, LocalDateTime meetTime, String meetNote) {
         try (Connection conn = DBConnection.getConnection()) {
             conn.setAutoCommit(false);
             try {
                 int accepted;
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "UPDATE requests SET status = 'ACCEPTED', expected_return_date = ? "
+                        "UPDATE requests SET status = 'ACCEPTED', expected_return_date = ?, due_at = ?, meet_time = ?, meet_note = ? "
                         + "WHERE request_id = ? AND item_id = ? AND status = 'PENDING'")) {
-                    if (expectedReturnDate != null) {
-                        ps.setDate(1, expectedReturnDate);
+                    if (dueAt != null) {
+                        ps.setDate(1, Date.valueOf(dueAt.toLocalDate()));
+                        ps.setObject(2, dueAt);
                     } else {
                         ps.setNull(1, Types.DATE);
+                        ps.setNull(2, Types.TIMESTAMP);
                     }
-                    ps.setInt(2, requestId);
-                    ps.setInt(3, itemId);
+                    if (meetTime != null) {
+                        ps.setObject(3, meetTime);
+                    } else {
+                        ps.setNull(3, Types.TIMESTAMP);
+                    }
+                    ps.setString(4, meetNote == null || meetNote.isEmpty() ? null : meetNote);
+                    ps.setInt(5, requestId);
+                    ps.setInt(6, itemId);
                     accepted = ps.executeUpdate();
                 }
                 if (accepted != 1) {
@@ -298,10 +313,16 @@ public class RequestDAO {
      * @return how many requests were flagged this time.
      */
     public int markOverdue() {
-        String sql = "UPDATE requests SET status = 'OVERDUE' "
-                + "WHERE status = 'ACCEPTED' AND expected_return_date IS NOT NULL AND expected_return_date < CURDATE()";
+        // Compared against campus time (not the server clock, which may be UTC). Timed loans use due_at;
+        // older requests only have the date, so they are overdue once that whole day has passed.
+        LocalDateTime now = LocalDateTime.now(AppConstants.CAMPUS_ZONE);
+        String sql = "UPDATE requests SET status = 'OVERDUE', was_overdue = TRUE "
+                + "WHERE status = 'ACCEPTED' AND ((due_at IS NOT NULL AND due_at < ?) "
+                + "OR (due_at IS NULL AND expected_return_date IS NOT NULL AND expected_return_date < ?))";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setObject(1, now);
+            ps.setDate(2, Date.valueOf(now.toLocalDate()));
             return ps.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException("Could not flag overdue requests", e);
@@ -430,6 +451,13 @@ public class RequestDAO {
         r.setItemSuggestedDays(rs.getInt("item_suggested_days"));   // NULL reads as 0
         r.setRequesterName(rs.getString("requester_name"));
         r.setOwnerName(rs.getString("owner_name"));
+        r.setItemSuggestedHours(rs.getInt("item_suggested_hours"));
+        r.setRequesterBranch(rs.getString("requester_branch"));
+        r.setRequesterYear(rs.getInt("requester_year"));
+        r.setRequesterLate(rs.getInt("requester_late"));
+        r.setMeetTime(rs.getObject("meet_time", LocalDateTime.class));
+        r.setDueAt(rs.getObject("due_at", LocalDateTime.class));
+        r.setMeetNote(rs.getString("meet_note"));
         r.setRequesterCompleted(rs.getInt("requester_completed"));
         r.setOwnerCompleted(rs.getInt("owner_completed"));
         return r;

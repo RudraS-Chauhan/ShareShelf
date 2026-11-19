@@ -1,7 +1,12 @@
 package com.shareshelf.model;
 
+import com.shareshelf.util.AppConstants;
+
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 /**
  * A borrow/exchange request. The first block of fields mirrors the requests table.
@@ -19,7 +24,13 @@ public class Request {
 
     // display-only (from JOINs with resource_items / students / requests)
     private String itemTitle, listingType, itemStatus, requesterName, ownerName;
-    private int itemSuggestedDays;
+    private int itemSuggestedDays, itemSuggestedHours;
+    private String requesterBranch;
+    private int requesterYear, requesterLate;   // late = past returns that were flagged overdue
+
+    // meeting and deadline details, set when the owner accepts
+    private LocalDateTime meetTime, dueAt;
+    private String meetNote;
     private int requesterCompleted, ownerCompleted;   // reliability signal: completed exchanges
 
     public Request() {}
@@ -133,6 +144,70 @@ public class Request {
     }
     public void setOwnerCompleted(int ownerCompleted) {
         this.ownerCompleted = ownerCompleted;
+    }
+
+    public int getItemSuggestedHours() {
+        return itemSuggestedHours;
+    }
+    public void setItemSuggestedHours(int itemSuggestedHours) {
+        this.itemSuggestedHours = itemSuggestedHours;
+    }
+    public String getRequesterBranch() {
+        return requesterBranch;
+    }
+    public void setRequesterBranch(String requesterBranch) {
+        this.requesterBranch = requesterBranch;
+    }
+    public int getRequesterYear() {
+        return requesterYear;
+    }
+    public void setRequesterYear(int requesterYear) {
+        this.requesterYear = requesterYear;
+    }
+    public int getRequesterLate() {
+        return requesterLate;
+    }
+    public void setRequesterLate(int requesterLate) {
+        this.requesterLate = requesterLate;
+    }
+    public LocalDateTime getMeetTime() {
+        return meetTime;
+    }
+    public void setMeetTime(LocalDateTime meetTime) {
+        this.meetTime = meetTime;
+    }
+    public String getMeetNote() {
+        return meetNote;
+    }
+    public void setMeetNote(String meetNote) {
+        this.meetNote = meetNote;
+    }
+    public LocalDateTime getDueAt() {
+        return dueAt;
+    }
+    public void setDueAt(LocalDateTime dueAt) {
+        this.dueAt = dueAt;
+    }
+
+    private static final DateTimeFormatter WHEN = DateTimeFormatter.ofPattern("EEE d MMM, h:mm a", Locale.ENGLISH);
+
+    /** e.g. "Wed 18 Nov, 3:00 PM"; empty if no meeting time was set. */
+    public String getMeetTimeText() {
+        return meetTime == null ? "" : meetTime.format(WHEN);
+    }
+
+    /** Return deadline as text: a date and time for timed loans, the date for older ones, "" if none. */
+    public String getDueText() {
+        if (dueAt != null) {
+            return dueAt.format(WHEN);
+        }
+        return expectedReturnDate == null ? "" : expectedReturnDate.toString();
+    }
+
+    /** The listing's suggested duration as text ("2 hours", "3 days"), or "". */
+    public String getItemDurationLabel() {
+        int h = itemSuggestedHours > 0 ? itemSuggestedHours : itemSuggestedDays * 24;
+        return h > 0 ? AppConstants.durationLabel(h) : "";
     }
 
     /** True when the requested listing is a BORROW listing. */

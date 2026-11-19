@@ -41,6 +41,7 @@
           <option value="${t.name()}" ${param.listingType == t.name() ? 'selected' : ''}><c:out value="${t.label}"/></option>
         </c:forEach>
       </select>
+      <div class="hint" id="typeHelp">Borrow: lend it and get it back. Exchange: swap for something else. Donate: give it to someone who needs it, for good. Giveaway: free for the first student who asks.</div>
     </div>
     <div>
       <label for="itemCondition">Condition</label>
@@ -75,13 +76,13 @@
       <div class="hint">Helps the other student find you quickly. Do not write phone numbers or room numbers.</div>
     </div>
     <div id="durationBox" class="full ${param.listingType == 'BORROW' ? '' : 'hidden'}">
-      <label for="suggestedDays">Suggested borrow duration</label>
-      <select id="suggestedDays" name="suggestedDays">
-        <c:forEach var="d" items="${borrowDays}">
-          <option value="${d}" ${(empty param.suggestedDays ? 7 : param.suggestedDays) == d ? 'selected' : ''}>${d}${d == 1 ? ' day' : ' days'}</option>
+      <label for="suggestedHours">Suggested borrow duration</label>
+      <select id="suggestedHours" name="suggestedHours">
+        <c:forEach var="d" items="${durations}">
+          <option value="${d.key}" ${(empty param.suggestedHours ? 168 : param.suggestedHours) == d.key ? 'selected' : ''}><c:out value="${d.value}"/></option>
         </c:forEach>
       </select>
-      <div class="hint">You can still choose a different due date when you accept a request.</div>
+      <div class="hint">Hours suit a class slot (for example a laptop from 12 to 1). You can still pick a different duration when you accept a request.</div>
     </div>
   </div>
   <div class="actions" style="margin-top:20px">
@@ -94,8 +95,16 @@
   // Show the duration picker only for BORROW listings (the server ignores it for other types).
   var typeSelect = document.getElementById('listingType');
   var durationBox = document.getElementById('durationBox');
+  var typeHelp = document.getElementById('typeHelp');
+  var helpText = {
+    BORROW: 'Borrow: you lend it and the borrower gives it back by the agreed time.',
+    EXCHANGE: 'Exchange: you swap it for something the other student has.',
+    DONATE: 'Donate: you give it away for good to a student who needs it.',
+    GIVEAWAY: 'Giveaway: free for the first student who asks, no return expected.'
+  };
   typeSelect.addEventListener('change', function () {
     durationBox.classList.toggle('hidden', typeSelect.value !== 'BORROW');
+    if (helpText[typeSelect.value]) { typeHelp.textContent = helpText[typeSelect.value]; }
   });
 
   // Ask for a floor only when the handover spot is inside a block.
