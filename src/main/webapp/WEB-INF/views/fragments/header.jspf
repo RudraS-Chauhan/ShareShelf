@@ -18,6 +18,7 @@
       <a href="${ctx}/dashboard" class="${active == 'dashboard' ? 'active' : ''}">Dashboard</a>
       <a href="${ctx}/search" class="${active == 'search' ? 'active' : ''}">Search</a>
       <a href="${ctx}/add-listing" class="${active == 'add' ? 'active' : ''}">Add listing</a>
+      <a href="${ctx}/wanted" class="${active == 'wanted' ? 'active' : ''}">Wanted</a>
       <a href="${ctx}/my-requests" class="${active == 'requests' ? 'active' : ''}">My requests</a>
       <a href="${ctx}/reports" class="${active == 'reports' ? 'active' : ''}">Reports</a>
       <a href="${ctx}/profile" class="${active == 'profile' ? 'active' : ''}">Profile</a>

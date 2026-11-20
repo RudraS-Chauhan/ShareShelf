@@ -38,6 +38,7 @@
             <td data-label="Status"><span class="badge badge-${fn:toLowerCase(r.status)}"><c:out value="${r.status}"/></span></td>
             <td class="due ${r.status == 'OVERDUE' ? 'late' : ''}" data-label="Due back">
               <c:choose><c:when test="${empty r.dueText}">–</c:when><c:otherwise><c:out value="${r.dueText}"/></c:otherwise></c:choose>
+              <c:if test="${r.status == 'CANCELLED' and not empty r.cancelReason}"><div class="sub">Cancelled: <c:out value="${r.cancelReason}"/></div></c:if>
               <c:if test="${not empty r.timerNote}"><div class="sub"><c:out value="${r.timerNote}"/></div></c:if>
               <c:if test="${not empty r.returnConditionText}"><div class="sub"><c:out value="${r.returnConditionText}"/></div></c:if>
               <c:if test="${not empty r.meetTimeText}"><div class="sub">Meet: <c:out value="${r.meetTimeText}"/></div></c:if>
@@ -76,6 +77,7 @@
             <td data-label="Status"><span class="badge badge-${fn:toLowerCase(r.status)}"><c:out value="${r.status}"/></span></td>
             <td class="due ${r.status == 'OVERDUE' ? 'late' : ''}" data-label="Due back">
               <c:choose><c:when test="${empty r.dueText}">–</c:when><c:otherwise><c:out value="${r.dueText}"/></c:otherwise></c:choose>
+              <c:if test="${r.status == 'CANCELLED' and not empty r.cancelReason}"><div class="sub">Cancelled: <c:out value="${r.cancelReason}"/></div></c:if>
               <c:if test="${not empty r.timerNote}"><div class="sub"><c:out value="${r.timerNote}"/></div></c:if>
               <c:if test="${not empty r.returnConditionText}"><div class="sub"><c:out value="${r.returnConditionText}"/></div></c:if>
               <c:if test="${not empty r.meetTimeText}"><div class="sub">Meet: <c:out value="${r.meetTimeText}"/></div></c:if>
@@ -90,6 +92,7 @@
                   <button type="submit" class="btn btn-sm btn-danger">Cancel</button>
                 </form>
               </c:if>
+              <%@ include file="/WEB-INF/views/fragments/cancel-accepted.jspf" %>
               <c:if test="${r.status == 'ACCEPTED' and r.borrow and r.itemStatus == 'RESERVED'}">
                 <a class="btn btn-sm" href="${ctx}/scan?requestId=${r.requestId}">Confirm pickup (code)</a>
                 <div class="hint">or scan the owner's QR with your camera</div>

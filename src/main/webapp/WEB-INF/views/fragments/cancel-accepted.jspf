@@ -1,0 +1,20 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%-- Cancel an accepted request before pickup. Expects: r (request), back (page to return to). Either side may use it. --%>
+<c:if test="${r.status == 'ACCEPTED' and r.itemStatus == 'RESERVED'}">
+  <details class="accept-box">
+    <summary class="btn btn-sm btn-outline">Cancel…</summary>
+    <form class="accept-form" method="post" action="${ctx}/request/cancel-accepted">
+      <input type="hidden" name="requestId" value="${r.requestId}">
+      <input type="hidden" name="back" value="${back}">
+      <label>Why are you cancelling?
+        <select name="reason" required>
+          <option value="Changed my mind">Changed my mind</option>
+          <option value="Cannot make the meeting time">Cannot make the meeting time</option>
+          <option value="Item is no longer available">Item is no longer available</option>
+          <option value="Other">Other</option>
+        </select>
+      </label>
+      <button type="submit" class="btn btn-sm btn-danger">Confirm cancel</button>
+    </form>
+  </details>
+</c:if>

@@ -34,7 +34,15 @@ public class AppLifecycleListener implements ServletContextListener {
         ServletContext context = event.getServletContext();
         int minutes = readMinutes(context.getInitParameter("overdueCheckMinutes"));
 
-        StaleReservationChecker checker = new StaleReservationChecker(new RequestDAO()::markOverdue);
+        StaleReservationChecker checker = new StaleReservationChecker(() -> {
+            RequestDAO dao = new RequestDAO();
+            try {
+                dao.releaseUnclaimed();      // unclaimed reservations go back on the shelf
+            } catch (RuntimeException e) {
+                LOG.log(java.util.logging.Level.WARNING, "Releasing unclaimed reservations failed", e);
+            }
+            return dao.markOverdue();
+        });
         context.setAttribute(CHECKER_ATTRIBUTE, checker);
 
         ThreadFactory daemonThreads = runnable -> {

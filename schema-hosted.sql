@@ -52,6 +52,8 @@ CREATE TABLE IF NOT EXISTS requests (
   was_overdue           BOOLEAN DEFAULT FALSE,
   borrow_hours INT NULL,
   return_condition VARCHAR(10) NULL,
+  accepted_at DATETIME NULL,
+  cancel_reason VARCHAR(60) NULL,
   contact_revealed      BOOLEAN DEFAULT FALSE,
   revealed_at           TIMESTAMP NULL,
   created_at            TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -117,4 +119,26 @@ CREATE TABLE IF NOT EXISTS ratings (
   FOREIGN KEY (request_id) REFERENCES requests(request_id),
   FOREIGN KEY (rater_id) REFERENCES students(student_id),
   FOREIGN KEY (ratee_id) REFERENCES students(student_id)
+);
+
+-- ===== Phase 4 (19 Nov 2026): wanted board, cancel after accept, unclaimed reservations =====
+CREATE TABLE IF NOT EXISTS wanted_posts (
+  post_id     INT AUTO_INCREMENT PRIMARY KEY,
+  student_id  VARCHAR(20) NOT NULL,
+  title       VARCHAR(100) NOT NULL,
+  category    VARCHAR(40) NOT NULL,
+  note        VARCHAR(200),
+  status      VARCHAR(10) NOT NULL DEFAULT 'OPEN',
+  created_at  DATETIME NOT NULL,
+  FOREIGN KEY (student_id) REFERENCES students(student_id),
+  INDEX idx_wanted_status (status, created_at)
+);
+
+-- "I have this" answers: one per person per post, so the poster is not spammed.
+CREATE TABLE IF NOT EXISTS wanted_offers (
+  post_id     INT NOT NULL,
+  offerer_id  VARCHAR(20) NOT NULL,
+  PRIMARY KEY (post_id, offerer_id),
+  FOREIGN KEY (post_id) REFERENCES wanted_posts(post_id),
+  FOREIGN KEY (offerer_id) REFERENCES students(student_id)
 );

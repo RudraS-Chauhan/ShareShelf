@@ -310,6 +310,8 @@ class DaoIntegrationTest {
         assertTrue(requests.accept(r.getRequestId(), item.getItemId(), LocalDateTime.now().plusDays(1), null, ""));
         assertTrue(requests.complete(r.getRequestId(), item.getItemId()));
         RatingDAO ratings = new RatingDAO();
+        assertTrue(ratings.pendingFor(borrower).isEmpty(), "a return without a scan creates no rating duty");
+        requests.setReturnCondition(r.getRequestId(), "OK");   // what the return scan does
 
         // the borrower owes a rating for the finished borrow
         assertEquals(1, ratings.pendingFor(borrower).size());
@@ -389,5 +391,80 @@ class DaoIntegrationTest {
         assertEquals("second", n.latest(id).get(0).getMessage(), "newest first");
         n.markAllRead(id);
         assertEquals(0, n.unreadCount(id));
+    }
+
+    @Test
+    void acceptedRequestCanBeCancelledBeforePickupOnly() {
+        String owner = uniqueId("U13"), borrower = uniqueId("U14");
+        students.register(newStudent(owner));
+        students.register(newStudent(borrower));
+        ResourceItem item = newItem(owner, "BORROW");
+        listings.insert(item);
+        Request r = newRequest(item, borrower);
+        requests.insert(r);
+        assertTrue(requests.accept(r.getRequestId(), item.getItemId(), null, null, "", 24));
+
+        assertTrue(requests.cancelAccepted(r.getRequestId(), item.getItemId(), "Changed my mind"));
+        Request after = requests.findById(r.getRequestId());
+        assertEquals("CANCELLED", after.getStatus());
+        assertEquals("Changed my mind", after.getCancelReason());
+        assertEquals("AVAILABLE", after.getItemStatus());
+        assertFalse(requests.cancelAccepted(r.getRequestId(), item.getItemId(), "Other"), "only once");
+
+        // after a verified pickup it is too late to cancel
+        Request r2 = newRequest(item, borrower);
+        requests.insert(r2);
+        assertTrue(requests.accept(r2.getRequestId(), item.getItemId(), null, null, "", 24));
+        assertTrue(requests.startBorrow(r2.getRequestId(), item.getItemId()));
+        assertFalse(requests.cancelAccepted(r2.getRequestId(), item.getItemId(), "Other"));
+        assertEquals("BORROWED", requests.findById(r2.getRequestId()).getItemStatus());
+    }
+
+    @Test
+    void unclaimedReservationsGoBackOnTheShelfButFutureMeetingsStay() {
+        String owner = uniqueId("U15"), borrower = uniqueId("U16");
+        students.register(newStudent(owner));
+        students.register(newStudent(borrower));
+        ResourceItem late = newItem(owner, "BORROW");
+        ResourceItem future = newItem(owner, "BORROW");
+        listings.insert(late);
+        listings.insert(future);
+        Request r1 = newRequest(late, borrower);
+        Request r2 = newRequest(future, borrower);
+        requests.insert(r1);
+        requests.insert(r2);
+        LocalDateTime now = LocalDateTime.now(AppConstants.CAMPUS_ZONE);
+        // meeting was 3 hours ago and nobody came / meeting is tomorrow
+        assertTrue(requests.accept(r1.getRequestId(), late.getItemId(), null, now.minusHours(3), "", 24));
+        assertTrue(requests.accept(r2.getRequestId(), future.getItemId(), null, now.plusDays(1), "", 24));
+
+        assertTrue(requests.releaseUnclaimed() >= 1);
+        Request released = requests.findById(r1.getRequestId());
+        assertEquals("CANCELLED", released.getStatus());
+        assertEquals("AVAILABLE", released.getItemStatus());
+        assertEquals("ACCEPTED", requests.findById(r2.getRequestId()).getStatus(), "a future meeting is left alone");
+        assertTrue(new NotificationDAO().unreadCount(borrower) >= 1, "both students are told");
+    }
+
+    @Test
+    void wantedBoardLimitsPostsAndOffersOncePerPerson() {
+        String poster = uniqueId("U17"), helper = uniqueId("U18");
+        students.register(newStudent(poster));
+        students.register(newStudent(helper));
+        WantedDAO wanted = new WantedDAO();
+        int first = wanted.add(poster, "Lab coat", "Stationery", "two days");
+        assertTrue(first > 0);
+        for (int i = 1; i < AppConstants.MAX_OPEN_WANTED; i++) {
+            assertTrue(wanted.add(poster, "Thing " + i, "Stationery", null) > 0);
+        }
+        assertEquals(-1, wanted.add(poster, "One too many", "Stationery", null));
+        assertTrue(wanted.listOpen().stream().anyMatch(w -> w.getPostId() == first));
+
+        assertTrue(wanted.offerOnce(first, helper));
+        assertFalse(wanted.offerOnce(first, helper), "one offer per person");
+        assertFalse(wanted.close(first, helper), "only the poster can close");
+        assertTrue(wanted.close(first, poster));
+        assertFalse(wanted.listOpen().stream().anyMatch(w -> w.getPostId() == first));
+        assertTrue(wanted.add(poster, "Room again", "Stationery", null) > 0, "closing frees a slot");
     }
 }

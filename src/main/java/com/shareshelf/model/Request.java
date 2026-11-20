@@ -32,6 +32,7 @@ public class Request {
     private LocalDateTime meetTime, dueAt;
     private String meetNote;
     private int borrowHours;           // agreed hours; the clock starts at pickup (0 = old-style request)
+    private String cancelReason;
     private String returnCondition;    // OK / DAMAGED / MISSING, set at the return scan
     private double requesterStars, ownerStars;   // average of revealed ratings (0 when none)
     private int requesterStarsN, ownerStarsN;
@@ -218,6 +219,9 @@ public class Request {
     public boolean isBorrow() {
         return ListingType.BORROW.name().equals(listingType);
     }
+
+    public String getCancelReason() { return cancelReason; }
+    public void setCancelReason(String v) { cancelReason = v; }
 
     public int getBorrowHours() { return borrowHours; }
     public void setBorrowHours(int v) { borrowHours = v; }

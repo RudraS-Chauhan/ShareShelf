@@ -77,6 +77,7 @@ public class RatingDAO {
                 + "JOIN students os ON os.student_id = q.owner_id "
                 + "JOIN students rs ON rs.student_id = q.requester_id "
                 + "WHERE (q.requester_id = ? OR q.owner_id = ?) AND q.status = 'COMPLETED' AND i.listing_type = 'BORROW' "
+                + "AND q.return_condition IS NOT NULL "   // only returns verified by a scan; a manual 'returned (no scan)' creates no duty
                 + "AND NOT EXISTS (SELECT 1 FROM ratings r WHERE r.request_id = q.request_id AND r.rater_id = ?) "
                 + "ORDER BY q.request_id";
         List<Pending> list = new ArrayList<>();

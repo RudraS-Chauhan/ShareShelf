@@ -37,6 +37,7 @@
     </form>
   </c:if>
 
+  <%@ include file="/WEB-INF/views/fragments/cancel-accepted.jspf" %>
   <%-- Borrow items: handover and return are confirmed by QR / code, not by a button --%>
   <c:if test="${r.status == 'ACCEPTED' and r.borrow and r.itemStatus == 'RESERVED'}">
     <a class="btn btn-sm" href="${ctx}/handover/qr?requestId=${r.requestId}">Show handover QR</a>

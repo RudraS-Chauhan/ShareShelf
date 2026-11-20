@@ -137,7 +137,7 @@ public class RequestDAO {
             try {
                 int accepted;
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "UPDATE requests SET status = 'ACCEPTED', expected_return_date = ?, due_at = ?, meet_time = ?, meet_note = ?, borrow_hours = ? "
+                        "UPDATE requests SET status = 'ACCEPTED', expected_return_date = ?, due_at = ?, meet_time = ?, meet_note = ?, borrow_hours = ?, accepted_at = ? "
                         + "WHERE request_id = ? AND item_id = ? AND status = 'PENDING'")) {
                     if (dueAt != null) {
                         ps.setDate(1, Date.valueOf(dueAt.toLocalDate()));
@@ -157,8 +157,9 @@ public class RequestDAO {
                     } else {
                         ps.setNull(5, Types.INTEGER);
                     }
-                    ps.setInt(6, requestId);
-                    ps.setInt(7, itemId);
+                    ps.setObject(6, LocalDateTime.now(AppConstants.CAMPUS_ZONE));
+                    ps.setInt(7, requestId);
+                    ps.setInt(8, itemId);
                     accepted = ps.executeUpdate();
                 }
                 if (accepted != 1) {
@@ -253,6 +254,89 @@ public class RequestDAO {
         } catch (SQLException e) {
             throw new DataAccessException("Could not start the borrow for request " + requestId, e);
         }
+    }
+
+    /**
+     * TRANSACTION: either side cancels an ACCEPTED request before the pickup. Request -> CANCELLED,
+     * item RESERVED -> AVAILABLE again, so someone else can ask for it.
+     *
+     * @return false (and nothing changed) if the request is not ACCEPTED or the item is no longer RESERVED
+     *         (for example because the pickup was verified a moment earlier).
+     */
+    public boolean cancelAccepted(int requestId, int itemId, String reason) {
+        try (Connection conn = DBConnection.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                int a;
+                try (PreparedStatement ps = conn.prepareStatement(
+                        "UPDATE requests SET status = 'CANCELLED', cancel_reason = ? WHERE request_id = ? AND item_id = ? AND status = 'ACCEPTED'")) {
+                    ps.setString(1, reason);
+                    ps.setInt(2, requestId);
+                    ps.setInt(3, itemId);
+                    a = ps.executeUpdate();
+                }
+                int b = 0;
+                if (a == 1) {
+                    try (PreparedStatement ps = conn.prepareStatement(
+                            "UPDATE resource_items SET status = 'AVAILABLE' WHERE item_id = ? AND status = 'RESERVED'")) {
+                        ps.setInt(1, itemId);
+                        b = ps.executeUpdate();
+                    }
+                }
+                if (a != 1 || b != 1) {
+                    conn.rollback();
+                    return false;
+                }
+                conn.commit();
+                return true;
+            } catch (SQLException e) {
+                rollbackQuietly(conn);
+                throw new DataAccessException("Could not cancel request " + requestId, e);
+            } finally {
+                conn.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Could not cancel request " + requestId, e);
+        }
+    }
+
+    /**
+     * Background job: an accepted item that nobody picked up goes back on the shelf. Counts from the
+     * meeting time (+2 hours) or, when there was none, from the accept time (+24 hours). Both students are told.
+     *
+     * @return how many reservations were released
+     */
+    public int releaseUnclaimed() {
+        LocalDateTime now = LocalDateTime.now(AppConstants.CAMPUS_ZONE);
+        String sql = "SELECT q.request_id, q.item_id, q.requester_id, q.owner_id, i.title FROM requests q "
+                + "JOIN resource_items i ON i.item_id = q.item_id "
+                + "WHERE q.status = 'ACCEPTED' AND i.status = 'RESERVED' AND ("
+                + "(q.meet_time IS NOT NULL AND q.meet_time < ?) OR "
+                + "(q.meet_time IS NULL AND q.accepted_at IS NOT NULL AND q.accepted_at < ?))";
+        List<Object[]> due = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setObject(1, now.minusHours(AppConstants.RELEASE_AFTER_MEET_HOURS));
+            ps.setObject(2, now.minusHours(AppConstants.RELEASE_NO_MEET_HOURS));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    due.add(new Object[]{rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getString(4), rs.getString(5)});
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Could not look for unclaimed reservations", e);
+        }
+        NotificationDAO notifier = new NotificationDAO();
+        int released = 0;
+        for (Object[] row : due) {
+            if (cancelAccepted((int) row[0], (int) row[1], "Not picked up in time")) {
+                released++;
+                String msg = "\"" + row[4] + "\" was not picked up in time, so the reservation was released.";
+                notifier.add((String) row[2], msg, "/my-requests");
+                notifier.add((String) row[3], msg + " It is available again.", "/my-requests");
+            }
+        }
+        return released;
     }
 
     /** Remembers what the owner saw when the item came back (OK, DAMAGED or MISSING). */
@@ -579,6 +663,7 @@ public class RequestDAO {
         r.setRequesterCompleted(rs.getInt("requester_completed"));
         r.setOwnerCompleted(rs.getInt("owner_completed"));
         r.setBorrowHours(rs.getInt("borrow_hours"));
+        r.setCancelReason(rs.getString("cancel_reason"));
         r.setReturnCondition(rs.getString("return_condition"));
         r.setRequesterStars(rs.getDouble("requester_stars"));
         r.setRequesterStarsN(rs.getInt("requester_stars_n"));
