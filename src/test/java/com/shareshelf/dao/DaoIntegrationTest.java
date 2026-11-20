@@ -447,17 +447,18 @@ class DaoIntegrationTest {
     }
 
     @Test
-    void wantedBoardLimitsPostsAndOffersOncePerPerson() {
+    void wantedBoardLimitsPostsPerMonthStoresLocationAndOffersOncePerPerson() {
         String poster = uniqueId("U17"), helper = uniqueId("U18");
         students.register(newStudent(poster));
         students.register(newStudent(helper));
         WantedDAO wanted = new WantedDAO();
-        int first = wanted.add(poster, "Lab coat", "Stationery", "two days");
+        int first = wanted.add(poster, "Lab coat", "Stationery", "two days", "D Block ground floor");
         assertTrue(first > 0);
-        for (int i = 1; i < AppConstants.MAX_OPEN_WANTED; i++) {
-            assertTrue(wanted.add(poster, "Thing " + i, "Stationery", null) > 0);
+        assertEquals("D Block ground floor", wanted.findById(first).getLocation());
+        for (int i = 1; i < AppConstants.MAX_WANTED_PER_MONTH; i++) {
+            assertTrue(wanted.add(poster, "Thing " + i, "Stationery", null, null) > 0);
         }
-        assertEquals(-1, wanted.add(poster, "One too many", "Stationery", null));
+        assertEquals(-1, wanted.add(poster, "One too many", "Stationery", null, null));
         assertTrue(wanted.listOpen().stream().anyMatch(w -> w.getPostId() == first));
 
         assertTrue(wanted.offerOnce(first, helper));
@@ -465,6 +466,42 @@ class DaoIntegrationTest {
         assertFalse(wanted.close(first, helper), "only the poster can close");
         assertTrue(wanted.close(first, poster));
         assertFalse(wanted.listOpen().stream().anyMatch(w -> w.getPostId() == first));
-        assertTrue(wanted.add(poster, "Room again", "Stationery", null) > 0, "closing frees a slot");
+        assertEquals(-1, wanted.add(poster, "Still too many", "Stationery", null, null),
+                "closing a post does not give the monthly allowance back");
+    }
+
+    @Test
+    void unansweredWantedPostsCloseByThemselvesButAnsweredOnesStayUntilThirtyDays() {
+        String poster = uniqueId("U19"), helper = uniqueId("U20");
+        students.register(newStudent(poster));
+        students.register(newStudent(helper));
+        WantedDAO wanted = new WantedDAO();
+        int quiet = wanted.add(poster, "Nobody answers", "Stationery", null, null);
+        int answered = wanted.add(poster, "Someone answers", "Stationery", null, null);
+        int fresh = wanted.add(poster, "Brand new", "Stationery", null, null);
+        wanted.offerOnce(answered, helper);
+        backdate(quiet, 8);
+        backdate(answered, 8);
+
+        assertTrue(wanted.expireStale() >= 1);
+        assertFalse(wanted.listOpen().stream().anyMatch(w -> w.getPostId() == quiet), "unanswered post closed after 7 days");
+        assertTrue(wanted.listOpen().stream().anyMatch(w -> w.getPostId() == answered), "answered post stays");
+        assertTrue(wanted.listOpen().stream().anyMatch(w -> w.getPostId() == fresh), "new post stays");
+        assertTrue(new NotificationDAO().unreadCount(poster) >= 1, "the poster is told");
+
+        backdate(answered, 31);
+        wanted.expireStale();
+        assertFalse(wanted.listOpen().stream().anyMatch(w -> w.getPostId() == answered), "everything closes after 30 days");
+    }
+
+    private static void backdate(int postId, int days) {
+        try (Connection c = DBConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement("UPDATE wanted_posts SET created_at = ? WHERE post_id = ?")) {
+            ps.setObject(1, LocalDateTime.now(AppConstants.CAMPUS_ZONE).minusDays(days));
+            ps.setInt(2, postId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            fail(e);
+        }
     }
 }

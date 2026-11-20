@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%-- Wanted board (GET /wanted). Model from WantedServlet: posts, categories, myOpen, maxOpen --%>
+<%-- Wanted board (GET /wanted). Model from WantedServlet: posts, categories, myMonth, maxMonth, noOfferDays, maxLocation --%>
 <c:set var="pageTitle" value="Wanted"/>
 <c:set var="active" value="wanted"/>
 <%@ include file="/WEB-INF/views/fragments/header.jspf" %>
@@ -24,6 +24,10 @@
         <c:forEach var="c" items="${categories}"><option value="<c:out value='${c}'/>"><c:out value="${c}"/></option></c:forEach>
       </select>
     </div>
+    <div class="full">
+      <label for="wloc">Where should it be brought? <span class="hint">(optional, type any place)</span></label>
+      <input id="wloc" type="text" name="location" maxlength="${maxLocation}" placeholder="e.g. D Block ground floor, near the canteen">
+    </div>
     <div>
       <label for="wnote">Note <span class="hint">(optional)</span></label>
       <input id="wnote" type="text" name="note" maxlength="200" placeholder="e.g. Only for 2 days">
@@ -31,7 +35,7 @@
   </div>
   <div class="form-actions">
     <button type="submit" class="btn">Post request</button>
-    <span class="hint">${myOpen} of ${maxOpen} open posts used. Posts disappear after 30 days.</span>
+    <span class="hint">${myMonth} of ${maxMonth} posts used in the last 30 days. A post nobody answers closes by itself after ${noOfferDays} days.</span>
   </div>
 </form>
 
@@ -45,6 +49,7 @@
       <c:forEach var="w" items="${posts}">
         <li>
           <strong><c:out value="${w.title}"/></strong> <span class="role-tag"><c:out value="${w.category}"/></span>
+          <c:if test="${not empty w.location}"><div class="sub">📍 <c:out value="${w.location}"/></div></c:if>
           <c:if test="${not empty w.note}"><div class="sub"><c:out value="${w.note}"/></div></c:if>
           <div class="sub">
             <a href="${ctx}/profile?id=${w.studentId}"><c:out value="${w.studentName}"/></a>

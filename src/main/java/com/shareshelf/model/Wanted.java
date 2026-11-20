@@ -9,7 +9,7 @@ public class Wanted {
     private static final DateTimeFormatter WHEN = DateTimeFormatter.ofPattern("d MMM", Locale.ENGLISH);
 
     private int postId, year;
-    private String studentId, studentName, branch, title, category, note;
+    private String studentId, studentName, branch, title, category, note, location;
     private LocalDateTime createdAt;
 
     public int getPostId() { return postId; }
@@ -28,6 +28,8 @@ public class Wanted {
     public void setCategory(String v) { category = v; }
     public String getNote() { return note; }
     public void setNote(String v) { note = v; }
+    public String getLocation() { return location; }
+    public void setLocation(String v) { location = v; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime v) { createdAt = v; }
     public String getWhenText() { return createdAt == null ? "" : createdAt.format(WHEN); }

@@ -1,11 +1,11 @@
 
 Thanks for using JUnit! Support its development at https://junit.org/sponsoring
 
-Nov 20, 2026 10:10:57 AM com.shareshelf.util.StaleReservationChecker run
+Nov 20, 2026 3:13:14 PM com.shareshelf.util.StaleReservationChecker run
 INFO: Overdue check: flagged 2 request(s) as OVERDUE
-Nov 20, 2026 10:10:57 AM com.shareshelf.util.StaleReservationChecker run
+Nov 20, 2026 3:13:14 PM com.shareshelf.util.StaleReservationChecker run
 INFO: Overdue check: flagged 2 request(s) as OVERDUE
-Nov 20, 2026 10:10:57 AM com.shareshelf.util.StaleReservationChecker run
+Nov 20, 2026 3:13:14 PM com.shareshelf.util.StaleReservationChecker run
 WARNING: Overdue check failed; will retry on the next cycle
 com.shareshelf.util.DataAccessException: database is down
 	at com.shareshelf.util.StaleReservationCheckerTest.lambda$aFailingScanDoesNotKillTheThreadAndRecoversNextTime$1(StaleReservationCheckerTest.java:27)
@@ -113,9 +113,9 @@ com.shareshelf.util.DataAccessException: database is down
 Caused by: java.lang.RuntimeException
 	... 102 more
 
-Nov 20, 2026 10:10:57 AM com.shareshelf.util.StaleReservationChecker run
+Nov 20, 2026 3:13:14 PM com.shareshelf.util.StaleReservationChecker run
 INFO: Overdue check: flagged 1 request(s) as OVERDUE
-Nov 20, 2026 10:10:57 AM com.shareshelf.util.DBConnection <clinit>
+Nov 20, 2026 3:13:14 PM com.shareshelf.util.DBConnection <clinit>
 SEVERE: MySQL JDBC driver not found on the classpath
 java.lang.ClassNotFoundException: com.mysql.cj.jdbc.Driver
 	at java.base/java.net.URLClassLoader.findClass(URLClassLoader.java:445)
@@ -232,7 +232,9 @@ java.lang.ClassNotFoundException: com.mysql.cj.jdbc.Driver
 ?  ?  ?? countsFlaggedRequestsAndRecordsTheScanTime() ?
 ?  ?  ?? aFailingScanDoesNotKillTheThreadAndRecoversNextTime() ?
 ?  ?? DaoIntegrationTest ?
+?  ?  ?? wantedBoardLimitsPostsPerMonthStoresLocationAndOffersOncePerPerson() ?
 ?  ?  ?? notificationsAreStoredCountedAndMarkedRead() ?
+?  ?  ?? unansweredWantedPostsCloseByThemselvesButAnsweredOnesStayUntilThirtyDays() ?
 ?  ?  ?? handoverCodeWorksOnceExpiresWithNewOnesAndLocksAfterWrongGuesses() ?
 ?  ?  ?? acceptIsATransactionAndOnlyOneRequestCanWin() ?
 ?  ?  ?? unclaimedReservationsGoBackOnTheShelfButFutureMeetingsStay() ?
@@ -241,7 +243,6 @@ java.lang.ClassNotFoundException: com.mysql.cj.jdbc.Driver
 ?  ?  ?? searchIsCaseInsensitiveTrimmedAndOnlyShowsAvailableItems() ?
 ?  ?  ?? passwordIsStoredHashedAndLoginChecksTheHash() ?
 ?  ?  ?? borrowClockStartsAtVerifiedPickupNotAtAccept() ?
-?  ?  ?? wantedBoardLimitsPostsAndOffersOncePerPerson() ?
 ?  ?  ?? listingForUnknownOwnerIsRejectedByTheForeignKey() ?
 ?  ?  ?? completeReopensBorrowItemsAndClosesGiveaways() ?
 ?  ?  ?? acceptedRequestCanBeCancelledBeforePickupOnly() ?
@@ -267,18 +268,18 @@ java.lang.ClassNotFoundException: com.mysql.cj.jdbc.Driver
 ?     ?? handoverRulesAreSane() ?
 ?? JUnit Vintage ?
 
-Test run finished after 2061 ms
+Test run finished after 2237 ms
 [        10 containers found      ]
 [         0 containers skipped    ]
 [        10 containers started    ]
 [         0 containers aborted    ]
 [        10 containers successful ]
 [         0 containers failed     ]
-[        41 tests found           ]
+[        42 tests found           ]
 [         0 tests skipped         ]
-[        41 tests started         ]
+[        42 tests started         ]
 [         0 tests aborted         ]
-[        41 tests successful      ]
+[        42 tests successful      ]
 [         0 tests failed          ]
 
 

@@ -41,6 +41,11 @@ public class AppLifecycleListener implements ServletContextListener {
             } catch (RuntimeException e) {
                 LOG.log(java.util.logging.Level.WARNING, "Releasing unclaimed reservations failed", e);
             }
+            try {
+                new com.shareshelf.dao.WantedDAO().expireStale();   // unanswered wanted posts close by themselves
+            } catch (RuntimeException e) {
+                LOG.log(java.util.logging.Level.WARNING, "Closing stale wanted posts failed", e);
+            }
             return dao.markOverdue();
         });
         context.setAttribute(CHECKER_ATTRIBUTE, checker);

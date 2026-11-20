@@ -32,8 +32,10 @@ public class WantedServlet extends BaseServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setAttribute("posts", wantedDAO.listOpen());
         req.setAttribute("categories", AppConstants.CATEGORIES);
-        req.setAttribute("myOpen", wantedDAO.countOpen(currentStudentId(req)));
-        req.setAttribute("maxOpen", AppConstants.MAX_OPEN_WANTED);
+        req.setAttribute("myMonth", wantedDAO.countRecent(currentStudentId(req)));
+        req.setAttribute("maxMonth", AppConstants.MAX_WANTED_PER_MONTH);
+        req.setAttribute("noOfferDays", AppConstants.WANTED_NO_OFFER_DAYS);
+        req.setAttribute("maxLocation", AppConstants.MAX_WANTED_LOCATION);
         forward(req, resp, "wanted");
     }
 
@@ -45,6 +47,7 @@ public class WantedServlet extends BaseServlet {
         if ("add".equals(action)) {
             String title = ValidationUtil.limit(req.getParameter("title"), 200).replaceAll("\\p{Cntrl}", " ").trim();
             String note = ValidationUtil.limit(req.getParameter("note"), 600).replaceAll("\\p{Cntrl}", " ").trim();
+            String location = ValidationUtil.limit(req.getParameter("location"), 200).replaceAll("\\p{Cntrl}", " ").trim();
             String category = param(req, "category");
             if (title.length() < 3 || title.length() > AppConstants.MAX_WANTED_TITLE) {
                 flash(req, "error", "Say what you need in 3 to " + AppConstants.MAX_WANTED_TITLE + " characters.");
@@ -52,8 +55,10 @@ public class WantedServlet extends BaseServlet {
                 flash(req, "error", "Choose a category from the list.");
             } else if (note.length() > AppConstants.MAX_WANTED_NOTE) {
                 flash(req, "error", "The note can be at most " + AppConstants.MAX_WANTED_NOTE + " characters.");
-            } else if (wantedDAO.add(me, title, category, note) < 0) {
-                flash(req, "error", "You already have " + AppConstants.MAX_OPEN_WANTED + " open posts. Close one first.");
+            } else if (location.length() > AppConstants.MAX_WANTED_LOCATION) {
+                flash(req, "error", "The location can be at most " + AppConstants.MAX_WANTED_LOCATION + " characters.");
+            } else if (wantedDAO.add(me, title, category, note, location) < 0) {
+                flash(req, "error", "You have already made " + AppConstants.MAX_WANTED_PER_MONTH + " posts in the last 30 days.");
             } else {
                 flash(req, "success", "Posted. Students who have it can now tell you.");
             }

@@ -133,7 +133,11 @@ public final class AppConstants {
     public static final int RELEASE_NO_MEET_HOURS = 24;
     public static final int MAX_WANTED_TITLE = 100;
     public static final int MAX_WANTED_NOTE = 200;
-    public static final int MAX_OPEN_WANTED = 5;
+    /** How many wanted posts one student may create in any 30-day window. */
+    public static final int MAX_WANTED_PER_MONTH = 10;
+    /** A wanted post nobody answered ("I have this") closes by itself after this many days. */
+    public static final int WANTED_NO_OFFER_DAYS = 7;
+    public static final int MAX_WANTED_LOCATION = 60;
     /** Wanted posts older than this many days are no longer shown. */
     public static final int WANTED_DAYS = 30;
 

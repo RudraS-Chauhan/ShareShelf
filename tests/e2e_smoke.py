@@ -292,9 +292,11 @@ check("   cancelling twice is refused", "before the pickup" in B.follow(B.post("
 
 check("   wanted page opens", "Open requests" in B.get("/wanted")[2])
 check("   a short title is refused", "3 to 100" in B.follow(B.post("/wanted", dict(action="add", title="x", category="Stationery")))[2])
+check("   a too long location is refused", "location can be at most" in B.follow(B.post("/wanted", dict(action="add", title="Lab coat", category="Stationery", location="x" * 70)))[2])
 check("   a bad category is refused", "category" in B.follow(B.post("/wanted", dict(action="add", title="Lab coat", category="Nonsense")))[2])
-check("   B posts a wanted item", "Posted" in B.follow(B.post("/wanted", dict(action="add", title="Lab coat <script>alert(2)</script>", category="Stationery", note="two days")))[2])
+check("   B posts a wanted item", "Posted" in B.follow(B.post("/wanted", dict(action="add", title="Lab coat <script>alert(2)</script>", category="Stationery", note="two days", location="D Block <b>ground</b> floor")))[2])
 w = B.get("/wanted")[2]
+check("   the typed location shows, escaped", "D Block &lt;b&gt;ground&lt;/b&gt; floor" in w)
 check("   it shows, escaped", "<script>alert(2)</script>" not in w and "Lab coat &lt;script&gt;" in w)
 w_id = re.search(r'name="postId" value="(\d+)"', w).group(1)
 check("   A answers 'I have this' and is sent to Add listing", "Add listing" in A.follow(A.post("/wanted", dict(action="offer", postId=w_id)))[2])
@@ -303,9 +305,9 @@ A.post("/wanted", dict(action="offer", postId=w_id))
 check("   a second offer does not notify again", B.get("/notifications")[2].count("for you. They will list it") == 1)
 check("   only the poster can close", "Only the person who posted" in A.follow(A.post("/wanted", dict(action="close", postId=w_id)))[2])
 check("   the poster closes it", "Post closed" in B.follow(B.post("/wanted", dict(action="close", postId=w_id)))[2])
-for i in range(5):
+for i in range(9):
     B.post("/wanted", dict(action="add", title="Thing %d" % i, category="Stationery"))
-check("   at most 5 open posts per student", "5 open posts" in B.follow(B.post("/wanted", dict(action="add", title="One too many", category="Stationery")))[2])
+check("   at most 10 posts per student in 30 days", "10 posts" in B.follow(B.post("/wanted", dict(action="add", title="One too many", category="Stationery")))[2])
 check("   anonymous cannot open the wanted board", "login_required" in loc(anon.get("/wanted")))
 
 print("== Logout ==")

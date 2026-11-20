@@ -152,19 +152,21 @@ PASS     the cancel reason is visible on B's request
 PASS     cancelling twice is refused
 PASS     wanted page opens
 PASS     a short title is refused
+PASS     a too long location is refused
 PASS     a bad category is refused
 PASS     B posts a wanted item
+PASS     the typed location shows, escaped
 PASS     it shows, escaped
 PASS     A answers 'I have this' and is sent to Add listing
 PASS     B is told, with a link to search
 PASS     a second offer does not notify again
 PASS     only the poster can close
 PASS     the poster closes it
-PASS     at most 5 open posts per student
+PASS     at most 10 posts per student in 30 days
 PASS     anonymous cannot open the wanted board
 == Logout ==
 PASS     logout redirects to login
 PASS     session is dead after logout
 PASS     unknown URL gives the friendly 404 page
 
-155 checks, 155 passed, 0 failed
+157 checks, 157 passed, 0 failed

@@ -129,6 +129,7 @@ CREATE TABLE IF NOT EXISTS wanted_posts (
   title       VARCHAR(100) NOT NULL,
   category    VARCHAR(40) NOT NULL,
   note        VARCHAR(200),
+  location    VARCHAR(60),
   status      VARCHAR(10) NOT NULL DEFAULT 'OPEN',
   created_at  DATETIME NOT NULL,
   FOREIGN KEY (student_id) REFERENCES students(student_id),
