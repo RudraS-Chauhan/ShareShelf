@@ -6,7 +6,7 @@ ShareShelf-Java/
 ├── pom.xml                      Maven build (WAR, Servlet 4.0 / Tomcat 9, JSTL, MySQL driver, JUnit 5)
 ├── schema.sql                   creates the database and 4 tables
 ├── tests/
-│   └── e2e_smoke.py             black-box HTTP test of every workflow (134 checks)
+│   └── e2e_smoke.py             black-box HTTP test of every workflow (155 checks)
 ├── docs/                        planning docs, test cases, screenshots
 └── src/
     ├── main/
@@ -26,7 +26,7 @@ ShareShelf-Java/
     │           ├── web.xml      welcome file, sessions, JSP config, error pages
     │           └── views/       dashboard, search, add-listing, my-requests, reports, error (.jsp)
     │                            + fragments/ (header, footer, owner-actions, trust, taglibs)
-    └── test/java/com/shareshelf/   JUnit 5: util tests + DAO integration tests (36 tests)
+    └── test/java/com/shareshelf/   JUnit 5: util tests + DAO integration tests (41 tests)
 ```
 
 Request flow: **browser → servlet (validates, checks ownership) → DAO (JDBC) → MySQL**, then the servlet either

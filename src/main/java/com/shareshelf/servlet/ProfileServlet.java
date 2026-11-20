@@ -30,6 +30,11 @@ public class ProfileServlet extends BaseServlet {
             return;
         }
         req.setAttribute("profile", p);
+        com.shareshelf.util.StudentIdInfo info = com.shareshelf.util.StudentIdInfo.parse(p.getStudentId());
+        if (info != null) {
+            req.setAttribute("idSummary", info.summary());
+            req.setAttribute("studyYear", info.studyYear(java.time.LocalDate.now(com.shareshelf.util.AppConstants.CAMPUS_ZONE)));
+        }
         req.setAttribute("isMe", id.equals(currentStudentId(req)));
         forward(req, resp, "profile");
     }

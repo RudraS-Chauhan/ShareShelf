@@ -7,7 +7,8 @@
 <div class="page-head">
   <div>
     <h1><c:out value="${profile.name}"/><c:if test="${isMe}"> <span class="role-tag">This is you</span></c:if></h1>
-    <p><c:out value="${profile.branch}"/> · Year <c:out value="${profile.year}"/> · <c:out value="${profile.hostelOrDay}"/></p>
+    <p><c:out value="${profile.branch}"/> · Year <c:out value="${empty studyYear ? profile.year : studyYear}"/> · <c:out value="${profile.hostelOrDay}"/></p>
+    <c:if test="${not empty idSummary}"><p class="hint"><c:out value="${idSummary}"/></p></c:if>
   </div>
 </div>
 

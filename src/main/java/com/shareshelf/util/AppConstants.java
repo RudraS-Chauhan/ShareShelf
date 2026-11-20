@@ -122,4 +122,24 @@ public final class AppConstants {
     /** A profile badge appears after this many completed exchanges. */
     public static final int BADGE_MIN_EXCHANGES = 3;
     public static final double BADGE_MIN_STARS = 4.0;
+
+    // ---- cancelling, unclaimed reservations, wanted board ----
+    /** Reasons offered when an accepted request is cancelled before pickup. */
+    public static final List<String> CANCEL_REASONS = List.of(
+            "Changed my mind", "Cannot make the meeting time", "Item is no longer available", "Other");
+    /** An accepted item nobody picked up is released this many hours after the meeting time... */
+    public static final int RELEASE_AFTER_MEET_HOURS = 2;
+    /** ...or this many hours after accepting, when no meeting time was set. */
+    public static final int RELEASE_NO_MEET_HOURS = 24;
+    public static final int MAX_WANTED_TITLE = 100;
+    public static final int MAX_WANTED_NOTE = 200;
+    public static final int MAX_OPEN_WANTED = 5;
+    /** Wanted posts older than this many days are no longer shown. */
+    public static final int WANTED_DAYS = 30;
+
+    // ---- admission numbers: 25SCSE1180735 = year 25, school SCSE, serial ----
+    /** School codes we can name. Unknown codes are shown as the code itself; add new ones here. */
+    public static final java.util.Map<String, String> SCHOOLS = java.util.Map.of(
+            "SCSE", "School of Computer Science and Engineering",
+            "SOAI", "School of Artificial Intelligence");
 }

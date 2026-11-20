@@ -67,6 +67,7 @@
         <h2>Create your account</h2>
         <label for="r-id">Admission number</label>
         <input id="r-id" type="text" name="studentId" placeholder="e.g. 25SCSE1000000" required>
+        <div id="r-id-hint" class="hint"></div>
         <label for="r-name">Full name</label>
         <input id="r-name" type="text" name="name" maxlength="100" required>
         <label for="r-branch">Branch</label>
@@ -104,6 +105,21 @@
       document.getElementById('registerForm').classList.toggle('hidden', !showRegister);
       document.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.toggle('active', b === btn); });
     });
+  });
+
+  // Friendly hint from the admission number (25 = admitted 2025, SCSE = school). Display only: the server
+  // accepts any 6-20 letter/digit ID, and keep this list in step with AppConstants.SCHOOLS.
+  var SCHOOLS = { SCSE: 'School of Computer Science and Engineering', SOAI: 'School of Artificial Intelligence' };
+  document.getElementById('r-id').addEventListener('input', function () {
+    var hint = document.getElementById('r-id-hint');
+    var m = /^(\d{2})([A-Z]{2,8})(\d{3,10})$/.exec(this.value.trim().toUpperCase());
+    if (!m) { hint.textContent = ''; return; }
+    var admitted = 2000 + parseInt(m[1], 10), now = new Date();
+    var start = now.getMonth() >= 6 ? now.getFullYear() : now.getFullYear() - 1;
+    var year = Math.min(4, Math.max(1, start - admitted + 1));
+    hint.textContent = 'Class of ' + (admitted + 4) + ' · ' + (SCHOOLS[m[2]] || m[2]) + ' · looks like year ' + year;
+    var y = document.getElementById('r-year');
+    if (y && !y.value) { y.value = year; }
   });
 </script>
 </body>
