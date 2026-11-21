@@ -42,6 +42,10 @@ public class LoginServlet extends BaseServlet {
             request.changeSessionId();   // new session id after login (prevents session fixation)
             session.setAttribute("studentId", student.getStudentId());
             session.setAttribute("studentName", student.getName());
+            if ("on".equals(request.getParameter("remember"))) {
+                // survives a server restart, a closed browser and the free host going to sleep
+                com.shareshelf.util.RememberCookie.set(request, response, new com.shareshelf.dao.RememberDAO().issue(student.getStudentId()));
+            }
             redirect(request, response, "/dashboard");
         } else {
             redirect(request, response, "/index.jsp?error=invalid");

@@ -42,6 +42,10 @@ public class AuthFilter implements Filter {
         HttpSession session = req.getSession(false);
         boolean loggedIn = session != null && session.getAttribute("studentId") != null;
         if (!loggedIn) {
+            session = restoreFromRememberCookie(req, resp);   // null when there is no valid cookie
+            loggedIn = session != null;
+        }
+        if (!loggedIn) {
             resp.sendRedirect(req.getContextPath() + "/index.jsp?error=login_required");
             return;
         }
@@ -53,6 +57,34 @@ public class AuthFilter implements Filter {
             addBellData(req, (String) session.getAttribute("studentId"));
         }
         chain.doFilter(request, response);
+    }
+
+    /**
+     * The server forgot the login (restart, sleep, redeploy) but the browser still has a valid
+     * "keep me signed in" cookie: sign the student in again quietly.
+     *
+     * @return the new session, or null when the cookie is missing, wrong or expired (a bad cookie is cleared)
+     */
+    private HttpSession restoreFromRememberCookie(HttpServletRequest req, HttpServletResponse resp) {
+        String cookie = com.shareshelf.util.RememberCookie.read(req);
+        if (cookie == null) {
+            return null;
+        }
+        try {
+            String studentId = new com.shareshelf.dao.RememberDAO().studentFor(cookie);
+            com.shareshelf.model.Student student = studentId == null ? null : new com.shareshelf.dao.StudentDAO().findById(studentId);
+            if (student == null) {
+                com.shareshelf.util.RememberCookie.clear(req, resp);
+                return null;
+            }
+            HttpSession fresh = req.getSession(true);
+            fresh.setAttribute("studentId", student.getStudentId());
+            fresh.setAttribute("studentName", student.getName());
+            return fresh;
+        } catch (RuntimeException e) {
+            java.util.logging.Logger.getLogger(AuthFilter.class.getName()).warning("Remember-me check failed: " + e.getMessage());
+            return null;
+        }
     }
 
     /** Numbers for the top bar (bell count, ratings still owed). A failure here must never break the page. */

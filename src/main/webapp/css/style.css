@@ -374,3 +374,6 @@ form.accept-form input, form.accept-form select { font-size: 14px; padding: 7px 
 .stat { background: #fff; border: 1px solid var(--border, #d9dce3); border-radius: 12px; padding: 14px; }
 .stat strong { display: block; font-size: 26px; }
 .stat span { color: #5b6580; font-size: 13px; }
+
+.check-row { display: flex; align-items: center; gap: 8px; font-weight: 400; margin: 10px 0; font-size: 14px; }
+.check-row input { width: auto; margin: 0; }

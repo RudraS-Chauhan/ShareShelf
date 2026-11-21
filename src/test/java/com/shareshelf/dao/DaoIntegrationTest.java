@@ -504,4 +504,33 @@ class DaoIntegrationTest {
             fail(e);
         }
     }
+
+    @Test
+    void keepMeSignedInTokenWorksUntilLogoutAndRejectsGuessesAndExpiry() {
+        String id = uniqueId("U21");
+        students.register(newStudent(id));
+        RememberDAO remember = new RememberDAO();
+        String cookie = remember.issue(id);
+        assertEquals(id, remember.studentFor(cookie));
+        assertNull(remember.studentFor(null));
+        assertNull(remember.studentFor("short"));
+        // right selector, wrong secret
+        assertNull(remember.studentFor(cookie.substring(0, 25) + "0".repeat(64)));
+
+        // expired
+        try (Connection c = DBConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement("UPDATE remember_tokens SET expires_at = ? WHERE selector = ?")) {
+            ps.setObject(1, LocalDateTime.now(AppConstants.CAMPUS_ZONE).minusMinutes(1));
+            ps.setString(2, cookie.substring(0, 24));
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            fail(e);
+        }
+        assertNull(remember.studentFor(cookie), "expired token refused");
+
+        String second = remember.issue(id);
+        assertEquals(id, remember.studentFor(second));
+        remember.delete(second);
+        assertNull(remember.studentFor(second), "logout kills the token");
+    }
 }

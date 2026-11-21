@@ -59,6 +59,7 @@
         <input id="l-id" type="text" name="studentId" placeholder="e.g. 25SCSE1000000" required autocomplete="username">
         <label for="l-pw">Password</label>
         <input id="l-pw" type="password" name="password" required autocomplete="current-password">
+        <label class="check-row"><input type="checkbox" name="remember" value="on" checked> Keep me signed in on this device (30 days)</label>
         <button type="submit">Login</button>
       </form>
 

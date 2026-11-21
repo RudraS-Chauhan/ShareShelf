@@ -164,9 +164,16 @@ PASS     only the poster can close
 PASS     the poster closes it
 PASS     at most 10 posts per student in 30 days
 PASS     anonymous cannot open the wanted board
+== Keep me signed in ==
+PASS     the keep-signed-in cookie is set when the box is ticked
+PASS     the cookie is HttpOnly
+PASS     a browser with only that cookie is signed in again (like after a server restart)
+PASS     a wrong secret is refused
+PASS     no cookie is set when the box is not ticked
+PASS     after logout the old cookie no longer works
 == Logout ==
 PASS     logout redirects to login
 PASS     session is dead after logout
 PASS     unknown URL gives the friendly 404 page
 
-157 checks, 157 passed, 0 failed
+163 checks, 163 passed, 0 failed

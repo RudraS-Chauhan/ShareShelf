@@ -138,6 +138,10 @@ public final class AppConstants {
     /** A wanted post nobody answered ("I have this") closes by itself after this many days. */
     public static final int WANTED_NO_OFFER_DAYS = 7;
     public static final int MAX_WANTED_LOCATION = 60;
+
+    // ---- "keep me signed in" ----
+    public static final String REMEMBER_COOKIE = "ss_remember";
+    public static final int REMEMBER_DAYS = 30;
     /** Wanted posts older than this many days are no longer shown. */
     public static final int WANTED_DAYS = 30;
 

@@ -310,6 +310,25 @@ for i in range(9):
 check("   at most 10 posts per student in 30 days", "10 posts" in B.follow(B.post("/wanted", dict(action="add", title="One too many", category="Stationery")))[2])
 check("   anonymous cannot open the wanted board", "login_required" in loc(anon.get("/wanted")))
 
+print("== Keep me signed in ==")
+import copy
+R = Client()
+R.post("/login", dict(studentId=SA, password="Passw0rd!x", remember="on"))
+ck = next((c for c in R.jar if c.name == "ss_remember"), None)
+check("   the keep-signed-in cookie is set when the box is ticked", ck is not None and len(ck.value) == 89)
+check("   the cookie is HttpOnly", ck is not None and ck.has_nonstandard_attr("HttpOnly"))
+R2 = Client()
+R2.jar.set_cookie(ck)
+check("   a browser with only that cookie is signed in again (like after a server restart)", R2.get("/dashboard")[0] == 200)
+bad = copy.copy(ck); bad.value = ck.value[:25] + "0" * 64
+R4 = Client(); R4.jar.set_cookie(bad)
+check("   a wrong secret is refused", "login_required" in loc(R4.get("/dashboard")))
+nb = Client(); nb.post("/login", dict(studentId=SA, password="Passw0rd!x"))
+check("   no cookie is set when the box is not ticked", not any(c.name == "ss_remember" for c in nb.jar))
+R.get("/logout")
+R3 = Client(); R3.jar.set_cookie(ck)
+check("   after logout the old cookie no longer works", "login_required" in loc(R3.get("/dashboard")))
+
 print("== Logout ==")
 check("   logout redirects to login", "logged_out=true" in loc(A.get("/logout")))
 check("   session is dead after logout", "login_required" in loc(A.get("/dashboard")))

@@ -143,3 +143,13 @@ CREATE TABLE IF NOT EXISTS wanted_offers (
   FOREIGN KEY (post_id) REFERENCES wanted_posts(post_id),
   FOREIGN KEY (offerer_id) REFERENCES students(student_id)
 );
+
+-- ===== 21 Nov 2026: "keep me signed in" (survives server restarts, unlike the in-memory session) =====
+CREATE TABLE IF NOT EXISTS remember_tokens (
+  token_id    INT AUTO_INCREMENT PRIMARY KEY,
+  student_id  VARCHAR(20) NOT NULL,
+  selector    VARCHAR(24) NOT NULL UNIQUE,
+  token_hash  VARCHAR(64) NOT NULL,
+  expires_at  DATETIME NOT NULL,
+  FOREIGN KEY (student_id) REFERENCES students(student_id)
+);

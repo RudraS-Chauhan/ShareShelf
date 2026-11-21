@@ -17,9 +17,12 @@
   </welcome-file-list>
 
   <session-config>
-    <session-timeout>30</session-timeout>
+    <!-- 8 hours of inactivity before login is asked again (was 30 minutes) -->
+    <session-timeout>480</session-timeout>
     <cookie-config>
       <http-only>true</http-only>
+      <!-- keep the login cookie for 8 hours, so closing the browser or a tab does not log you out -->
+      <max-age>28800</max-age>
     </cookie-config>
   </session-config>
 
