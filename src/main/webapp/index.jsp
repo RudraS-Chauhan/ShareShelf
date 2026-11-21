@@ -110,7 +110,9 @@
 
   // Friendly hint from the admission number (25 = admitted 2025, SCSE = school). Display only: the server
   // accepts any 6-20 letter/digit ID, and keep this list in step with AppConstants.SCHOOLS.
-  var SCHOOLS = { SCSE: 'School of Computer Science and Engineering', SOAI: 'School of Artificial Intelligence' };
+  var SCHOOLS = { SCSE: 'School of Computer Science and Engineering', SOAI: 'School of Artificial Intelligence',
+                  GSFC: 'School of Finance and Commerce', GSOL: 'School of Law', GSOB: 'School of Business (BBA)',
+                  SODT: 'School of Defence Technology', SMAS: 'B.Optom (Optometry)', SALM: 'BBA (Aviation)', BAS: 'B.Sc (Maths Hons)', GPTC: 'Diploma (Polytechnic)' };
   document.getElementById('r-id').addEventListener('input', function () {
     var hint = document.getElementById('r-id-hint');
     var m = /^(\d{2})([A-Z]{2,8})(\d{3,10})$/.exec(this.value.trim().toUpperCase());

@@ -1,11 +1,11 @@
 
 Thanks for using JUnit! Support its development at https://junit.org/sponsoring
 
-Nov 21, 2026 10:47:04 AM com.shareshelf.util.StaleReservationChecker run
+Nov 21, 2026 11:16:08 PM com.shareshelf.util.StaleReservationChecker run
 INFO: Overdue check: flagged 2 request(s) as OVERDUE
-Nov 21, 2026 10:47:04 AM com.shareshelf.util.StaleReservationChecker run
+Nov 21, 2026 11:16:08 PM com.shareshelf.util.StaleReservationChecker run
 INFO: Overdue check: flagged 2 request(s) as OVERDUE
-Nov 21, 2026 10:47:04 AM com.shareshelf.util.StaleReservationChecker run
+Nov 21, 2026 11:16:08 PM com.shareshelf.util.StaleReservationChecker run
 WARNING: Overdue check failed; will retry on the next cycle
 com.shareshelf.util.DataAccessException: database is down
 	at com.shareshelf.util.StaleReservationCheckerTest.lambda$aFailingScanDoesNotKillTheThreadAndRecoversNextTime$1(StaleReservationCheckerTest.java:27)
@@ -113,9 +113,9 @@ com.shareshelf.util.DataAccessException: database is down
 Caused by: java.lang.RuntimeException
 	... 102 more
 
-Nov 21, 2026 10:47:04 AM com.shareshelf.util.StaleReservationChecker run
+Nov 21, 2026 11:16:08 PM com.shareshelf.util.StaleReservationChecker run
 INFO: Overdue check: flagged 1 request(s) as OVERDUE
-Nov 21, 2026 10:47:04 AM com.shareshelf.util.DBConnection <clinit>
+Nov 21, 2026 11:16:08 PM com.shareshelf.util.DBConnection <clinit>
 SEVERE: MySQL JDBC driver not found on the classpath
 java.lang.ClassNotFoundException: com.mysql.cj.jdbc.Driver
 	at java.base/java.net.URLClassLoader.findClass(URLClassLoader.java:445)
@@ -126,7 +126,7 @@ java.lang.ClassNotFoundException: com.mysql.cj.jdbc.Driver
 	at java.base/java.lang.Class.forName(Class.java:423)
 	at java.base/java.lang.Class.forName(Class.java:414)
 	at com.shareshelf.util.DBConnection.<clinit>(DBConnection.java:31)
-	at com.shareshelf.dao.DaoIntegrationTest.needsDatabase(DaoIntegrationTest.java:35)
+	at com.shareshelf.dao.DaoIntegrationTest.needsDatabase(DaoIntegrationTest.java:36)
 	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
 	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
 	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:728)
@@ -222,10 +222,14 @@ java.lang.ClassNotFoundException: com.mysql.cj.jdbc.Driver
 [36m?  ?  ??[0m [34mwrongPasswordIsRejected()[0m [32m?[0m
 [36m?  ?  ??[0m [34mmalformedStoredValuesNeverVerify()[0m [32m?[0m
 [36m?  ?  ??[0m [34mcorrectPasswordVerifies()[0m [32m?[0m
+[36m?  ??[0m [36mJsonUtilTest[0m [32m?[0m
+[36m?  ?  ??[0m [34memptyMapIsEmptyObject()[0m [32m?[0m
+[36m?  ?  ??[0m [34mbuildsFlatJsonAndEscapesStrings()[0m [32m?[0m
 [36m?  ??[0m [36mQrUtilTest[0m [32m?[0m
 [36m?  ?  ??[0m [34mdifferentTextGivesADifferentCode()[0m [32m?[0m
 [36m?  ?  ??[0m [34mdrawsAScalableSvgAndOnlyEverContainsShapes()[0m [32m?[0m
 [36m?  ??[0m [36mStudentIdInfoTest[0m [32m?[0m
+[36m?  ?  ??[0m [34meveryKnownSchoolCodeIsNamedAndParsesFromARealShapedId()[0m [32m?[0m
 [36m?  ?  ??[0m [34mworksForOtherBatchesAndSchoolsAndIgnoresOddShapes()[0m [32m?[0m
 [36m?  ?  ??[0m [34mreadsBatchSchoolAndYearOfStudy()[0m [32m?[0m
 [36m?  ??[0m [36mStaleReservationCheckerTest[0m [32m?[0m
@@ -240,6 +244,7 @@ java.lang.ClassNotFoundException: com.mysql.cj.jdbc.Driver
 [36m?  ?  ??[0m [34mkeepMeSignedInTokenWorksUntilLogoutAndRejectsGuessesAndExpiry()[0m [32m?[0m
 [36m?  ?  ??[0m [34munclaimedReservationsGoBackOnTheShelfButFutureMeetingsStay()[0m [32m?[0m
 [36m?  ?  ??[0m [34moverdueFlaggingAndTheWhatsAppSafetyNet()[0m [32m?[0m
+[36m?  ?  ??[0m [34mentityDaosShareTheDaoContract()[0m [32m?[0m
 [36m?  ?  ??[0m [34mratingsAreOnePerPersonValidatedAndOnlyCountOnceBothSidesRated()[0m [32m?[0m
 [36m?  ?  ??[0m [34msearchIsCaseInsensitiveTrimmedAndOnlyShowsAvailableItems()[0m [32m?[0m
 [36m?  ?  ??[0m [34mpasswordIsStoredHashedAndLoginChecksTheHash()[0m [32m?[0m
@@ -269,18 +274,18 @@ java.lang.ClassNotFoundException: com.mysql.cj.jdbc.Driver
 [36m?     ??[0m [34mhandoverRulesAreSane()[0m [32m?[0m
 [36m??[0m [36mJUnit Vintage[0m [32m?[0m
 
-Test run finished after 2326 ms
-[        10 containers found      ]
+Test run finished after 2153 ms
+[        11 containers found      ]
 [         0 containers skipped    ]
-[        10 containers started    ]
+[        11 containers started    ]
 [         0 containers aborted    ]
-[        10 containers successful ]
+[        11 containers successful ]
 [         0 containers failed     ]
-[        43 tests found           ]
+[        47 tests found           ]
 [         0 tests skipped         ]
-[        43 tests started         ]
+[        47 tests started         ]
 [         0 tests aborted         ]
-[        43 tests successful      ]
+[        47 tests successful      ]
 [         0 tests failed          ]
 
 

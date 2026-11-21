@@ -43,7 +43,7 @@ Within `overdueCheckMinutes` (default 5) the status becomes OVERDUE, the owner s
 ```bash
 mvn test
 ```
-Expect **43 tests, 0 failures** with a database (27 unit + 16 DAO). Without a database the 16 DAO tests are skipped, so you see 27. The DAO integration tests need a reachable database; without one they skip themselves.
+Expect **47 tests, 0 failures** with a database (29 unit + 18 DAO). Without a database the 18 DAO tests are skipped, so you see 29. The DAO integration tests need a reachable database; without one they skip themselves.
 
 ## Level 3: Automated end-to-end script
 With the app running and an **empty** database (re-run `schema.sql` to empty it):

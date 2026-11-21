@@ -147,7 +147,15 @@ public final class AppConstants {
 
     // ---- admission numbers: 25SCSE1180735 = year 25, school SCSE, serial ----
     /** School codes we can name. Unknown codes are shown as the code itself; add new ones here. */
-    public static final java.util.Map<String, String> SCHOOLS = java.util.Map.of(
-            "SCSE", "School of Computer Science and Engineering",
-            "SOAI", "School of Artificial Intelligence");
+    public static final java.util.Map<String, String> SCHOOLS = java.util.Map.ofEntries(   // ofEntries: no 10-pair limit
+            java.util.Map.entry("SCSE", "School of Computer Science and Engineering"),
+            java.util.Map.entry("SOAI", "School of Artificial Intelligence"),
+            java.util.Map.entry("GSFC", "School of Finance and Commerce"),
+            java.util.Map.entry("GSOL", "School of Law"),
+            java.util.Map.entry("GSOB", "School of Business (BBA)"),
+            java.util.Map.entry("SODT", "School of Defence Technology"),
+            java.util.Map.entry("SMAS", "B.Optom (Optometry)"),
+            java.util.Map.entry("SALM", "BBA (Aviation)"),
+            java.util.Map.entry("BAS",  "B.Sc (Maths Hons)"),
+            java.util.Map.entry("GPTC", "Diploma (Polytechnic)"));
 }
