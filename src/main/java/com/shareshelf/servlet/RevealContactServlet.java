@@ -1,6 +1,7 @@
 package com.shareshelf.servlet;
 
 import com.shareshelf.dao.RequestDAO;
+import com.shareshelf.dao.RequestTransactionService;
 import com.shareshelf.model.Request;
 import com.shareshelf.util.ValidationUtil;
 
@@ -13,7 +14,7 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * POST /request/reveal - the privacy safety net.
- * This is the ONLY place a student's WhatsApp number ever leaves the database. RequestDAO.revealContact()
+ * This is the ONLY place a student's WhatsApp number ever leaves the database. RequestTransactionService.revealContact()
  * returns it only when the request is OVERDUE and the caller is the request's owner, and it logs the reveal.
  * On success the owner is sent straight to a wa.me chat with a prefilled message.
  */
@@ -23,13 +24,15 @@ public class RevealContactServlet extends BaseServlet {
     private static final long serialVersionUID = 1L;
 
     private final transient RequestDAO requestDAO = new RequestDAO();
+    private final transient RequestTransactionService requestTx = new RequestTransactionService();
+
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String ownerId = currentStudentId(req);
         int requestId = ValidationUtil.parseIntOr(req.getParameter("requestId"), -1);
 
-        String number = requestId > 0 ? requestDAO.revealContact(requestId, ownerId) : null;
+        String number = requestId > 0 ? requestTx.revealContact(requestId, ownerId) : null;
         if (number == null || !number.matches("[0-9]{10,15}")) {
             flash(req, "error", "Contact details are only available to the owner of an overdue request.");
             redirect(req, resp, "/my-requests");

@@ -32,7 +32,7 @@ public class CancelAcceptedServlet extends RequestActionServlet {
                 || !ListingStatus.RESERVED.name().equals(request.getItemStatus())) {
             return Outcome.failure("This can only be cancelled before the pickup.");
         }
-        if (!requestDAO.cancelAccepted(request.getRequestId(), request.getItemId(), reason)) {
+        if (!requestTx.cancelAccepted(request.getRequestId(), request.getItemId(), reason)) {
             return Outcome.failure("Could not cancel: the pickup may have just happened.");
         }
         boolean byOwner = request.getOwnerId().equals(currentStudentId(req));

@@ -3,6 +3,7 @@ package com.shareshelf.servlet;
 import com.shareshelf.dao.ListingDAO;
 import com.shareshelf.dao.NotificationDAO;
 import com.shareshelf.dao.RequestDAO;
+import com.shareshelf.dao.RequestTransactionService;
 import com.shareshelf.model.Request;
 import com.shareshelf.util.ValidationUtil;
 
@@ -25,6 +26,7 @@ public abstract class RequestActionServlet extends BaseServlet {
     private static final long serialVersionUID = 1L;
 
     protected final transient RequestDAO requestDAO = new RequestDAO();
+    protected final transient RequestTransactionService requestTx = new RequestTransactionService();
     protected final transient ListingDAO listingDAO = new ListingDAO();
     protected final transient NotificationDAO notifier = new NotificationDAO();
 

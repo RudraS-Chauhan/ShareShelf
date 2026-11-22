@@ -14,7 +14,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 /** The "wanted" board: students post what they need, others answer with "I have this". */
-public class WantedDAO {
+public class WantedDAO implements Dao<Wanted, Integer> {
+
+    /** {@link Dao} contract: stores the post (subject to the monthly limit) and sets its id. */
+    @Override
+    public boolean insert(Wanted w) {
+        int id = add(w.getStudentId(), w.getTitle(), w.getCategory(), w.getNote(), w.getLocation());
+        if (id > 0) {
+            w.setPostId(id);
+        }
+        return id > 0;
+    }
 
     /**
      * @param location where the student wants to receive it (typed, optional)
@@ -114,7 +124,8 @@ public class WantedDAO {
     }
 
     /** @return the post, or null */
-    public Wanted findById(int postId) {
+    @Override
+    public Wanted findById(Integer postId) {
         String sql = "SELECT w.*, s.name, s.branch, s.year FROM wanted_posts w JOIN students s ON s.student_id = w.student_id WHERE w.post_id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {

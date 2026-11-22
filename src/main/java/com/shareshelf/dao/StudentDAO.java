@@ -19,7 +19,13 @@ import java.sql.SQLIntegrityConstraintViolationException;
  * stored hash, so no other class ever deals with password storage. Students returned from here have
  * their password field cleared.
  */
-public class StudentDAO {
+public class StudentDAO implements Dao<Student, String> {
+
+    /** {@link Dao} contract: same as {@link #register}. */
+    @Override
+    public boolean insert(Student s) {
+        return register(s);
+    }
 
     /** @return true if the student was created; false if the ID already exists. */
     public boolean register(Student s) {
@@ -74,6 +80,7 @@ public class StudentDAO {
     }
 
     /** @return the student, or null if there is no such ID. */
+    @Override
     public Student findById(String studentId) {
         String sql = "SELECT * FROM students WHERE student_id = ?";
         try (Connection conn = DBConnection.getConnection();

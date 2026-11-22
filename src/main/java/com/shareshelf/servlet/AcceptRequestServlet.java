@@ -15,7 +15,7 @@ import java.time.format.DateTimeParseException;
  * POST /request/accept - the OWNER accepts a pending request.
  * The owner may also set a meeting time and a note on where exactly to meet.
  * For BORROW listings the owner's chosen duration (or the listing's suggestion), counted from the
- * meeting time (or from now if none was set), becomes the exact return deadline. The two table updates happen in one transaction inside RequestDAO.accept().
+ * meeting time (or from now if none was set), becomes the exact return deadline. The two table updates happen in one transaction inside RequestTransactionService.accept().
  */
 @WebServlet("/request/accept")
 public class AcceptRequestServlet extends RequestActionServlet {
@@ -80,7 +80,7 @@ public class AcceptRequestServlet extends RequestActionServlet {
             borrowHours = hours;
         }
 
-        if (requestDAO.accept(request.getRequestId(), request.getItemId(), dueAt, meetTime, meetNote, borrowHours)) {
+        if (requestTx.accept(request.getRequestId(), request.getItemId(), dueAt, meetTime, meetNote, borrowHours)) {
             notifier.add(request.getRequesterId(), request.getOwnerName() + " accepted your request for \"" + item.getTitle() + "\""
                     + (meetTime != null ? ". Meet: " + meetTime.format(DUE_FORMAT) : ".")
                     + (borrowHours != null ? " You can keep it " + AppConstants.durationLabel(borrowHours) + " from pickup." : ""), "/my-requests");

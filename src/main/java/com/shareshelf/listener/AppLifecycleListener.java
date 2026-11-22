@@ -1,6 +1,6 @@
 package com.shareshelf.listener;
 
-import com.shareshelf.dao.RequestDAO;
+import com.shareshelf.dao.RequestTransactionService;
 import com.shareshelf.util.StaleReservationChecker;
 
 import javax.servlet.ServletContext;
@@ -35,9 +35,9 @@ public class AppLifecycleListener implements ServletContextListener {
         int minutes = readMinutes(context.getInitParameter("overdueCheckMinutes"));
 
         StaleReservationChecker checker = new StaleReservationChecker(() -> {
-            RequestDAO dao = new RequestDAO();
+            RequestTransactionService requestTx = new RequestTransactionService();
             try {
-                dao.releaseUnclaimed();      // unclaimed reservations go back on the shelf
+                requestTx.releaseUnclaimed();      // unclaimed reservations go back on the shelf
             } catch (RuntimeException e) {
                 LOG.log(java.util.logging.Level.WARNING, "Releasing unclaimed reservations failed", e);
             }
@@ -46,7 +46,7 @@ public class AppLifecycleListener implements ServletContextListener {
             } catch (RuntimeException e) {
                 LOG.log(java.util.logging.Level.WARNING, "Closing stale wanted posts failed", e);
             }
-            return dao.markOverdue();
+            return requestTx.markOverdue();
         });
         context.setAttribute(CHECKER_ATTRIBUTE, checker);
 

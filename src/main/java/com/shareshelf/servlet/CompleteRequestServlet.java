@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * POST /request/complete - the OWNER confirms the exchange is finished (item returned, or given away).
- * RequestDAO.complete() updates the request and the listing together in one transaction.
+ * RequestTransactionService.complete() updates the request and the listing together in one transaction.
  */
 @WebServlet("/request/complete")
 public class CompleteRequestServlet extends RequestActionServlet {
@@ -24,7 +24,7 @@ public class CompleteRequestServlet extends RequestActionServlet {
         if (request.isBorrow() && !"OVERDUE".equals(request.getStatus())) {
             return Outcome.failure("A return is confirmed by scanning the borrower's return QR (or typing the 6-digit code).");
         }
-        if (requestDAO.complete(request.getRequestId(), request.getItemId())) {
+        if (requestTx.complete(request.getRequestId(), request.getItemId())) {
             String next = request.isBorrow() ? "It is available to borrow again." : "The listing is now closed.";
             return Outcome.success("Marked as completed. " + next);
         }

@@ -4,6 +4,19 @@ The servlets call these exact signatures. All SQL lives in the DAOs; every state
 inside try-with-resources. SQL failures are logged and rethrown as the unchecked `DataAccessException`
 (servlets turn that into a friendly error page), except where a plain `false`/`null` is the documented answer.
 
+## The shared contract: `Dao<T, ID>`
+`StudentDAO`, `ListingDAO`, `RequestDAO` and `WantedDAO` implement one generic interface, so every entity is created and read the same way:
+```java
+public interface Dao<T, ID> {
+    boolean insert(T entity);
+    T findById(ID id);                       // null if missing
+    default boolean exists(ID id) { return findById(id) != null; }
+}
+// StudentDAO: Dao<Student,String>   ListingDAO: Dao<ResourceItem,Integer>
+// RequestDAO: Dao<Request,Integer>  WantedDAO:  Dao<Wanted,Integer>
+```
+The other DAOs (Handover, Notification, Rating, Profile, Remember) are not "one entity" stores (tokens, feeds, aggregates), so they keep their own small APIs.
+
 ## StudentDAO
 ```java
 boolean register(Student s);                       // hashes the password (PBKDF2) before storing; false on duplicate id
@@ -26,7 +39,11 @@ Map<String,Integer> countByCategory();                       // reports
 ```
 Search trims the keyword, is case-insensitive, and treats `%` and `_` literally.
 
-## RequestDAO
+## RequestDAO and RequestTransactionService
+`RequestDAO` holds reads, inserts, single-row status changes and reports. `RequestTransactionService` holds the multi-table
+workflows (accept, startBorrow, cancelAccepted, complete, revealContact, releaseUnclaimed, markOverdue), each in a JDBC
+transaction with `SELECT ... FOR UPDATE`. In the lists below, the methods marked TRANSACTION live in `RequestTransactionService`.
+
 ```java
 boolean insert(Request r);
 boolean hasDuplicatePending(int itemId, String requesterId);

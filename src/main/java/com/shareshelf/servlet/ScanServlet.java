@@ -4,6 +4,7 @@ import com.shareshelf.dao.HandoverDAO;
 import com.shareshelf.dao.ListingDAO;
 import com.shareshelf.dao.NotificationDAO;
 import com.shareshelf.dao.RequestDAO;
+import com.shareshelf.dao.RequestTransactionService;
 import com.shareshelf.model.ListingStatus;
 import com.shareshelf.model.Request;
 import com.shareshelf.util.AppConstants;
@@ -30,6 +31,7 @@ public class ScanServlet extends BaseServlet {
 
     private static final long serialVersionUID = 1L;
     private final transient RequestDAO requestDAO = new RequestDAO();
+    private final transient RequestTransactionService requestTx = new RequestTransactionService();
     private final transient ListingDAO listingDAO = new ListingDAO();
     private final transient HandoverDAO handoverDAO = new HandoverDAO();
     private final transient NotificationDAO notifier = new NotificationDAO();
@@ -70,7 +72,7 @@ public class ScanServlet extends BaseServlet {
         }
 
         if (!isReturn) {
-            if (requestDAO.startBorrow(r.getRequestId(), r.getItemId())) {
+            if (requestTx.startBorrow(r.getRequestId(), r.getItemId())) {
                 Request now = requestDAO.findById(r.getRequestId());
                 notifier.add(r.getOwnerId(), r.getRequesterName() + " picked up \"" + r.getItemTitle() + "\". It is now marked as borrowed.", "/my-requests");
                 flash(req, "success", "Pickup confirmed. \"" + r.getItemTitle() + "\" is yours"
@@ -82,7 +84,7 @@ public class ScanServlet extends BaseServlet {
             return;
         }
 
-        if (requestDAO.complete(r.getRequestId(), r.getItemId())) {
+        if (requestTx.complete(r.getRequestId(), r.getItemId())) {
             requestDAO.setReturnCondition(r.getRequestId(), condition);
             notifier.add(r.getRequesterId(), "Return of \"" + r.getItemTitle() + "\" confirmed. Please rate " + r.getOwnerName() + ".",
                     "/rate?requestId=" + r.getRequestId());

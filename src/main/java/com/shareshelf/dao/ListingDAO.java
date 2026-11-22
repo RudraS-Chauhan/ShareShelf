@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 /** All SQL for the {@code resource_items} table (listings). */
-public class ListingDAO {
+public class ListingDAO implements Dao<ResourceItem, Integer> {
 
     /** Item columns plus the owner's name and their completed-exchange count (reliability signal). */
     private static final String SELECT_WITH_OWNER =
@@ -27,6 +27,7 @@ public class ListingDAO {
             + "FROM resource_items i JOIN students s ON s.student_id = i.owner_id ";
 
     /** Creates a listing with status AVAILABLE and stores the generated id back into the item. */
+    @Override
     public boolean insert(ResourceItem item) {
         String sql = "INSERT INTO resource_items "
                 + "(owner_id, title, description, category, listing_type, item_condition, location, suggested_days, suggested_hours, status) "
@@ -120,7 +121,8 @@ public class ListingDAO {
     }
 
     /** @return the listing, or null if there is no such id. */
-    public ResourceItem findById(int itemId) {
+    @Override
+    public ResourceItem findById(Integer itemId) {
         List<ResourceItem> found = queryList(SELECT_WITH_OWNER + "WHERE i.item_id = ?", List.of((Object) itemId));
         return found.isEmpty() ? null : found.get(0);
     }

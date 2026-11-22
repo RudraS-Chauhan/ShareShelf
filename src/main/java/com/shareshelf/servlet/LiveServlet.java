@@ -6,7 +6,11 @@ import com.shareshelf.dao.RequestDAO;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.shareshelf.util.JsonUtil;
+
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * GET /live - a tiny JSON answer the pages poll every few seconds: {"unread":2,"sig":"1a2b3c"}.
@@ -24,14 +28,13 @@ public class LiveServlet extends BaseServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String me = currentStudentId(req);
-        resp.setContentType("application/json;charset=UTF-8");
-        resp.setHeader("Cache-Control", "no-store");
         try {
-            resp.getWriter().write("{\"unread\":" + notificationDAO.unreadCount(me)
-                    + ",\"sig\":\"" + requestDAO.stateSignature(me) + "\"}");
+            Map<String, Object> answer = new LinkedHashMap<>();
+            answer.put("unread", notificationDAO.unreadCount(me));
+            answer.put("sig", requestDAO.stateSignature(me));
+            JsonUtil.send(resp, 200, answer);
         } catch (RuntimeException e) {
-            resp.setStatus(503);
-            resp.getWriter().write("{}");
+            JsonUtil.send(resp, 503, new LinkedHashMap<String, Object>());
         }
     }
 }
