@@ -43,16 +43,16 @@ Within `overdueCheckMinutes` (default 5) the status becomes OVERDUE, the owner s
 ```bash
 mvn test
 ```
-Expect **47 tests, 0 failures** with a database (29 unit + 18 DAO). Without a database the 18 DAO tests are skipped, so you see 29. The DAO integration tests need a reachable database; without one they skip themselves.
+Expect **53 tests, 0 failures** with a database (34 unit + 19 DAO). Without a database the 19 DAO tests are skipped, so you see 34. The DAO integration tests need a reachable database; without one they skip themselves.
 
 ## Level 3: Automated end-to-end script
 With the app running and an **empty** database (re-run `schema.sql` to empty it):
 ```bash
-python3 tests/e2e_smoke.py                    # 157 checks (163 with the overdue hook)
+python3 tests/e2e_smoke.py                    # 166 checks (173 with the overdue hook)
 ```
 It registers students, lists items, runs every request step, and checks escaping and security. Every line prints `PASS` or `FAIL`.
 
-The overdue part needs a hook that backdates a due date and restarts the app, so it only runs when you set `OVERDUE_HOOK`; that brings it to the full 163 checks. Our recorded run is in [`test-results/e2e-output.txt`](test-results/e2e-output.txt).
+The overdue part needs a hook that backdates a due date and restarts the app, so it only runs when you set `OVERDUE_HOOK`; that brings it to the full 173 checks. Our recorded run is in [`test-results/e2e-output.txt`](test-results/e2e-output.txt).
 
 ## What a good demo test looks like
 Run level 1 steps 1-10 live: it tells the whole story of the app in about three minutes.

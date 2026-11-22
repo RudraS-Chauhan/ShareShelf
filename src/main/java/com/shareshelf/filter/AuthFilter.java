@@ -21,7 +21,7 @@ import java.util.Set;
 public class AuthFilter implements Filter {
 
     private static final Set<String> PUBLIC_PATHS =
-            Set.of("/", "/index.jsp", "/login", "/register", "/logout", "/hello");
+            Set.of("/", "/index.jsp", "/login", "/register", "/logout", "/hello", "/stats");
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)

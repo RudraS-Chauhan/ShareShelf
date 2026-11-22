@@ -28,6 +28,7 @@ class DaoIntegrationTest {
     private final StudentDAO students = new StudentDAO();
     private final ListingDAO listings = new ListingDAO();
     private final RequestDAO requests = new RequestDAO();
+    private final RequestTransactionService requestTx = new RequestTransactionService();
 
     @BeforeAll
     static void needsDatabase() {
@@ -140,14 +141,14 @@ class DaoIntegrationTest {
         assertTrue(requests.hasDuplicatePending(item.getItemId(), a));
 
         LocalDateTime due = LocalDateTime.now(AppConstants.CAMPUS_ZONE).plusDays(3);
-        assertTrue(requests.accept(ra.getRequestId(), item.getItemId(), due, null, null));
+        assertTrue(requestTx.accept(ra.getRequestId(), item.getItemId(), due, null, null));
 
         assertEquals("ACCEPTED", requests.findById(ra.getRequestId()).getStatus());
         assertEquals("RESERVED", listings.findById(item.getItemId()).getStatus());
         assertEquals("REJECTED", requests.findById(rb.getRequestId()).getStatus(), "competing request auto-rejected");
 
         // second accept must fail and change nothing
-        assertFalse(requests.accept(rb.getRequestId(), item.getItemId(), due, null, null));
+        assertFalse(requestTx.accept(rb.getRequestId(), item.getItemId(), due, null, null));
         assertEquals("ACCEPTED", requests.findById(ra.getRequestId()).getStatus());
     }
 
@@ -161,18 +162,18 @@ class DaoIntegrationTest {
         listings.insert(borrow);
         Request r1 = newRequest(borrow, taker);
         requests.insert(r1);
-        requests.accept(r1.getRequestId(), borrow.getItemId(), LocalDateTime.now(AppConstants.CAMPUS_ZONE).plusDays(1), null, null);
-        assertTrue(requests.complete(r1.getRequestId(), borrow.getItemId()));
+        requestTx.accept(r1.getRequestId(), borrow.getItemId(), LocalDateTime.now(AppConstants.CAMPUS_ZONE).plusDays(1), null, null);
+        assertTrue(requestTx.complete(r1.getRequestId(), borrow.getItemId()));
         assertEquals("AVAILABLE", listings.findById(borrow.getItemId()).getStatus());
         assertEquals(1, requests.countCompleted(owner));
-        assertFalse(requests.complete(r1.getRequestId(), borrow.getItemId()), "cannot complete twice");
+        assertFalse(requestTx.complete(r1.getRequestId(), borrow.getItemId()), "cannot complete twice");
 
         ResourceItem gift = newItem(owner, "DONATE");
         listings.insert(gift);
         Request r2 = newRequest(gift, taker);
         requests.insert(r2);
-        requests.accept(r2.getRequestId(), gift.getItemId(), null, null, null);
-        assertTrue(requests.complete(r2.getRequestId(), gift.getItemId()));
+        requestTx.accept(r2.getRequestId(), gift.getItemId(), null, null, null);
+        assertTrue(requestTx.complete(r2.getRequestId(), gift.getItemId()));
         assertEquals("CLOSED", listings.findById(gift.getItemId()).getStatus());
     }
 
@@ -186,9 +187,9 @@ class DaoIntegrationTest {
         listings.insert(item);
         Request r = newRequest(item, taker);
         requests.insert(r);
-        requests.accept(r.getRequestId(), item.getItemId(), LocalDateTime.now(AppConstants.CAMPUS_ZONE).plusDays(2), null, null);
+        requestTx.accept(r.getRequestId(), item.getItemId(), LocalDateTime.now(AppConstants.CAMPUS_ZONE).plusDays(2), null, null);
 
-        assertNull(requests.revealContact(r.getRequestId(), owner), "not overdue yet: must stay hidden");
+        assertNull(requestTx.revealContact(r.getRequestId(), owner), "not overdue yet: must stay hidden");
 
         try (Connection c = DBConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(
@@ -196,11 +197,11 @@ class DaoIntegrationTest {
             ps.setInt(1, r.getRequestId());
             ps.executeUpdate();
         }
-        assertTrue(requests.markOverdue() >= 1);
+        assertTrue(requestTx.markOverdue() >= 1);
         assertEquals("OVERDUE", requests.findById(r.getRequestId()).getStatus());
 
-        assertNull(requests.revealContact(r.getRequestId(), other), "only the request's owner may reveal");
-        assertEquals("919876543210", requests.revealContact(r.getRequestId(), owner));
+        assertNull(requestTx.revealContact(r.getRequestId(), other), "only the request's owner may reveal");
+        assertEquals("919876543210", requestTx.revealContact(r.getRequestId(), owner));
         assertTrue(requests.findById(r.getRequestId()).isContactRevealed(), "reveal is logged on the request");
     }
 
@@ -219,7 +220,7 @@ class DaoIntegrationTest {
         requests.insert(r);
         LocalDateTime meet = LocalDateTime.now(AppConstants.CAMPUS_ZONE).minusHours(3).withNano(0);
         LocalDateTime due = meet.plusHours(2);          // already one hour in the past
-        assertTrue(requests.accept(r.getRequestId(), item.getItemId(), due, meet, "table near the left water outlet"));
+        assertTrue(requestTx.accept(r.getRequestId(), item.getItemId(), due, meet, "table near the left water outlet"));
 
         Request loaded = requests.findById(r.getRequestId());
         assertEquals(meet, loaded.getMeetTime());
@@ -227,7 +228,7 @@ class DaoIntegrationTest {
         assertEquals("table near the left water outlet", loaded.getMeetNote());
         assertEquals(0, loaded.getRequesterLate());
 
-        assertTrue(requests.markOverdue() >= 1, "due_at has passed, so it is flagged even though the date is today");
+        assertTrue(requestTx.markOverdue() >= 1, "due_at has passed, so it is flagged even though the date is today");
         loaded = requests.findById(r.getRequestId());
         assertEquals("OVERDUE", loaded.getStatus());
         assertEquals(1, loaded.getRequesterLate(), "the late return is remembered for the requester's record");
@@ -307,8 +308,8 @@ class DaoIntegrationTest {
         listings.insert(item);
         Request r = newRequest(item, borrower);
         requests.insert(r);
-        assertTrue(requests.accept(r.getRequestId(), item.getItemId(), LocalDateTime.now().plusDays(1), null, ""));
-        assertTrue(requests.complete(r.getRequestId(), item.getItemId()));
+        assertTrue(requestTx.accept(r.getRequestId(), item.getItemId(), LocalDateTime.now().plusDays(1), null, ""));
+        assertTrue(requestTx.complete(r.getRequestId(), item.getItemId()));
         RatingDAO ratings = new RatingDAO();
         assertTrue(ratings.pendingFor(borrower).isEmpty(), "a return without a scan creates no rating duty");
         requests.setReturnCondition(r.getRequestId(), "OK");   // what the return scan does
@@ -355,7 +356,7 @@ class DaoIntegrationTest {
         requests.insert(r);
 
         String before = requests.stateSignature(owner);
-        assertTrue(requests.accept(r.getRequestId(), item.getItemId(), null, null, "", 24));
+        assertTrue(requestTx.accept(r.getRequestId(), item.getItemId(), null, null, "", 24));
         Request accepted = requests.findById(r.getRequestId());
         assertEquals(24, accepted.getBorrowHours());
         assertEquals("", accepted.getDueText(), "no deadline before pickup");
@@ -363,12 +364,12 @@ class DaoIntegrationTest {
         assertNotEquals(before, requests.stateSignature(owner), "the live signature changes on accept");
 
         // a reserved item that was never picked up must not be flagged overdue
-        requests.markOverdue();
+        requestTx.markOverdue();
         assertEquals("ACCEPTED", requests.findById(r.getRequestId()).getStatus());
 
         LocalDateTime t0 = LocalDateTime.now(AppConstants.CAMPUS_ZONE);
-        assertTrue(requests.startBorrow(r.getRequestId(), item.getItemId()));
-        assertFalse(requests.startBorrow(r.getRequestId(), item.getItemId()), "pickup counts once");
+        assertTrue(requestTx.startBorrow(r.getRequestId(), item.getItemId()));
+        assertFalse(requestTx.startBorrow(r.getRequestId(), item.getItemId()), "pickup counts once");
         Request picked = requests.findById(r.getRequestId());
         assertEquals("BORROWED", picked.getItemStatus());
         assertNotNull(picked.getDueAt());
@@ -402,21 +403,21 @@ class DaoIntegrationTest {
         listings.insert(item);
         Request r = newRequest(item, borrower);
         requests.insert(r);
-        assertTrue(requests.accept(r.getRequestId(), item.getItemId(), null, null, "", 24));
+        assertTrue(requestTx.accept(r.getRequestId(), item.getItemId(), null, null, "", 24));
 
-        assertTrue(requests.cancelAccepted(r.getRequestId(), item.getItemId(), "Changed my mind"));
+        assertTrue(requestTx.cancelAccepted(r.getRequestId(), item.getItemId(), "Changed my mind"));
         Request after = requests.findById(r.getRequestId());
         assertEquals("CANCELLED", after.getStatus());
         assertEquals("Changed my mind", after.getCancelReason());
         assertEquals("AVAILABLE", after.getItemStatus());
-        assertFalse(requests.cancelAccepted(r.getRequestId(), item.getItemId(), "Other"), "only once");
+        assertFalse(requestTx.cancelAccepted(r.getRequestId(), item.getItemId(), "Other"), "only once");
 
         // after a verified pickup it is too late to cancel
         Request r2 = newRequest(item, borrower);
         requests.insert(r2);
-        assertTrue(requests.accept(r2.getRequestId(), item.getItemId(), null, null, "", 24));
-        assertTrue(requests.startBorrow(r2.getRequestId(), item.getItemId()));
-        assertFalse(requests.cancelAccepted(r2.getRequestId(), item.getItemId(), "Other"));
+        assertTrue(requestTx.accept(r2.getRequestId(), item.getItemId(), null, null, "", 24));
+        assertTrue(requestTx.startBorrow(r2.getRequestId(), item.getItemId()));
+        assertFalse(requestTx.cancelAccepted(r2.getRequestId(), item.getItemId(), "Other"));
         assertEquals("BORROWED", requests.findById(r2.getRequestId()).getItemStatus());
     }
 
@@ -435,10 +436,10 @@ class DaoIntegrationTest {
         requests.insert(r2);
         LocalDateTime now = LocalDateTime.now(AppConstants.CAMPUS_ZONE);
         // meeting was 3 hours ago and nobody came / meeting is tomorrow
-        assertTrue(requests.accept(r1.getRequestId(), late.getItemId(), null, now.minusHours(3), "", 24));
-        assertTrue(requests.accept(r2.getRequestId(), future.getItemId(), null, now.plusDays(1), "", 24));
+        assertTrue(requestTx.accept(r1.getRequestId(), late.getItemId(), null, now.minusHours(3), "", 24));
+        assertTrue(requestTx.accept(r2.getRequestId(), future.getItemId(), null, now.plusDays(1), "", 24));
 
-        assertTrue(requests.releaseUnclaimed() >= 1);
+        assertTrue(requestTx.releaseUnclaimed() >= 1);
         Request released = requests.findById(r1.getRequestId());
         assertEquals("CANCELLED", released.getStatus());
         assertEquals("AVAILABLE", released.getItemStatus());
@@ -532,5 +533,28 @@ class DaoIntegrationTest {
         assertEquals(id, remember.studentFor(second));
         remember.delete(second);
         assertNull(remember.studentFor(second), "logout kills the token");
+    }
+
+    @Test
+    void entityDaosShareTheDaoContract() {
+        String id = uniqueId("D22");
+        Dao<Student, String> studentDao = students;           // the same interface for every entity DAO
+        assertFalse(studentDao.exists(id));
+        assertTrue(studentDao.insert(newStudent(id)));
+        assertTrue(studentDao.exists(id));
+        assertEquals(id, studentDao.findById(id).getStudentId());
+        Dao<ResourceItem, Integer> listingDao = new ListingDAO();
+        assertFalse(listingDao.exists(-1));
+        Dao<Request, Integer> requestDao = requests;
+        assertNull(requestDao.findById(-1));
+    }
+
+    @Test
+    void campusImpactCountsRealRows() {
+        java.util.Map<String, Object> before = new StatsDAO().campusImpact();
+        students.insert(newStudent(uniqueId("D23")));
+        java.util.Map<String, Object> after = new StatsDAO().campusImpact();
+        assertEquals((Integer) before.get("students") + 1, after.get("students"));
+        assertTrue((Integer) after.get("exchanges") >= 0 && (Integer) after.get("items") >= 0);
     }
 }

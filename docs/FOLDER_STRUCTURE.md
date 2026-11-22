@@ -6,18 +6,19 @@ ShareShelf-Java/
 ├── pom.xml                      Maven build (WAR, Servlet 4.0 / Tomcat 9, JSTL, MySQL driver, JUnit 5)
 ├── schema.sql                   creates the database and 4 tables
 ├── tests/
-│   └── e2e_smoke.py             black-box HTTP test of every workflow (157 checks)
+│   └── e2e_smoke.py             black-box HTTP test of every workflow (173 checks)
 ├── docs/                        planning docs, test cases, screenshots
 └── src/
     ├── main/
     │   ├── java/com/shareshelf/
     │   │   ├── model/           Student, ResourceItem, Request (+ ListingType, ListingStatus, RequestStatus enums)
-    │   │   ├── dao/             StudentDAO, ListingDAO, RequestDAO (all SQL and transactions)
+    │   │   ├── dao/             Dao<T,ID> interface; StudentDAO, ListingDAO, RequestDAO (reads),
+    │   │                    RequestTransactionService (multi-table transactions), WantedDAO, ...
     │   │   ├── servlet/         BaseServlet + one servlet per action (login, register, search, request/*, ...)
     │   │   ├── filter/          AuthFilter (login gate: every page except login/register needs a session)
     │   │   ├── listener/        AppLifecycleListener (starts/stops the background thread)
     │   │   └── util/            DBConnection, PasswordUtil, ValidationUtil, AppConstants,
-    │   │                        DataAccessException, StaleReservationChecker (the overdue thread)
+    │   │                        JsonUtil, DataAccessException, StaleReservationChecker (the overdue thread)
     │   ├── resources/           db.properties.example (copy to db.properties; git-ignored)
     │   └── webapp/
     │       ├── index.jsp        login / register
@@ -26,7 +27,7 @@ ShareShelf-Java/
     │           ├── web.xml      welcome file, sessions, JSP config, error pages
     │           └── views/       dashboard, search, add-listing, my-requests, reports, error (.jsp)
     │                            + fragments/ (header, footer, owner-actions, trust, taglibs)
-    └── test/java/com/shareshelf/   JUnit 5: util tests + DAO integration tests (42 tests)
+    └── test/java/com/shareshelf/   JUnit 5: util tests + DAO integration tests (53 tests)
 ```
 
 Request flow: **browser → servlet (validates, checks ownership) → DAO (JDBC) → MySQL**, then the servlet either

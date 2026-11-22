@@ -310,6 +310,26 @@ for i in range(9):
 check("   at most 10 posts per student in 30 days", "10 posts" in B.follow(B.post("/wanted", dict(action="add", title="One too many", category="Stationery")))[2])
 check("   anonymous cannot open the wanted board", "login_required" in loc(anon.get("/wanted")))
 
+print("== Dashboard ==")
+dash = A.get("/dashboard")[2]
+check("   the dashboard greets by campus time of day", any(g in dash for g in ("Good morning", "Good afternoon", "Good evening", "Good night")))
+check("   it shows the trust level card", "level-card" in dash and "Level " in dash)
+check("   it shows the Next for you strip", "Next for you" in dash and "next-card" in dash)
+check("   the stat cards are still there", dash.count('class="stat') >= 4)
+
+print("== Campus impact counter ==")
+import json as _json
+s, h, body = Client().get("/stats")
+data = _json.loads(body) if s == 200 else {}
+check("   /stats is public and returns JSON", s == 200 and "application/json" in h.get("Content-Type", ""), s)
+check("   it has students, items and exchanges as numbers", all(isinstance(data.get(k), int) for k in ("students", "items", "exchanges")), body)
+check("   the student total counts the people registered in this run", data.get("students", 0) >= 3)
+check("   it exposes no personal data", "@" not in body and "name" not in body)
+_, _, login_page = Client().get("/")
+check("   the login page has the impact strip", 'id="impact"' in login_page and "exchanges completed" in login_page)
+
+check("   the login page has the splash screen markup", 'id="splash"' in login_page and "splash-on" in login_page)
+
 print("== Keep me signed in ==")
 import copy
 R = Client()

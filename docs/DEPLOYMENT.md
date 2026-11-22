@@ -56,6 +56,16 @@ From now on, every `git push` to `main` redeploys automatically.
 
 ---
 
+## Keeping the free tiers awake (smoother first load)
+
+Render's free plan sleeps after about 15 minutes without traffic, and the first visit afterwards waits for it to wake up. A free pinger prevents that:
+
+1. Make a free account at uptimerobot.com and add a new **HTTP(s)** monitor.
+2. URL: `https://YOUR-APP.onrender.com/stats`, interval: **5 minutes**.
+3. `/stats` is public and cached for a minute, so each ping also keeps the TiDB connection warm and costs the database almost nothing. It also feeds the campus impact counter on the login page.
+
+Also check that Render and TiDB are in the same region (for example both in Singapore); a different continent adds noticeable delay to every database call.
+
 ## If something goes wrong
 | Symptom | Likely cause and fix |
 |---|---|

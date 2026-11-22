@@ -164,6 +164,18 @@ PASS     only the poster can close
 PASS     the poster closes it
 PASS     at most 10 posts per student in 30 days
 PASS     anonymous cannot open the wanted board
+== Dashboard ==
+PASS     the dashboard greets by campus time of day
+PASS     it shows the trust level card
+PASS     it shows the Next for you strip
+PASS     the stat cards are still there
+== Campus impact counter ==
+PASS     /stats is public and returns JSON
+PASS     it has students, items and exchanges as numbers
+PASS     the student total counts the people registered in this run
+PASS     it exposes no personal data
+PASS     the login page has the impact strip
+PASS     the login page has the splash screen markup
 == Keep me signed in ==
 PASS     the keep-signed-in cookie is set when the box is ticked
 PASS     the cookie is HttpOnly
@@ -176,4 +188,4 @@ PASS     logout redirects to login
 PASS     session is dead after logout
 PASS     unknown URL gives the friendly 404 page
 
-163 checks, 163 passed, 0 failed
+173 checks, 173 passed, 0 failed

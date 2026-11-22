@@ -26,8 +26,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ShareShelf · Borrow what you need. Share what you have.</title>
   <link rel="stylesheet" href="${ctx}/css/style.css">
+  <%-- Splash shows once per browser tab, and not when a message (error, registered, logged out) is waiting. --%>
+  <script>
+    try { if (!sessionStorage.getItem('ss_splash') && !location.search) { document.documentElement.classList.add('splash-on'); } } catch (e) {}
+  </script>
 </head>
 <body>
+<div id="splash" class="splash" aria-hidden="true">
+  <div class="splash-books"><span>📕</span><span>📗</span><span>📘</span><span>🧮</span><span>🥼</span></div>
+  <div class="splash-logo">ShareShelf</div>
+  <div id="splash-line" class="splash-line">Dusting off the shelves…</div>
+  <div class="splash-bar"><i id="splash-fill"></i></div>
+</div>
 <div class="landing">
   <section class="hero">
     <div class="logo">📚 ShareShelf</div>
@@ -39,6 +49,12 @@
       <li><span class="dot">⏰</span> Due dates with automatic overdue flags</li>
       <li><span class="dot">🛡️</span> Contact shared only if something goes overdue</li>
     </ul>
+    <%-- Campus impact counter: filled by /stats; stays hidden if the call fails or every number is 0 --%>
+    <div id="impact" class="impact hidden" aria-label="Campus impact so far">
+      <div class="impact-tile" data-key="exchanges"><b>0</b><span>exchanges completed</span></div>
+      <div class="impact-tile" data-key="items"><b>0</b><span>items on the shelf</span></div>
+      <div class="impact-tile" data-key="students"><b>0</b><span>students sharing</span></div>
+    </div>
   </section>
 
   <section class="panel">
@@ -56,7 +72,7 @@
       <form id="loginForm" class="card ${showRegister ? 'hidden' : ''}" method="post" action="${ctx}/login">
         <h2>Login</h2>
         <label for="l-id">Admission number</label>
-        <input id="l-id" type="text" name="studentId" placeholder="e.g. 25SCSE1000000" required autocomplete="username">
+        <input id="l-id" type="text" autofocus name="studentId" placeholder="e.g. 25SCSE1000000" required autocomplete="username">
         <label for="l-pw">Password</label>
         <input id="l-pw" type="password" name="password" required autocomplete="current-password">
         <label class="check-row"><input type="checkbox" name="remember" value="on" checked> Keep me signed in on this device (30 days)</label>
@@ -107,6 +123,71 @@
       document.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.toggle('active', b === btn); });
     });
   });
+
+  // On the free host the first request after a quiet spell can take a few seconds: show that something is happening
+  // and stop a second click from sending the form twice.
+  ['loginForm', 'registerForm'].forEach(function (id) {
+    var form = document.getElementById(id);
+    if (!form) { return; }
+    form.addEventListener('submit', function () {
+      var btn = form.querySelector('button[type=submit]');
+      if (btn) { btn.disabled = true; btn.textContent = id === 'loginForm' ? 'Signing in…' : 'Creating account…'; }
+    });
+  });
+  // Pressing the browser Back button restores the page with the button still disabled: reset it.
+  window.addEventListener('pageshow', function (e) { if (e.persisted) { location.reload(); } });
+
+  // Splash: one short, upbeat screen while the server wakes up (the /stats call below doubles as the wake-up
+  // ping). Shown at least 1.4 s so it reads as intentional, and never longer than 6 s.
+  var splash = document.getElementById('splash'), splashDone = false;
+  var splashShownAt = Date.now();
+  function endSplash() {
+    if (splashDone) { return; }
+    splashDone = true;
+    var wait = Math.max(0, 1400 - (Date.now() - splashShownAt));
+    setTimeout(function () {
+      document.getElementById('splash-fill').style.width = '100%';
+      setTimeout(function () {
+        splash.classList.add('splash-out');
+        document.documentElement.classList.remove('splash-on');
+        try { sessionStorage.setItem('ss_splash', '1'); } catch (e) {}
+      }, 250);
+    }, wait);
+  }
+  if (document.documentElement.classList.contains('splash-on')) {
+    var lines = ['Dusting off the shelves…', 'Finding a calculator near you…', 'Lab coats: counted. Almost ready…', 'Waking up the campus…'];
+    var li = 0, fill = document.getElementById('splash-fill'), pct = 8;
+    fill.style.width = pct + '%';
+    var tick = setInterval(function () {
+      li = (li + 1) % lines.length;
+      document.getElementById('splash-line').textContent = lines[li];
+      pct = Math.min(88, pct + 18);
+      fill.style.width = pct + '%';
+      if (splashDone) { clearInterval(tick); }
+    }, 900);
+    setTimeout(endSplash, 6000);
+  }
+
+  // Campus impact counter. Real totals from /stats; any failure just leaves the strip hidden.
+  fetch('${ctx}/stats', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+    if (!d) { return; }
+    var box = document.getElementById('impact'), any = false;
+    var calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    box.querySelectorAll('.impact-tile').forEach(function (tile) {
+      var n = parseInt(d[tile.dataset.key], 10) || 0, el = tile.querySelector('b');
+      if (n <= 0) { tile.classList.add('hidden'); return; }
+      any = true;
+      if (calm || n < 3) { el.textContent = n; return; }
+      var start = null;
+      (function step(t) {
+        start = start || t;
+        var p = Math.min((t - start) / 900, 1);
+        el.textContent = Math.round(n * (1 - Math.pow(1 - p, 3)));
+        if (p < 1) { requestAnimationFrame(step); }
+      })(performance.now());
+    });
+    if (any) { box.classList.remove('hidden'); }
+  }).catch(function () {}).then(endSplash);
 
   // Friendly hint from the admission number (25 = admitted 2025, SCSE = school). Display only: the server
   // accepts any 6-20 letter/digit ID, and keep this list in step with AppConstants.SCHOOLS.
