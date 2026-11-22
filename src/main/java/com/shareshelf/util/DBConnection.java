@@ -64,12 +64,29 @@ public class DBConnection {
         }
     }
 
-    /** Opens a new connection. Callers must close it (use try-with-resources). */
+    /** Pool of reusable connections: see {@link ConnectionPool} for why. 8 is plenty for a campus-size app. */
+    private static final ConnectionPool POOL = new ConnectionPool(
+            DBConnection::openNew, 8,
+            4 * 60_000L,    // replace a connection after 4 minutes, before the host can drop it
+            15_000L,        // test a connection that sat idle for 15 seconds before reusing it
+            10_000L);       // wait at most 10 seconds for a free connection
+
+    /** Lends a pooled connection. Callers still close it with try-with-resources, which hands it back. */
     public static Connection getConnection() throws SQLException {
+        return POOL.getConnection();
+    }
+
+    /** Opens a brand-new physical connection (used by the pool). */
+    private static Connection openNew() throws SQLException {
         return DriverManager.getConnection(
                 CONFIG.getProperty("db.url"),
                 CONFIG.getProperty("db.user"),
                 CONFIG.getProperty("db.password"));
+    }
+
+    /** Closes the pooled connections when the application stops. */
+    public static void shutdown() {
+        POOL.shutdown();
     }
 
     /** Run this class directly to check that your database settings work. */

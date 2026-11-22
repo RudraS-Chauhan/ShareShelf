@@ -71,6 +71,7 @@ public class AppLifecycleListener implements ServletContextListener {
             }
             LOG.info("Overdue checker stopped");
         }
+        com.shareshelf.util.DBConnection.shutdown();
     }
 
     private static int readMinutes(String raw) {

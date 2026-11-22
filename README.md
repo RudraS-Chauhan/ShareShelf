@@ -2,7 +2,7 @@
 
 **A student-to-student resource-sharing platform for Galgotias University.** Borrow, exchange, donate, or give away campus items such as calculators, lab coats, notes, and books, with tracked requests, due dates and an overdue safety net.
 
-![Java](https://img.shields.io/badge/Java-17-orange) ![Servlets](https://img.shields.io/badge/Servlets-4.0-green) ![JDBC](https://img.shields.io/badge/JDBC-MySQL-blue) ![Tests](https://img.shields.io/badge/tests-53%20unit%20%2B%20173%20e2e%20passing-brightgreen)
+![Java](https://img.shields.io/badge/Java-17-orange) ![Servlets](https://img.shields.io/badge/Servlets-4.0-green) ![JDBC](https://img.shields.io/badge/JDBC-MySQL-blue) ![Tests](https://img.shields.io/badge/tests-61%20unit%20%2B%20173%20e2e%20passing-brightgreen)
 
 [Problem](#-the-problem) · [Features](#-features) · [Screenshots](#-screenshots) · [How it works](#-how-it-works) · [Architecture](#-architecture) · [Database](#-database) · [Run it](#-run-it-locally) · [Host it](#-deploying-it-online) · [Testing](#-testing) · [Team](#-team)
 
@@ -139,7 +139,9 @@ The overdue-scan interval is the `overdueCheckMinutes` context parameter in `WEB
 
 **Splash screen:** the first visit in a browser tab opens with a short animated loading screen (it ends as soon as the server answers, 1.4 to 6 seconds, and is skipped when a message such as "logged out" is waiting). It is plain HTML, CSS and a few lines of JavaScript and respects the reduced-motion setting.
 
-mvn test                      # 53 JUnit tests: 34 unit + 19 DAO tests (the DAO tests skip themselves if no DB is reachable)
+**Connection pool:** `util/ConnectionPool` keeps a few database connections open and lends them out, instead of opening a new TLS connection to the cloud database for every query. DAO code is unchanged (closing a pooled connection hands it back; unfinished transactions are rolled back and auto-commit restored). It is our own small class with 8 unit tests, so there is no extra library to install.
+
+mvn test                      # 61 JUnit tests: 42 unit + 19 DAO tests (the DAO tests skip themselves if no DB is reachable)
 python3 tests/e2e_smoke.py    # 173 end-to-end checks against the running app (empty DB)
 ```
 New here? Follow the click-by-click guide in [`docs/HOW_TO_TEST.md`](docs/HOW_TO_TEST.md). Recorded results: [`docs/TESTING.md`](docs/TESTING.md). Test cases: [`docs/TEST_CASES.md`](docs/TEST_CASES.md).
@@ -164,7 +166,7 @@ Who did what, weekend by weekend: [`docs/TEAM_CONTRIBUTIONS.md`](docs/TEAM_CONTR
 We planned the screens and flows first (`docs/USER_FLOWS.md`, `docs/UI_GUIDE.md`), agreed on the database as a team (`docs/DAO_CONTRACT.md`), then built layer by layer: database → DAOs → servlets → pages. After Phase 1 feedback (empty files, hardcoded credentials, non-standard layout) we rebuilt the project on the standard Maven layout, hashed passwords, and added automated tests so those problems cannot come back.
 
 ### An honest note on tools
-We used an AI assistant (Claude) heavily in Phase 2 to write and test much of the code. We reviewed it, ran it, and can explain every layer, and the 53 unit and 173 end-to-end checks in `docs/test-results/` are real runs. We list this openly because we would rather be upfront than overclaim.
+We used an AI assistant (Claude) heavily in Phase 2 to write and test much of the code. We reviewed it, ran it, and can explain every layer, and the 61 unit and 173 end-to-end checks in `docs/test-results/` are real runs. We list this openly because we would rather be upfront than overclaim.
 
 ## 🧭 What's next
 Email verification of the college address, item photos, in-app notifications, and an admin moderation panel.

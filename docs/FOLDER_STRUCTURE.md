@@ -27,7 +27,7 @@ ShareShelf-Java/
     │           ├── web.xml      welcome file, sessions, JSP config, error pages
     │           └── views/       dashboard, search, add-listing, my-requests, reports, error (.jsp)
     │                            + fragments/ (header, footer, owner-actions, trust, taglibs)
-    └── test/java/com/shareshelf/   JUnit 5: util tests + DAO integration tests (53 tests)
+    └── test/java/com/shareshelf/   JUnit 5: util tests + DAO integration tests (61 tests)
 ```
 
 Request flow: **browser → servlet (validates, checks ownership) → DAO (JDBC) → MySQL**, then the servlet either

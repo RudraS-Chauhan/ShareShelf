@@ -16,7 +16,7 @@ Three layers, from fastest to most realistic.
 
 ## Recorded results (final code)
 * `docs/test-results/e2e-output.txt`: **173 checks, 173 passed, 0 failed**
-* `docs/test-results/unit-output.txt`: **53 tests, 53 passed, 0 failed** (19 DAO integration tests ran against a real database)
+* `docs/test-results/unit-output.txt`: **61 tests, 61 passed, 0 failed** (19 DAO integration tests ran against a real database)
 
 The runs above used Tomcat 9.0.118 (embedded) with MariaDB 11. The manual "Result" column in `TEST_CASES.md`
 is for Member 3's own browser run.
