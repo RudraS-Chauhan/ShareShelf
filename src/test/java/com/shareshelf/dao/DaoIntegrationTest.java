@@ -17,7 +17,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
- * Integration tests for the DAO layer against a real MySQL database (database/schema.sql already loaded).
+ * Integration tests for the DAO layer against a real MySQL database (schema.sql already loaded).
  * Skipped automatically when no database is reachable, so `mvn test` still passes on a laptop without MySQL.
  * Every run uses fresh unique admission numbers, so it never collides with existing data.
  */
@@ -47,6 +47,10 @@ class DaoIntegrationTest {
     }
 
     private Student newStudent(String id) {
+        return newStudent(id, "919876543210");
+    }
+
+    private Student newStudent(String id, String whatsapp) {
         Student s = new Student();
         s.setStudentId(id);
         s.setName("Test " + id);
@@ -54,7 +58,7 @@ class DaoIntegrationTest {
         s.setYear(2);
         s.setEmail(id.toLowerCase() + "@galgotiasuniversity.ac.in");
         s.setHostelOrDay("Hostel");
-        s.setWhatsappNumber("919876543210");
+        s.setWhatsappNumber(whatsapp);
         s.setPassword("Passw0rd!x");
         return s;
     }
@@ -180,9 +184,9 @@ class DaoIntegrationTest {
     @Test
     void overdueFlaggingAndTheWhatsAppSafetyNet() throws SQLException {
         String owner = uniqueId("U8"), taker = uniqueId("U9"), other = uniqueId("UA");
-        students.register(newStudent(owner));
-        students.register(newStudent(taker));
-        students.register(newStudent(other));
+        students.register(newStudent(owner, "919111111111"));
+        students.register(newStudent(taker, "919876543210"));
+        students.register(newStudent(other, "919222222222"));
         ResourceItem item = newItem(owner, "BORROW");
         listings.insert(item);
         Request r = newRequest(item, taker);
@@ -201,8 +205,30 @@ class DaoIntegrationTest {
         assertEquals("OVERDUE", requests.findById(r.getRequestId()).getStatus());
 
         assertNull(requestTx.revealContact(r.getRequestId(), other), "only the request's owner may reveal");
-        assertEquals("919876543210", requestTx.revealContact(r.getRequestId(), owner));
+        assertEquals("919876543210", requestTx.revealContact(r.getRequestId(), owner),
+                "the owner gets the BORROWER's number, never their own (919111111111)");
         assertTrue(requests.findById(r.getRequestId()).isContactRevealed(), "reveal is logged on the request");
+    }
+
+    @Test
+    void sameNumberForOwnerAndBorrowerRevealsNothingAndLogsNothing() throws SQLException {
+        String owner = uniqueId("UF"), taker = uniqueId("UG");
+        students.register(newStudent(owner, "919333333333"));
+        students.register(newStudent(taker, "919333333333"));   // two test accounts on one phone
+        ResourceItem item = newItem(owner, "BORROW");
+        listings.insert(item);
+        Request r = newRequest(item, taker);
+        requests.insert(r);
+        requestTx.accept(r.getRequestId(), item.getItemId(), LocalDateTime.now(AppConstants.CAMPUS_ZONE).plusDays(2), null, null);
+        try (Connection c = DBConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(
+                     "UPDATE requests SET expected_return_date = DATE_SUB(CURDATE(), INTERVAL 1 DAY), due_at = DATE_SUB(NOW(), INTERVAL 1 DAY) WHERE request_id = ?")) {
+            ps.setInt(1, r.getRequestId());
+            ps.executeUpdate();
+        }
+        assertTrue(requestTx.markOverdue() >= 1);
+        assertEquals(RequestTransactionService.SAME_NUMBER, requestTx.revealContact(r.getRequestId(), owner));
+        assertFalse(requests.findById(r.getRequestId()).isContactRevealed(), "nothing was revealed, so nothing is logged");
     }
 
     @Test

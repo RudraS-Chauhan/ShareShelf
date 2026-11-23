@@ -1,11 +1,11 @@
 
 Thanks for using JUnit! Support its development at https://junit.org/sponsoring
 
-Nov 22, 2026 10:57:46 PM com.shareshelf.util.StaleReservationChecker run
+Nov 23, 2026 1:18:53 PM com.shareshelf.util.StaleReservationChecker run
 INFO: Overdue check: flagged 2 request(s) as OVERDUE
-Nov 22, 2026 10:57:46 PM com.shareshelf.util.StaleReservationChecker run
+Nov 23, 2026 1:18:53 PM com.shareshelf.util.StaleReservationChecker run
 INFO: Overdue check: flagged 2 request(s) as OVERDUE
-Nov 22, 2026 10:57:46 PM com.shareshelf.util.StaleReservationChecker run
+Nov 23, 2026 1:18:53 PM com.shareshelf.util.StaleReservationChecker run
 WARNING: Overdue check failed; will retry on the next cycle
 com.shareshelf.util.DataAccessException: database is down
 	at com.shareshelf.util.StaleReservationCheckerTest.lambda$aFailingScanDoesNotKillTheThreadAndRecoversNextTime$1(StaleReservationCheckerTest.java:27)
@@ -101,9 +101,9 @@ com.shareshelf.util.DataAccessException: database is down
 Caused by: java.lang.RuntimeException
 	... 90 more
 
-Nov 22, 2026 10:57:46 PM com.shareshelf.util.StaleReservationChecker run
+Nov 23, 2026 1:18:53 PM com.shareshelf.util.StaleReservationChecker run
 INFO: Overdue check: flagged 1 request(s) as OVERDUE
-Nov 22, 2026 10:57:46 PM com.shareshelf.util.DBConnection <clinit>
+Nov 23, 2026 1:18:53 PM com.shareshelf.util.DBConnection <clinit>
 SEVERE: MySQL JDBC driver not found on the classpath
 java.lang.ClassNotFoundException: com.mysql.cj.jdbc.Driver
 	at java.base/java.net.URLClassLoader.findClass(URLClassLoader.java:445)
@@ -220,6 +220,7 @@ java.lang.ClassNotFoundException: com.mysql.cj.jdbc.Driver
 [36m?  ?  ??[0m [34mkeepMeSignedInTokenWorksUntilLogoutAndRejectsGuessesAndExpiry()[0m [32m?[0m
 [36m?  ?  ??[0m [34munclaimedReservationsGoBackOnTheShelfButFutureMeetingsStay()[0m [32m?[0m
 [36m?  ?  ??[0m [34mcampusImpactCountsRealRows()[0m [32m?[0m
+[36m?  ?  ??[0m [34msameNumberForOwnerAndBorrowerRevealsNothingAndLogsNothing()[0m [32m?[0m
 [36m?  ?  ??[0m [34moverdueFlaggingAndTheWhatsAppSafetyNet()[0m [32m?[0m
 [36m?  ?  ??[0m [34mentityDaosShareTheDaoContract()[0m [32m?[0m
 [36m?  ?  ??[0m [34mratingsAreOnePerPersonValidatedAndOnlyCountOnceBothSidesRated()[0m [32m?[0m
@@ -267,17 +268,17 @@ java.lang.ClassNotFoundException: com.mysql.cj.jdbc.Driver
 [36m?     ??[0m [34mhandoverRulesAreSane()[0m [32m?[0m
 [36m??[0m [36mJUnit Vintage[0m [32m?[0m
 
-Test run finished after 2431 ms
+Test run finished after 2787 ms
 [        14 containers found      ]
 [         0 containers skipped    ]
 [        14 containers started    ]
 [         0 containers aborted    ]
 [        14 containers successful ]
 [         0 containers failed     ]
-[        61 tests found           ]
+[        62 tests found           ]
 [         0 tests skipped         ]
-[        61 tests started         ]
+[        62 tests started         ]
 [         0 tests aborted         ]
-[        61 tests successful      ]
+[        62 tests successful      ]
 [         0 tests failed          ]
 

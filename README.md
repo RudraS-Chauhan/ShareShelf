@@ -5,7 +5,7 @@
 ### 🔗 Live demo: [shareshelf-idws.onrender.com](https://shareshelf-idws.onrender.com)
 *(Free hosting: the first visit after a quiet period can take a few seconds to wake up.)*
 
-![Java](https://img.shields.io/badge/Java-17-orange) ![Servlets](https://img.shields.io/badge/Servlets-4.0-green) ![JDBC](https://img.shields.io/badge/JDBC-MySQL-blue) ![Tests](https://img.shields.io/badge/tests-61%20unit%20%2B%20173%20e2e%20passing-brightgreen) ![License](https://img.shields.io/badge/license-MIT-lightgrey)
+![Java](https://img.shields.io/badge/Java-17-orange) ![Servlets](https://img.shields.io/badge/Servlets-4.0-green) ![JDBC](https://img.shields.io/badge/JDBC-MySQL-blue) ![Tests](https://img.shields.io/badge/tests-62%20unit%20%2B%20174%20e2e%20passing-brightgreen) ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 ![ShareShelf dashboard](docs/screenshots/v2-02-dashboard.png)
 
@@ -78,6 +78,7 @@ flowchart LR
 - Only verified Galgotias email addresses can register, and the address must contain the student's own admission number.
 - Borrowing sets a due date; late items are flagged **OVERDUE** automatically by a background thread.
 - The requester's WhatsApp number is revealed to the owner **only when a request is overdue**; consent is captured at registration and every reveal is logged (`contact_reveal_logs` table).
+- If the borrower and the owner registered the same WhatsApp number (for example two test accounts on one phone), nothing is revealed or logged, because the chat link would open the owner's own number.
 - No GPS, no in-app chat, no payments. Handover spots are a fixed list of public campus places.
 </details>
 
@@ -157,8 +158,8 @@ Vercel cannot run Java servlets, so we deploy the same GitHub-push workflow on R
 
 ## 🧪 Testing
 ```bash
-mvn test                      # 61 JUnit tests: 42 unit + 19 DAO tests (the DAO tests skip themselves if no DB is reachable)
-python3 tests/e2e_smoke.py    # 173 end-to-end checks against the running app (empty DB)
+mvn test                      # 62 JUnit tests: 42 unit + 20 DAO tests (the DAO tests skip themselves if no DB is reachable)
+python3 tests/e2e_smoke.py    # 174 end-to-end checks against the running app (empty DB)
 ```
 New here? Follow the click-by-click guide in [`docs/testing/HOW_TO_TEST.md`](docs/testing/HOW_TO_TEST.md). Recorded results: [`docs/testing/TESTING.md`](docs/testing/TESTING.md). Test cases: [`docs/testing/TEST_CASES.md`](docs/testing/TEST_CASES.md).
 
@@ -191,7 +192,7 @@ Who did what, weekend by weekend: [`docs/team/TEAM_CONTRIBUTIONS.md`](docs/team/
 We planned the screens and flows first ([`USER_FLOWS`](docs/design/USER_FLOWS.md), [`UI_GUIDE`](docs/design/UI_GUIDE.md)), agreed on the database as a team ([`DAO_CONTRACT`](docs/design/DAO_CONTRACT.md)), then built layer by layer: database → DAOs → servlets → pages. After Phase 1 feedback (empty files, hardcoded credentials, non-standard layout) we rebuilt the project on the standard Maven layout, hashed passwords, and added automated tests so those problems cannot come back. After Review 1 we added the generic `Dao<T, ID>` interface, a JSON helper, and split the request DAO into reads and a transaction service.
 
 ### An honest note on tools
-We used an AI assistant (Claude) heavily in Phase 2 to write and test much of the code. We reviewed it, ran it, and can explain every layer, and the 61 unit and 173 end-to-end checks in [`docs/testing/test-results/`](docs/testing/test-results/) are real runs. We list this openly because we would rather be upfront than overclaim.
+We used an AI assistant (Claude) heavily in Phase 2 to write and test much of the code. We reviewed it, ran it, and can explain every layer, and the 62 unit and 174 end-to-end checks in [`docs/testing/test-results/`](docs/testing/test-results/) are real runs. We list this openly because we would rather be upfront than overclaim.
 
 ## 🧭 What's next
 Email verification of the college address, item photos, a read-only "peek" for visitors who have not signed in yet, and an admin moderation panel.

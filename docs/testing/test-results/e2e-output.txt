@@ -134,6 +134,7 @@ PASS  T14 request is flagged OVERDUE by the background thread
 PASS     dashboard shows the overdue alert
 PASS  T15 non-owner cannot reveal the number
 PASS  T16 owner is sent to a wa.me chat with the requester's number
+PASS     it is the BORROWER's number, not the owner's own
 PASS     reveal is recorded on the request
 PASS     overdue request can still be completed
 == Reports ==
@@ -188,4 +189,4 @@ PASS     logout redirects to login
 PASS     session is dead after logout
 PASS     unknown URL gives the friendly 404 page
 
-173 checks, 173 passed, 0 failed
+174 checks, 174 passed, 0 failed

@@ -2,7 +2,7 @@
 """
 ShareShelf end-to-end smoke test (black-box, over HTTP).
 
-Runs the real app (Tomcat + MySQL) through every workflow in docs/testing/TEST_CASES.md and prints PASS/FAIL per check.
+Runs the real app (Tomcat + MySQL) through every workflow in docs/TEST_CASES.md and prints PASS/FAIL per check.
 Usage:   python3 tests/e2e_smoke.py [base_url]        (default http://localhost:8080/ShareShelf)
 Needs:   the app running, an empty `shareshelf` database, Python 3 (standard library only).
 Overdue check: set OVERDUE_HOOK to a shell command that backdates a request's due date and restarts the app
@@ -264,6 +264,7 @@ if OVERDUE_HOOK:
     check("T15 non-owner cannot reveal the number", "only available to the owner" in B.follow(B.post("/request/reveal", dict(requestId=rid_o)))[2])
     r = A.post("/request/reveal", dict(requestId=rid_o))
     check("T16 owner is sent to a wa.me chat with the requester's number", r[0] == 302 and re.match(r"https://wa\.me/91\d{10}\?text=", loc(r)), loc(r))
+    check("   it is the BORROWER's number, not the owner's own", loc(r).startswith("https://wa.me/91" + "98765432" + SB[-2:] + "?") and ("98765432" + SA[-2:]) not in loc(r).split("?")[0], loc(r))
     check("   reveal is recorded on the request", "Contact revealed" in A.get("/my-requests")[2])
     check("   overdue request can still be completed", "available to borrow again" in A.follow(A.post("/request/complete", dict(requestId=rid_o)))[2])
 else:

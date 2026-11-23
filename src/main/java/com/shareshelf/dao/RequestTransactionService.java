@@ -28,6 +28,10 @@ import java.util.List;
  */
 public class RequestTransactionService {
 
+    /** Returned by {@link #revealContact} when borrower and owner registered the same WhatsApp number. */
+    public static final String SAME_NUMBER = "same-number";
+
+
     /**
      * TRANSACTION: the owner accepts a request.
      *  1. request PENDING -> ACCEPTED, with the expected return date (null for non-BORROW listings)
@@ -327,6 +331,9 @@ public class RequestTransactionService {
      *  - ownerId is really the owner of this request.
      * Every successful reveal is logged on the request (contact_revealed = TRUE, revealed_at = now).
      * Returns null in every other case, so the number can never leak for an on-time borrow.
+     * If the borrower registered with the very same number as the owner (for example two test accounts on one phone),
+     * a chat link would just open the owner's own number, so nothing is revealed or logged and {@link #SAME_NUMBER}
+     * is returned instead.
      */
     public String revealContact(int requestId, String ownerId) {
         try (Connection conn = DBConnection.getConnection()) {
@@ -364,6 +371,21 @@ public class RequestTransactionService {
                 if (whatsapp == null) {
                     conn.rollback();
                     return null;
+                }
+
+                String ownerNumber = null;
+                try (PreparedStatement ps = conn.prepareStatement(
+                        "SELECT whatsapp_number FROM students WHERE student_id = ?")) {
+                    ps.setString(1, realOwnerId);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) {
+                            ownerNumber = rs.getString(1);
+                        }
+                    }
+                }
+                if (whatsapp.equals(ownerNumber)) {
+                    conn.rollback();   // a chat with this number would open the owner's own WhatsApp: reveal nothing
+                    return SAME_NUMBER;
                 }
 
                 try (PreparedStatement ps = conn.prepareStatement(
