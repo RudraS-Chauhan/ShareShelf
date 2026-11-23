@@ -16,12 +16,12 @@
 | Weekend | Dates | What each person actually did |
 |---|---|---|
 | 1 | Sept 19–20 | |
-| 2 | Sept 26–27 | |
-| 3 | Oct 3–4 | |
+| 2 | Sept 26–27 | created the DAO student and listing class | 
+| 3 | Oct 3–4 |tested the student and listing class|    
 | (Review 1 submitted Oct 10) | | |
 | 4 | Oct 17–18 | |
 | 5 | Oct 24–25 | |
-| 6 | Oct 31–Nov 1 | |
+| 6 | Oct 31–Nov 1 | | 
 | 7 | Nov 7–8 | |
 | (Review 2 submitted Nov 14) | | |
 
