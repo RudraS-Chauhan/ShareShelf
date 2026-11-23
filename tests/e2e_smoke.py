@@ -2,7 +2,7 @@
 """
 ShareShelf end-to-end smoke test (black-box, over HTTP).
 
-Runs the real app (Tomcat + MySQL) through every workflow in docs/TEST_CASES.md and prints PASS/FAIL per check.
+Runs the real app (Tomcat + MySQL) through every workflow in docs/testing/TEST_CASES.md and prints PASS/FAIL per check.
 Usage:   python3 tests/e2e_smoke.py [base_url]        (default http://localhost:8080/ShareShelf)
 Needs:   the app running, an empty `shareshelf` database, Python 3 (standard library only).
 Overdue check: set OVERDUE_HOOK to a shell command that backdates a request's due date and restarts the app

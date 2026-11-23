@@ -1,42 +1,57 @@
 # 📚 ShareShelf
 
-**A student-to-student resource-sharing platform for Galgotias University.** Borrow, exchange, donate, or give away campus items such as calculators, lab coats, notes, and books, with tracked requests, due dates and an overdue safety net.
+**A student-to-student resource-sharing platform for Galgotias University.** Borrow, exchange, donate, or give away campus items such as calculators, lab coats, notes, and books, with tracked requests, QR handovers, due dates and an overdue safety net.
 
-![Java](https://img.shields.io/badge/Java-17-orange) ![Servlets](https://img.shields.io/badge/Servlets-4.0-green) ![JDBC](https://img.shields.io/badge/JDBC-MySQL-blue) ![Tests](https://img.shields.io/badge/tests-61%20unit%20%2B%20173%20e2e%20passing-brightgreen)
+### 🔗 Live demo: [shareshelf-idws.onrender.com](https://shareshelf-idws.onrender.com)
+*(Free hosting: the first visit after a quiet period can take a few seconds to wake up.)*
 
-[Problem](#-the-problem) · [Features](#-features) · [Screenshots](#-screenshots) · [How it works](#-how-it-works) · [Architecture](#-architecture) · [Database](#-database) · [Run it](#-run-it-locally) · [Host it](#-deploying-it-online) · [Testing](#-testing) · [Team](#-team)
+![Java](https://img.shields.io/badge/Java-17-orange) ![Servlets](https://img.shields.io/badge/Servlets-4.0-green) ![JDBC](https://img.shields.io/badge/JDBC-MySQL-blue) ![Tests](https://img.shields.io/badge/tests-61%20unit%20%2B%20173%20e2e%20passing-brightgreen) ![License](https://img.shields.io/badge/license-MIT-lightgrey)
+
+![ShareShelf dashboard](docs/screenshots/v2-02-dashboard.png)
+
+[Why](#-why-we-built-this) · [Features](#-features) · [Screenshots](#-screenshots) · [How it works](#-how-it-works) · [Architecture](#-architecture) · [Database](#-database) · [Run it](#-run-it-locally) · [Host it](#-deploying-it-online) · [Testing](#-testing) · [Docs](#-documentation) · [Team](#-meet-the-team)
 
 ## 👋 Why we built this
 We are four BTech students at Galgotias University, and we live this problem. Every semester someone buys a scientific calculator, a lab coat or a drafter for one subject, uses it for a few weeks, and then it sits in a hostel cupboard. A few rooms away, another student is asking a WhatsApp group if anyone has one to lend. The answers get buried, nobody remembers who has what, and things quietly go missing.
 
 ShareShelf is our fix, built by students for students: one place on campus to **list what you don't need, find what you do, and get it back on time**. We designed it around trust, because lending to a stranger only works if both sides feel safe. That is why a borrower's WhatsApp number stays hidden unless a return goes overdue.
 
-## ❓ The Problem
-- Students own items they rarely use, while others buy the same items for one-time use.
-- Borrowing happens informally over WhatsApp groups, with no record of who has what.
-- There is no return tracking or trust signal, so items go missing.
-
 ## ✨ Features
 | Feature | Description |
 |---|---|
-| 🔐 Registration & login | Galgotias email only (must contain your own admission number), salted PBKDF2 password hashing, session-based login |
+| 🔐 Registration & login | Galgotias email only (must contain your own admission number), salted PBKDF2 password hashing, session login, optional 30-day "keep me signed in" (only a hash of the token is stored) |
 | 📦 List an item | Borrow, exchange, donate or giveaway listings; suggested borrow duration; fixed public handover spots |
 | 🔎 Search & filter | Keyword (case-insensitive, trimmed) + category + type, combined |
-| 🤝 Request workflow | Send, accept, reject, cancel, hand over, complete, with ownership checks on every action |
-| ⏰ Due dates | The owner picks the return date when accepting a borrow request |
-| 🚩 Overdue detection | A background thread flags late returns as OVERDUE automatically |
+| 🤝 Request workflow | Send, accept, reject, cancel (with a reason), hand over, return, with ownership checks on every action |
+| 📱 QR handover & return | One-time QR token (6-digit fallback code, 10-minute expiry); the borrow clock starts when pickup is verified; condition check at return |
+| ⏰ Due dates & overdue | The owner sets the return date; a background thread flags late returns as OVERDUE automatically |
 | 🛡️ WhatsApp safety net | Contact is revealed to the owner **only** when a request is overdue, and every reveal is logged |
-| ⭐ Reliability count | Number of completed exchanges shown next to each student |
-| 📊 Reports | Live counts + **most-requested category** + **CSV export** (innovation) |
+| ⭐ Ratings & trust levels | Mandatory mutual ratings after a return, profile pages with badges, and levels from Newcomer to Campus star |
+| 📣 Wanted board | Post what you are looking for; others can offer to help |
+| 🔔 Notifications & live updates | In-app notifications and 5-second live refresh, with no page reload |
+| 📊 Reports | Live counts, **most-requested category** and **CSV export** |
+| 🌍 Campus impact counter | The login page shows live totals (exchanges completed, items on the shelf, students sharing) from a public `GET /stats` endpoint |
 
 ## 📸 Screenshots
-| Login | Dashboard | Search |
-|---|---|---|
-| ![login](docs/screenshots/01-login.png) | ![dashboard](docs/screenshots/03-dashboard-owner.png) | ![search](docs/screenshots/04-search.png) |
+| Login (campus impact counter) | Dashboard |
+|---|---|
+| ![login](docs/screenshots/v2-01-login.png) | ![dashboard](docs/screenshots/v2-02-dashboard.png) |
 
-| Requests (overdue + WhatsApp) | Reports | Mobile |
-|---|---|---|
-| ![requests](docs/screenshots/07-my-requests.png) | ![reports](docs/screenshots/08-reports.png) | ![mobile](docs/screenshots/09-mobile-search.png) |
+| Search | Requests |
+|---|---|
+| ![search](docs/screenshots/v2-03-search.png) | ![requests](docs/screenshots/v2-04-my-requests.png) |
+
+| Wanted board | Profile and trust level |
+|---|---|
+| ![wanted](docs/screenshots/v2-05-wanted-board.png) | ![profile](docs/screenshots/v2-06-profile.png) |
+
+| Notifications | Reports |
+|---|---|
+| ![notifications](docs/screenshots/v2-07-notifications.png) | ![reports](docs/screenshots/v2-08-reports.png) |
+
+| QR return | Mobile |
+|---|---|
+| ![qr](docs/screenshots/v2-09-qr-return.png) | <img src="docs/screenshots/v2-10-mobile.png" width="260" alt="mobile"> |
 
 ## 🔄 How It Works
 ```mermaid
@@ -48,8 +63,8 @@ flowchart LR
     E --> F{Owner decides}
     F -->|Accept + due date| G[Item RESERVED]
     F -->|Reject| D
-    G --> H[Handover: BORROWED]
-    H --> I[Returned: COMPLETED]
+    G --> H[QR handover: BORROWED]
+    H --> I[QR return: COMPLETED]
     I --> J[Item AVAILABLE again]
     H -.->|due date passed| K[OVERDUE]
     K --> I
@@ -71,32 +86,42 @@ flowchart LR
 flowchart LR
     UI[JSP + HTML/CSS] --> S[Servlets + AuthFilter]
     S --> D[DAO classes<br/>JDBC + transactions]
-    D --> DB[(MySQL)]
+    D --> P[Connection pool]
+    P --> DB[(MySQL / TiDB)]
     T[Overdue thread] --> D
 ```
-Servlets validate input and check ownership, DAOs hold **all** SQL (`PreparedStatement` everywhere, try-with-resources), JSPs only display data (every value is escaped with `<c:out>`). Full tree: [`docs/FOLDER_STRUCTURE.md`](docs/FOLDER_STRUCTURE.md).
+Servlets validate input and check ownership, DAOs hold **all** SQL (`PreparedStatement` everywhere, try-with-resources), JSPs only display data (every value is escaped with `<c:out>`). Full tree: [`docs/design/FOLDER_STRUCTURE.md`](docs/design/FOLDER_STRUCTURE.md).
 
 <details>
 <summary><b>☕ Core Java concepts used</b></summary>
 
 - **OOP:** model classes mirroring the tables, `BaseServlet` inheritance (shared session/flash/redirect code), enums for types and statuses, a custom unchecked `DataAccessException`
-- **DAO pattern:** all SQL kept out of servlets
+- **Generics & interfaces:** a generic `Dao<T, ID>` interface implemented by the DAO classes, plus a generic `TtlCache<T>`
+- **DAO pattern:** all SQL kept out of servlets; the multi-table workflows live in `RequestTransactionService`
 - **Collections:** `List`, `Map`, `Set` (listings, report counts, vocabularies)
 - **Exception handling:** try/catch, try-with-resources, a custom exception, safe fallbacks that never leak stack traces
-- **Multithreading:** `ScheduledExecutorService` runs `StaleReservationChecker` (a `Runnable`) on a daemon thread; started and stopped by a `ServletContextListener`; an exception in one scan never stops later scans
-- **JDBC transactions:** `accept()`, `complete()` and `revealContact()` commit or roll back as one unit; guarded `UPDATE ... WHERE status = ?` makes them safe against double-clicks and races
-- **Security:** PBKDF2 password hashing with a random salt, session fixation protection, login filter, XSS-safe output, SQL-injection-safe queries
+- **Multithreading:** `ScheduledExecutorService` runs the overdue checker (a `Runnable`) on a daemon thread, started and stopped by a `ServletContextListener`; an exception in one scan never stops later scans
+- **JDBC transactions:** accept, start-borrow, cancel, complete, reveal-contact and mark-overdue commit or roll back as one unit; `SELECT ... FOR UPDATE` and guarded `UPDATE ... WHERE status = ?` make them safe against double-clicks and races
+- **Our own connection pool:** `ConnectionPool` reuses database connections (rolls back unfinished transactions on return, replaces old or dead connections), with unit tests
+- **Security:** PBKDF2 password hashing with a random salt, session fixation protection, login filter, XSS-safe output, SQL-injection-safe queries, hashed remember-me tokens
 </details>
 
 ## 🗄️ Database
-Four tables in [`schema.sql`](schema.sql): `students`, `resource_items`, `requests`, `contact_reveal_logs`.
+Ten tables, all created by [`database/schema.sql`](database/schema.sql): `students`, `resource_items`, `requests`, `contact_reveal_logs`, `handover_tokens`, `notifications`, `ratings`, `wanted_posts`, `wanted_offers`, `remember_tokens`.
 ```mermaid
 erDiagram
     students ||--o{ resource_items : owns
     students ||--o{ requests : makes
     resource_items ||--o{ requests : receives
     requests ||--o{ contact_reveal_logs : "contact reveals"
+    requests ||--o{ handover_tokens : "pickup and return codes"
+    requests ||--o{ ratings : "rated after return"
+    students ||--o{ notifications : receives
+    students ||--o{ wanted_posts : posts
+    wanted_posts ||--o{ wanted_offers : "gets offers"
+    students ||--o{ remember_tokens : "stays signed in"
 ```
+Hosted databases (Render + TiDB): use [`database/schema-hosted.sql`](database/schema-hosted.sql). **Upgrading an older database?** See [`database/migrations/`](database/migrations/README.md).
 
 ## 🚀 Run It Locally
 **Requirements:** JDK 17+, Maven, MySQL 8, Tomcat 9 (not 10, which renamed `javax.servlet`).
@@ -108,7 +133,7 @@ erDiagram
    ```
 2. **Create the database**
    ```bash
-   mysql -u root -p < schema.sql
+   mysql -u root -p < database/schema.sql
    ```
 3. **Set your DB password** (never hardcoded, never committed). Either copy the template:
    ```bash
@@ -127,30 +152,30 @@ erDiagram
 
 The overdue-scan interval is the `overdueCheckMinutes` context parameter in `WEB-INF/web.xml` (default 5).
 
+## 🌐 Deploying it online
+Vercel cannot run Java servlets, so we deploy the same GitHub-push workflow on Render (Docker + Tomcat 9) with a hosted MySQL-compatible database (TiDB Cloud). Full step-by-step guide, including keeping the free tier awake: [`docs/guides/DEPLOYMENT.md`](docs/guides/DEPLOYMENT.md).
+
 ## 🧪 Testing
 ```bash
-> **Phase 2 and 3 features:** QR handover and return (one-time token, 6-digit fallback code, 10-minute expiry), the borrow clock starts when the pickup is verified, a condition check at return, mandatory mutual ratings right after the return code is verified, profile pages with badges, in-app notifications, live page updates (5-second polling), cancelling an accepted request with a reason, automatic release of reservations nobody picks up, and a Wanted board (typed location, 10 posts per 30 days, unanswered posts close after 7 days). 
-
-**Upgrading an existing database:** run these once, in order, one statement per run (a "Duplicate column name" error means that step was already applied): `docs/migration-2026-11-18.sql`, `-19.sql`, `-19b.sql`, `-19c.sql`, `-20.sql`, `-21.sql`. A fresh database made from `schema.sql` already has everything.
-
-**Keep me signed in:** the login box has a 30-day "keep me signed in" option. The database stores only a SHA-256 hash of a random token, and logging out deletes it, so students stay signed in even when the free host restarts.
-
-**Campus impact counter:** the login page shows live totals (exchanges completed, items on the shelf, students sharing) from a public `GET /stats` JSON endpoint. It returns only counts, is cached for a minute, and the strip stays hidden if there is nothing to show yet. Pointing a free uptime pinger at `/stats` also keeps the Render app awake (see `docs/DEPLOYMENT.md`).
-
-**Splash screen:** the first visit in a browser tab opens with a short animated loading screen (it ends as soon as the server answers, 1.4 to 6 seconds, and is skipped when a message such as "logged out" is waiting). It is plain HTML, CSS and a few lines of JavaScript and respects the reduced-motion setting.
-
-**Connection pool:** `util/ConnectionPool` keeps a few database connections open and lends them out, instead of opening a new TLS connection to the cloud database for every query. DAO code is unchanged (closing a pooled connection hands it back; unfinished transactions are rolled back and auto-commit restored). It is our own small class with 8 unit tests, so there is no extra library to install.
-
 mvn test                      # 61 JUnit tests: 42 unit + 19 DAO tests (the DAO tests skip themselves if no DB is reachable)
 python3 tests/e2e_smoke.py    # 173 end-to-end checks against the running app (empty DB)
 ```
-New here? Follow the click-by-click guide in [`docs/HOW_TO_TEST.md`](docs/HOW_TO_TEST.md). Recorded results: [`docs/TESTING.md`](docs/TESTING.md). Test cases: [`docs/TEST_CASES.md`](docs/TEST_CASES.md).
+New here? Follow the click-by-click guide in [`docs/testing/HOW_TO_TEST.md`](docs/testing/HOW_TO_TEST.md). Recorded results: [`docs/testing/TESTING.md`](docs/testing/TESTING.md). Test cases: [`docs/testing/TEST_CASES.md`](docs/testing/TEST_CASES.md).
+
+## 📚 Documentation
+| Folder | What is inside |
+|---|---|
+| [`docs/guides/`](docs/guides/) | Setup, deployment and the step-by-step build guide |
+| [`docs/design/`](docs/design/) | User flows, UI guide, DAO contract and folder structure |
+| [`docs/testing/`](docs/testing/) | Test cases, how to test, recorded results |
+| [`docs/planning/`](docs/planning/) | Project summary, final spec, roadmap, Review 0 |
+| [`docs/team/`](docs/team/) | Team roles and who did what |
+| [`database/`](database/README.md) | Schema files and upgrade migrations |
+
+Start with [`docs/README.md`](docs/README.md) for a one-line guide to each file.
 
 ## 🔭 Out of scope (future work)
 Payments, in-app chat, image upload, push notifications, GPS, an admin moderation panel, CSRF tokens on forms, email verification of the college address.
-
-## 🌐 Deploying it online
-Vercel cannot run Java servlets, so we deploy the same GitHub-push workflow on Render (Docker + Tomcat 9) with a hosted MySQL. Full step-by-step guide: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md). Hosted-database tables: [`schema-hosted.sql`](schema-hosted.sql).
 
 ## 👥 Meet the team
 | | Name | What they own |
@@ -158,18 +183,18 @@ Vercel cannot run Java servlets, so we deploy the same GitHub-push workflow on R
 | 🧭 | **Rudra Singh Chauhan** (Team Leader) | Backend: servlets, DAOs, the request workflow, overall integration |
 | 🗄️ | **Shreya Awasthi** | Database design: tables, constraints, the contact-reveal audit log |
 | 📝 | **Pratyush Kumar Singh** | Documentation: specs, user flows, this README's structure |
-| 🤝 | **Ram Ghelot** | Team member: testing the flows and feedback on the screens |
+| 🤝 | **Ram Ghelot** | Testing the flows and feedback on the screens |
 
-Who did what, weekend by weekend: [`docs/TEAM_CONTRIBUTIONS.md`](docs/TEAM_CONTRIBUTIONS.md).
+Who did what, weekend by weekend: [`docs/team/TEAM_CONTRIBUTIONS.md`](docs/team/TEAM_CONTRIBUTIONS.md).
 
 ### How we worked
-We planned the screens and flows first (`docs/USER_FLOWS.md`, `docs/UI_GUIDE.md`), agreed on the database as a team (`docs/DAO_CONTRACT.md`), then built layer by layer: database → DAOs → servlets → pages. After Phase 1 feedback (empty files, hardcoded credentials, non-standard layout) we rebuilt the project on the standard Maven layout, hashed passwords, and added automated tests so those problems cannot come back.
+We planned the screens and flows first ([`USER_FLOWS`](docs/design/USER_FLOWS.md), [`UI_GUIDE`](docs/design/UI_GUIDE.md)), agreed on the database as a team ([`DAO_CONTRACT`](docs/design/DAO_CONTRACT.md)), then built layer by layer: database → DAOs → servlets → pages. After Phase 1 feedback (empty files, hardcoded credentials, non-standard layout) we rebuilt the project on the standard Maven layout, hashed passwords, and added automated tests so those problems cannot come back. After Review 1 we added the generic `Dao<T, ID>` interface, a JSON helper, and split the request DAO into reads and a transaction service.
 
 ### An honest note on tools
-We used an AI assistant (Claude) heavily in Phase 2 to write and test much of the code. We reviewed it, ran it, and can explain every layer, and the 61 unit and 173 end-to-end checks in `docs/test-results/` are real runs. We list this openly because we would rather be upfront than overclaim.
+We used an AI assistant (Claude) heavily in Phase 2 to write and test much of the code. We reviewed it, ran it, and can explain every layer, and the 61 unit and 173 end-to-end checks in [`docs/testing/test-results/`](docs/testing/test-results/) are real runs. We list this openly because we would rather be upfront than overclaim.
 
 ## 🧭 What's next
-Email verification of the college address, item photos, in-app notifications, and an admin moderation panel.
+Email verification of the college address, item photos, a read-only "peek" for visitors who have not signed in yet, and an admin moderation panel.
 
 ---
 *Galgotias University · BTech 3rd semester · Java project-based evaluation · Made with ☕ in the hostels.*

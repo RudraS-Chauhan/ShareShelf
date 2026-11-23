@@ -17,7 +17,7 @@ public final class AppConstants {
     /** Only addresses on this domain may register. */
     public static final String COLLEGE_EMAIL_DOMAIN = "@galgotiasuniversity.ac.in";
 
-    /** The five categories (Hostel Items was dropped on purpose, see FINAL_SPEC.md section 2). */
+    /** The five categories (Hostel Items was dropped on purpose, see docs/planning/FINAL_SPEC.md section 2). */
     public static final Set<String> CATEGORIES = set(
             "Academic Materials", "Lab Equipment", "Stationery",
             "Event Supplies", "Electronics & Accessories");

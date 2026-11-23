@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.shareshelf.model.ListingType;
 import org.junit.jupiter.api.Test;
 
-/** Guards the agreed vocabulary (FINAL_SPEC.md) and the small model helpers. */
+/** Guards the agreed vocabulary (docs/planning/FINAL_SPEC.md) and the small model helpers. */
 class AppConstantsTest {
 
     @Test

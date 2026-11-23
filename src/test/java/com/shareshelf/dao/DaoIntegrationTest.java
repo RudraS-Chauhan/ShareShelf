@@ -17,7 +17,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
- * Integration tests for the DAO layer against a real MySQL database (schema.sql already loaded).
+ * Integration tests for the DAO layer against a real MySQL database (database/schema.sql already loaded).
  * Skipped automatically when no database is reachable, so `mvn test` still passes on a laptop without MySQL.
  * Every run uses fresh unique admission numbers, so it never collides with existing data.
  */
