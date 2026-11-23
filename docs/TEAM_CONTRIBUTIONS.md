@@ -7,7 +7,7 @@
 | Name | Role | GitHub username |
 |---|---|---|
 | Rudra (Leader) | Architecture, Servlets, models, UI (HTML), threading, integration, deployment | RudraS-Chauhan |
-| Shreya | Database schema, all DAO classes (JDBC, transactions) | |
+| Shreya | Database schema, all DAO classes (JDBC, transactions) |shreyaawasthi606-code|
 | Member 3 | Testing, user flows, demo | |
 | Member 4 | Documentation, demo coordination | |
 
