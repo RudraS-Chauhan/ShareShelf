@@ -6,7 +6,7 @@ Three layers, from fastest to most realistic.
 |---|---|---|---|
 | Unit tests | `src/test/java/.../util/*Test.java` | Validation rules, password hashing, the overdue-checker task (incl. "a failing scan never kills the thread"), constants | `mvn test` |
 | DAO integration tests | `src/test/java/.../dao/DaoIntegrationTest.java` | Real SQL against MySQL: hashed passwords, search rules, the `accept`/`complete`/`revealContact` transactions, overdue flagging | `mvn test` (skipped automatically if no database is reachable) |
-| End-to-end test | `tests/e2e_smoke.py` | The whole running app over HTTP: 174 checks covering every case in `TEST_CASES.md` | see below |
+| End-to-end test | `tests/e2e_smoke.py` | The whole running app over HTTP: 179 checks covering every case in `TEST_CASES.md` | see below |
 
 ## Running the end-to-end test
 1. Create an **empty** database (`mysql -u root -p < database/schema.sql`) and start the app (see README).
@@ -15,8 +15,8 @@ Three layers, from fastest to most realistic.
    (the background thread flags overdue requests on startup and every 5 minutes). Without it those checks are skipped.
 
 ## Recorded results (final code)
-* `docs/testing/test-results/e2e-output.txt`: **174 checks, 174 passed, 0 failed**
-* `docs/testing/test-results/unit-output.txt`: **62 tests, 62 passed, 0 failed** (20 DAO integration tests ran against a real database)
+* `docs/testing/test-results/e2e-output.txt`: **179 checks, 179 passed, 0 failed**
+* `docs/testing/test-results/unit-output.txt`: **63 tests, 63 passed, 0 failed** (21 DAO integration tests ran against a real database)
 
 The runs above used Tomcat 9.0.118 (embedded) with MariaDB 11. The manual "Result" column in `TEST_CASES.md`
 is for Member 3's own browser run.

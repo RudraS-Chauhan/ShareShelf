@@ -25,7 +25,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ShareShelf · Borrow what you need. Share what you have.</title>
-  <link rel="stylesheet" href="${ctx}/css/style.css?v=20261122">
+  <link rel="stylesheet" href="${ctx}/css/style.css?v=20261123">
   <%-- Splash shows once per browser tab, and not when a message (error, registered, logged out) is waiting. --%>
   <script>
     try { if (!sessionStorage.getItem('ss_splash') && !location.search) { document.documentElement.classList.add('splash-on'); } } catch (e) {}

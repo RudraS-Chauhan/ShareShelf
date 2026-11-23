@@ -111,6 +111,11 @@ PASS     borrower rates the owner
 PASS     live endpoint answers with bell count and a signature
 PASS     live endpoint needs a login
 PASS     profile page shows track record, no contact details
+PASS     own profile shows the change-WhatsApp box and only the last 4 digits
+PASS     other people's profiles have no change box
+PASS     wrong password does not change the number
+PASS     invalid number is rejected
+PASS     correct password changes the number
 PASS     rating twice is refused
 PASS     banner is gone after rating
 PASS     completing twice is handled
@@ -189,4 +194,4 @@ PASS     logout redirects to login
 PASS     session is dead after logout
 PASS     unknown URL gives the friendly 404 page
 
-174 checks, 174 passed, 0 failed
+179 checks, 179 passed, 0 failed

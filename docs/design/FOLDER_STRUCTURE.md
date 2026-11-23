@@ -11,7 +11,7 @@ ShareShelf-Java/
 │   └── migrations/              001 to 006: only for upgrading an older database
 ├── Dockerfile                   builds the WAR and runs it on Tomcat 9 (used by Render)
 ├── tests/
-│   └── e2e_smoke.py             black-box HTTP test of every workflow (174 checks)
+│   └── e2e_smoke.py             black-box HTTP test of every workflow (179 checks)
 ├── docs/
 │   ├── guides/                  setup, deployment, build guide
 │   ├── design/                  user flows, UI guide, DAO contract, this file
@@ -39,7 +39,7 @@ ShareShelf-Java/
     │           ├── web.xml      welcome file, sessions, JSP config, error pages
     │           └── views/       dashboard, search, add-listing, my-requests, reports, error (.jsp)
     │                            + fragments/ (header, footer, owner-actions, trust, taglibs)
-    └── test/java/com/shareshelf/   JUnit 5: util tests + DAO integration tests (62 tests)
+    └── test/java/com/shareshelf/   JUnit 5: util tests + DAO integration tests (63 tests)
 ```
 
 Request flow: **browser → servlet (validates, checks ownership) → DAO (JDBC) → MySQL**, then the servlet either

@@ -227,6 +227,13 @@ check("   borrower rates the owner", "rating for" in B.follow(B.post("/rate", di
 check("   live endpoint answers with bell count and a signature", re.search(r'"unread":\d+,"sig":"[0-9a-f-]+"', A.get("/live")[2]) is not None)
 check("   live endpoint needs a login", "login" in str(anon.get("/live")[1]).lower() or anon.get("/live")[0] in (302, 401, 403))
 check("   profile page shows track record, no contact details", "Completed exchanges" in B.get("/profile?id=" + SA)[2] and "whatsapp" not in B.get("/profile?id=" + SA)[2].lower())
+own_pf = B.get("/profile")[2]
+check("   own profile shows the change-WhatsApp box and only the last 4 digits", "My WhatsApp number" in own_pf and ("ends with " + ("98765432" + SB[-2:])[-4:]) in own_pf, own_pf[:0])
+check("   other people's profiles have no change box", "My WhatsApp number" not in B.get("/profile?id=" + SA)[2])
+check("   wrong password does not change the number", "Wrong password" in B.follow(B.post("/profile/whatsapp", dict(whatsappNumber="9123456780", password="nope-nope-1")))[2])
+check("   invalid number is rejected", "valid 10-digit" in B.follow(B.post("/profile/whatsapp", dict(whatsappNumber="12345", password="Passw0rd!x")))[2])
+check("   correct password changes the number", "number was updated" in B.follow(B.post("/profile/whatsapp", dict(whatsappNumber="98123 45678", password="Passw0rd!x")))[2] and "ends with 5678" in B.get("/profile")[2])
+B.follow(B.post("/profile/whatsapp", dict(whatsappNumber="98765432" + SB[-2:], password="Passw0rd!x")))   # put it back for the overdue test
 check("   rating twice is refused", "already rated" in B.follow(B.get("/rate?requestId=%s" % rid_b))[2])
 check("   banner is gone after rating", "Rate now" not in B.get("/dashboard")[2])
 check("   completing twice is handled", "return QR" in A.follow(A.post("/request/complete", dict(requestId=rid_b)))[2])

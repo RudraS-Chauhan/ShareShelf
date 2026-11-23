@@ -49,6 +49,19 @@ public class StudentDAO implements Dao<Student, String> {
         }
     }
 
+    /** Saves a new WhatsApp number (already normalised to 91XXXXXXXXXX). @return true when the student exists. */
+    public boolean updateWhatsapp(String studentId, String number) {
+        String sql = "UPDATE students SET whatsapp_number = ? WHERE student_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, number);
+            ps.setString(2, studentId);
+            return ps.executeUpdate() == 1;
+        } catch (SQLException e) {
+            throw new DataAccessException("Could not update the WhatsApp number of " + studentId, e);
+        }
+    }
+
     /** @return the student when the ID and password match, otherwise null. */
     public Student login(String studentId, String password) {
         String sql = "SELECT * FROM students WHERE student_id = ?";

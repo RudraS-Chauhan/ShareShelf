@@ -583,4 +583,13 @@ class DaoIntegrationTest {
         assertEquals((Integer) before.get("students") + 1, after.get("students"));
         assertTrue((Integer) after.get("exchanges") >= 0 && (Integer) after.get("items") >= 0);
     }
+
+    @Test
+    void studentCanCorrectOwnWhatsappNumber() {
+        String id = uniqueId("UW");
+        students.register(newStudent(id, "919111222333"));
+        assertTrue(students.updateWhatsapp(id, "919444555666"));
+        assertEquals("919444555666", students.findById(id).getWhatsappNumber());
+        assertFalse(students.updateWhatsapp("NO-SUCH-ID", "919444555666"), "unknown student: nothing changes");
+    }
 }

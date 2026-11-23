@@ -26,6 +26,22 @@
   <div class="stat"><strong>${empty profile.lenderStarsText ? '–' : profile.lenderStarsText}</strong><span>As a lender (${profile.lenderStarsN} ratings)</span></div>
 </div>
 
+<c:if test="${isMe}">
+  <details class="card form-card wa-edit">
+    <summary><strong>📱 My WhatsApp number</strong>
+      <c:if test="${not empty whatsappEnding}"><span class="hint"> (saved number ends with <c:out value="${whatsappEnding}"/>)</span></c:if>
+    </summary>
+    <p class="hint">Only used when one of your borrows goes overdue: the lender gets a chat link to this number. Check that it is <em>your own</em> number.</p>
+    <form method="post" action="${ctx}/profile/whatsapp">
+      <label for="wa-new">New WhatsApp number</label>
+      <input id="wa-new" type="tel" name="whatsappNumber" placeholder="10-digit mobile number" required>
+      <label for="wa-pw">Your password (to confirm)</label>
+      <input id="wa-pw" type="password" name="password" autocomplete="current-password" required>
+      <button type="submit">Save number</button>
+    </form>
+  </details>
+</c:if>
+
 <h2 class="section">Recent reviews</h2>
 <c:choose>
   <c:when test="${empty profile.reviews}">
