@@ -94,6 +94,13 @@ public class RegisterServlet extends BaseServlet {
             return;
         }
 
+        // Check 7: one WhatsApp number belongs to one account. The overdue chat link opens the borrower's number,
+        // so it must be the borrower's own, never a number typed in for someone else.
+        if (studentDAO.isWhatsappInUse(whatsapp)) {
+            fail(request, response, "whatsapp_taken");
+            return;
+        }
+
         Student student = new Student();
         student.setStudentId(studentId);
         student.setName(ValidationUtil.limit(name, 100));

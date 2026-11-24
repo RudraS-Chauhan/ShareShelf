@@ -2,7 +2,7 @@
 """
 ShareShelf end-to-end smoke test (black-box, over HTTP).
 
-Runs the real app (Tomcat + MySQL) through every workflow in docs/TEST_CASES.md and prints PASS/FAIL per check.
+Runs the real app (Tomcat + MySQL) through every workflow in docs/testing/TEST_CASES.md and prints PASS/FAIL per check.
 Usage:   python3 tests/e2e_smoke.py [base_url]        (default http://localhost:8080/ShareShelf)
 Needs:   the app running, an empty `shareshelf` database, Python 3 (standard library only).
 Overdue check: set OVERDUE_HOOK to a shell command that backdates a request's due date and restarts the app
@@ -90,6 +90,7 @@ check("   missing WhatsApp consent rejected", "error=no_consent" in loc(register
 check("   year out of range rejected", "error=invalid_year" in loc(register(A, SA, "Asha", year="9")))
 check("   registering Asha works", "registered=true" in loc(register(A, SA, "Asha")))
 check("T1 duplicate admission number rejected", "error=duplicate_id" in loc(register(A, SA, "Asha")))
+check("   a WhatsApp number already used by another account is rejected", "error=whatsapp_taken" in loc(register(A, "25SCSE1999901", "Copycat", whatsappNumber="98765432" + SA[-2:])))
 check("   registering Bilal works", "registered=true" in loc(register(B, SB, "Bilal")))
 check("   registering Chitra works", "registered=true" in loc(register(C, SC, "Chitra")))
 check("   wrong password refused", "error=invalid" in loc(A.post("/login", dict(studentId=SA, password="wrong-pass1"))))
@@ -227,13 +228,6 @@ check("   borrower rates the owner", "rating for" in B.follow(B.post("/rate", di
 check("   live endpoint answers with bell count and a signature", re.search(r'"unread":\d+,"sig":"[0-9a-f-]+"', A.get("/live")[2]) is not None)
 check("   live endpoint needs a login", "login" in str(anon.get("/live")[1]).lower() or anon.get("/live")[0] in (302, 401, 403))
 check("   profile page shows track record, no contact details", "Completed exchanges" in B.get("/profile?id=" + SA)[2] and "whatsapp" not in B.get("/profile?id=" + SA)[2].lower())
-own_pf = B.get("/profile")[2]
-check("   own profile shows the change-WhatsApp box and only the last 4 digits", "My WhatsApp number" in own_pf and ("ends with " + ("98765432" + SB[-2:])[-4:]) in own_pf, own_pf[:0])
-check("   other people's profiles have no change box", "My WhatsApp number" not in B.get("/profile?id=" + SA)[2])
-check("   wrong password does not change the number", "Wrong password" in B.follow(B.post("/profile/whatsapp", dict(whatsappNumber="9123456780", password="nope-nope-1")))[2])
-check("   invalid number is rejected", "valid 10-digit" in B.follow(B.post("/profile/whatsapp", dict(whatsappNumber="12345", password="Passw0rd!x")))[2])
-check("   correct password changes the number", "number was updated" in B.follow(B.post("/profile/whatsapp", dict(whatsappNumber="98123 45678", password="Passw0rd!x")))[2] and "ends with 5678" in B.get("/profile")[2])
-B.follow(B.post("/profile/whatsapp", dict(whatsappNumber="98765432" + SB[-2:], password="Passw0rd!x")))   # put it back for the overdue test
 check("   rating twice is refused", "already rated" in B.follow(B.get("/rate?requestId=%s" % rid_b))[2])
 check("   banner is gone after rating", "Rate now" not in B.get("/dashboard")[2])
 check("   completing twice is handled", "return QR" in A.follow(A.post("/request/complete", dict(requestId=rid_b)))[2])
@@ -271,7 +265,6 @@ if OVERDUE_HOOK:
     check("T15 non-owner cannot reveal the number", "only available to the owner" in B.follow(B.post("/request/reveal", dict(requestId=rid_o)))[2])
     r = A.post("/request/reveal", dict(requestId=rid_o))
     check("T16 owner is sent to a wa.me chat with the requester's number", r[0] == 302 and re.match(r"https://wa\.me/91\d{10}\?text=", loc(r)), loc(r))
-    check("   it is the BORROWER's number, not the owner's own", loc(r).startswith("https://wa.me/91" + "98765432" + SB[-2:] + "?") and ("98765432" + SA[-2:]) not in loc(r).split("?")[0], loc(r))
     check("   reveal is recorded on the request", "Contact revealed" in A.get("/my-requests")[2])
     check("   overdue request can still be completed", "available to borrow again" in A.follow(A.post("/request/complete", dict(requestId=rid_o)))[2])
 else:

@@ -14,6 +14,7 @@
   <c:when test="${param.error == 'email_mismatch'}"><c:set var="errText" value="Your college email must contain your own admission number."/></c:when>
   <c:when test="${param.error == 'weak_password'}"><c:set var="errText" value="Password needs at least 8 characters, with a letter and a digit."/></c:when>
   <c:when test="${param.error == 'invalid_whatsapp'}"><c:set var="errText" value="Enter a valid 10-digit Indian mobile number (WhatsApp)."/></c:when>
+  <c:when test="${param.error == 'whatsapp_taken'}"><c:set var="errText" value="That WhatsApp number is already registered to another account. Every student must use their own number."/></c:when>
   <c:when test="${param.error == 'no_consent'}"><c:set var="errText" value="Please tick the WhatsApp consent box to register."/></c:when>
   <c:when test="${param.error == 'invalid_year'}"><c:set var="errText" value="Year must be between 1 and 4."/></c:when>
   <c:when test="${param.error == 'duplicate_id'}"><c:set var="errText" value="That admission number is already registered. Try logging in."/></c:when>
@@ -25,7 +26,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ShareShelf · Borrow what you need. Share what you have.</title>
-  <link rel="stylesheet" href="${ctx}/css/style.css?v=20261123">
+  <link rel="stylesheet" href="${ctx}/css/style.css?v=20261122">
   <%-- Splash shows once per browser tab, and not when a message (error, registered, logged out) is waiting. --%>
   <script>
     try { if (!sessionStorage.getItem('ss_splash') && !location.search) { document.documentElement.classList.add('splash-on'); } } catch (e) {}
@@ -99,10 +100,11 @@
           <option value="Day Scholar">Day Scholar</option>
         </select>
         <label for="r-wa">WhatsApp number</label>
-        <input id="r-wa" type="tel" name="whatsappNumber" placeholder="10-digit mobile number" required>
+        <input id="r-wa" type="tel" name="whatsappNumber" placeholder="Your own 10-digit mobile number" required>
+        <div class="hint">Must be your own number. One number can belong to only one account.</div>
         <label class="check">
           <input type="checkbox" name="consent" value="yes" required>
-          <span>I agree that my WhatsApp number may be shown <strong>only</strong> to the owner of an item I borrowed, and <strong>only</strong> if that borrow becomes overdue. Every reveal is logged.</span>
+          <span>I confirm this is <strong>my own</strong> WhatsApp number and I agree it may be shown <strong>only</strong> to the owner of an item I borrowed, and <strong>only</strong> if that borrow becomes overdue. Every reveal is logged.</span>
         </label>
         <label for="r-pw">Password</label>
         <input id="r-pw" type="password" name="password" minlength="8" required autocomplete="new-password">

@@ -8,6 +8,7 @@ PASS     missing WhatsApp consent rejected
 PASS     year out of range rejected
 PASS     registering Asha works
 PASS  T1 duplicate admission number rejected
+PASS     a WhatsApp number already used by another account is rejected
 PASS     registering Bilal works
 PASS     registering Chitra works
 PASS     wrong password refused
@@ -111,11 +112,6 @@ PASS     borrower rates the owner
 PASS     live endpoint answers with bell count and a signature
 PASS     live endpoint needs a login
 PASS     profile page shows track record, no contact details
-PASS     own profile shows the change-WhatsApp box and only the last 4 digits
-PASS     other people's profiles have no change box
-PASS     wrong password does not change the number
-PASS     invalid number is rejected
-PASS     correct password changes the number
 PASS     rating twice is refused
 PASS     banner is gone after rating
 PASS     completing twice is handled
@@ -139,7 +135,6 @@ PASS  T14 request is flagged OVERDUE by the background thread
 PASS     dashboard shows the overdue alert
 PASS  T15 non-owner cannot reveal the number
 PASS  T16 owner is sent to a wa.me chat with the requester's number
-PASS     it is the BORROWER's number, not the owner's own
 PASS     reveal is recorded on the request
 PASS     overdue request can still be completed
 == Reports ==
@@ -194,4 +189,4 @@ PASS     logout redirects to login
 PASS     session is dead after logout
 PASS     unknown URL gives the friendly 404 page
 
-179 checks, 179 passed, 0 failed
+174 checks, 174 passed, 0 failed
