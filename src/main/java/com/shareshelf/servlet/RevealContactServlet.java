@@ -33,12 +33,6 @@ public class RevealContactServlet extends BaseServlet {
         int requestId = ValidationUtil.parseIntOr(req.getParameter("requestId"), -1);
 
         String number = requestId > 0 ? requestTx.revealContact(requestId, ownerId) : null;
-        if (RequestTransactionService.SAME_NUMBER.equals(number)) {
-            flash(req, "error", "The borrower registered with the same WhatsApp number as yours, so a chat link would open "
-                    + "your own number. Please contact them in person or through a friend.");
-            redirect(req, resp, "/my-requests");
-            return;
-        }
         if (number == null || !number.matches("[0-9]{10,15}")) {
             flash(req, "error", "Contact details are only available to the owner of an overdue request.");
             redirect(req, resp, "/my-requests");

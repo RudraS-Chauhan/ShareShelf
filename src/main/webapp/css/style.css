@@ -447,10 +447,3 @@ a.next-card:hover { background: #fbfcfb; box-shadow: 0 4px 12px rgba(0,0,0,.06);
   .splash-books span { animation: none; }
   .splash, .splash-bar i { transition: none; }
 }
-
-/* ---------- Profile: change WhatsApp number ---------- */
-details.wa-edit { margin: 18px 0 8px; }
-details.wa-edit > summary { cursor: pointer; }
-details.wa-edit[open] > summary { margin-bottom: 8px; }
-details.wa-edit form { margin: 0; }
-details.wa-edit button[type="submit"] { margin-top: 12px; }

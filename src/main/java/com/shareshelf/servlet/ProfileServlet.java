@@ -35,16 +35,7 @@ public class ProfileServlet extends BaseServlet {
             req.setAttribute("idSummary", info.summary());
             req.setAttribute("studyYear", info.studyYear(java.time.LocalDate.now(com.shareshelf.util.AppConstants.CAMPUS_ZONE)));
         }
-        boolean isMe = id.equals(currentStudentId(req));
-        req.setAttribute("isMe", isMe);
-        if (isMe) {
-            // only the owner of the account ever sees even a hint of their own number: the last 4 digits
-            com.shareshelf.model.Student me = new com.shareshelf.dao.StudentDAO().findById(id);
-            String n = me == null ? null : me.getWhatsappNumber();
-            if (n != null && n.length() >= 4) {
-                req.setAttribute("whatsappEnding", n.substring(n.length() - 4));
-            }
-        }
+        req.setAttribute("isMe", id.equals(currentStudentId(req)));
         forward(req, resp, "profile");
     }
 }
